@@ -1,6 +1,5 @@
 import java.io.*;
-import java.util.*;
-//import java.util.Scanner;
+import java.util.Scanner;
  
 class Index2 {
  
@@ -13,6 +12,16 @@ class Index2 {
         WikiItem(String s, WikiItem n) {
             str = s;
             next = n;
+        }
+    }
+
+    private class LinkedList {
+        String str;
+        LinkedList next;
+
+        LinkedList(String s, LinkedList l) {
+            str = s;
+            next = l;
         }
     }
  
@@ -37,21 +46,19 @@ class Index2 {
         }
     }
  
-    public List<String> search(String searchstr) {
-        WikiItem current = start;
+    public LinkedList search(String searchstr) {
         String title = start.str;
-        List<String> titles = new ArrayList<String>();
-        while (current != null) {
-            if (current.str.equals(searchstr)) {
-                if (titles.size() == 0 || titles.get(titles.size()-1) != title) {
-                    titles.add(title.substring(0,title.length()-1));
-                }
-            } else if (current.str.equals("---END.OF.DOCUMENT---")) {
-                if (current.next != null) {
-                    title = current.next.str;
-                }
+        title = title.substring(0, title.length()-1); // Remove "."
+        LinkedList titles = new LinkedList(null, null);
+
+        for (WikiItem current = start; current != null; current = current.next) {
+            if (current.str.equals(searchstr) && (titles.next == null || !titles.str.equals(title))) {
+                LinkedList tmp = new LinkedList(title, titles);
+                titles = tmp;
+            } else if (current.str.equals("---END.OF.DOCUMENT---") && current.next != null) {
+                title = current.next.str;
+                title = title.substring(0, title.length()-1); // Remove "."
             }
-            current = current.next;
         }
         return titles;
     }
@@ -66,12 +73,15 @@ class Index2 {
             if (searchstr.equals("exit")) {
                 break;
             }
-            List<String> titles = i.search(searchstr);
-            if (titles.isEmpty()) {
+            LinkedList titles = i.search(searchstr);
+            if (titles.next == null) {
                 System.out.println(searchstr + " does not exist");
             } else {
-                System.out.println(searchstr + " exists in the following articles:");
-                System.out.println(titles);
+                System.out.print("\""+searchstr+"\"" + " exists in the following articles:\n   ");
+                for (LinkedList current = titles; current != null && current.str != null; current=current.next) {
+                    System.out.print(current.str + " ");
+                }
+                System.out.println("\n");
             }
         }
         console.close();
