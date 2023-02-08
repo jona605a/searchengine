@@ -115,6 +115,10 @@ class Index4 {
     }
     
     public static void main(String[] args) {
+        if (args.length > 1) {
+            test(args);
+            return;
+        }
         System.out.println("Preprocessing " + args[0]);
         Index4 i = new Index4(args[0]);
         Scanner console = new Scanner(System.in);
@@ -136,5 +140,30 @@ class Index4 {
             }
         }
         console.close();
+    }
+
+    public static void test(String[] args) {
+        System.out.println("Preprocessing " + args[0]);
+        Index4 i = new Index4(args[0]);
+        int[] sizes = new int[i.n];
+        for (int j = 0; j < sizes.length; j++) {
+            if (i.wikiItems[j] != null) {
+                int count = 0;
+                for (WikiItem item = i.wikiItems[j]; item!=null; item=item.next) {
+                    count++;
+                }
+                sizes[j] = count;
+            }
+        }
+        int unique = 0;
+        int n_words = 0;
+        for (int j = 0; j < sizes.length; j++) {
+            if (sizes[j] > 0) {
+                unique++;
+                n_words+=sizes[j];
+            }
+        }
+        System.out.println("Unique hashes: " + unique);
+        System.out.println("Unique words: " + n_words);
     }
 }
