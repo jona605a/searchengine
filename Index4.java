@@ -3,7 +3,7 @@ import java.util.Scanner;
  
 class Index4 {
  
-    int n = 100_000_007;
+    int n = 10_007; // Prime
     WikiItem[] wikiItems = new WikiItem[n];
 
 
@@ -18,12 +18,14 @@ class Index4 {
     }
  
     private class WikiItem {
-        String str;
+        String word;
         ArticleItem articlelist;
+        WikiItem next;
  
-        WikiItem(String s, ArticleItem a) {
-            str = s;
+        WikiItem(String s, ArticleItem a, WikiItem w) {
+            word = s;
             articlelist = a;
+            next = w;
         }
     }
 
@@ -54,7 +56,7 @@ class Index4 {
         word = input.next();
         title = word.substring(0,word.length()-1); // Assume that the first word is a title
         
-        int collisionCounter = 0;
+        // int collisionCounter = 0;
         while (input.hasNext()) {   // Read all words in input
             previousWord = word;
             word = input.next();
@@ -70,18 +72,29 @@ class Index4 {
             
             if (wikiItems[hash] == null) {
                 newArticle = new ArticleItem(title, null);
-                wikiItems[hash] = new WikiItem(word, newArticle);
+                wikiItems[hash] = new WikiItem(word, newArticle, null);
             } else {
-                if (!wikiItems[hash].str.equals(word)) {
-                    collisionCounter++;
-                    System.out.println("Collision nr " + collisionCounter + "! Between words " + word + " and " + wikiItems[hash].str);
-                    System.out.println(word.hashCode() + " and " + wikiItems[hash].str.hashCode());
+                WikiItem item = wikiItems[hash];
+                for (; item != null; item = item.next) {
+                    if (item.word.equals(word)) {
+                        if (!item.articlelist.title.equals(title)) {
+                            newArticle = new ArticleItem(title, item.articlelist);
+                            item.articlelist = newArticle;
+                        }
+                        break;
+                    }
+                }
+                if (item == null) {
+                    newArticle = new ArticleItem(title, null);
+                    WikiItem newItem = new WikiItem(word, newArticle, wikiItems[hash]);
+                    wikiItems[hash] = newItem;
                 }
 
-                if (!wikiItems[hash].articlelist.title.equals(title)) {
-                    newArticle = new ArticleItem(title, wikiItems[hash].articlelist);
-                    wikiItems[hash].articlelist = newArticle;
-                }
+                // if (!wikiItems[hash].word.equals(word)) {
+                //     collisionCounter++;
+                //     System.out.println("Collision nr " + collisionCounter + "! Between words " + word + " and " + wikiItems[hash].word);
+                //     System.out.println(word.hashCode() + " and " + wikiItems[hash].word.hashCode());
+                // }
             }
             
         }
@@ -93,7 +106,12 @@ class Index4 {
         if (wikiItems[hash] == null) {
             return null;
         }
-        return wikiItems[hash].articlelist;
+        for (WikiItem item = wikiItems[hash]; item != null; item = item.next) {
+            if (item.word.equals(searchstr)) {
+                return wikiItems[hash].articlelist;
+            }
+        }
+        return null;
     }
     
     public static void main(String[] args) {
