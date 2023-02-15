@@ -1,29 +1,9 @@
 import java.io.*;
 import java.util.Scanner;
  
-class Index2 {
+class Index2 implements Index{
  
-    WikiItem start;
- 
-    private class WikiItem {
-        String str;
-        WikiItem next;
- 
-        WikiItem(String s, WikiItem n) {
-            str = s;
-            next = n;
-        }
-    }
-
-    private class ArticleItem {
-        String str;
-        ArticleItem next;
-
-        ArticleItem(String s, ArticleItem l) {
-            str = s;
-            next = l;
-        }
-    }
+    WikiItem start; 
  
     public Index2(String filename) {
         String word;
@@ -31,12 +11,12 @@ class Index2 {
         try {
             Scanner input = new Scanner(new File(filename), "UTF-8");
             word = input.next();
-            start = new WikiItem(word, null);
+            start = new WikiItem(word, null, null);
             current = start;
             while (input.hasNext()) {   // Read all words in input
                 word = input.next();
                 System.out.println(word);
-                tmp = new WikiItem(word, null);
+                tmp = new WikiItem(word, null, null);
                 current.next = tmp;
                 current = tmp;
             }
@@ -46,6 +26,7 @@ class Index2 {
         }
     }
  
+    @Override
     public ArticleItem search(String searchstr) {
         String title = start.str;
         title = title.substring(0, title.length()-1); // Remove "."
@@ -62,8 +43,6 @@ class Index2 {
         }
         return titles;
     }
-
-    
  
     public static void main(String[] args) {
         System.out.println("Preprocessing " + args[0]);
@@ -87,5 +66,26 @@ class Index2 {
             }
         }
         console.close();
+    }
+
+    @Override
+    public WikiItem getUniqueWords() {  
+        WikiItem uniqeWordsStart = new WikiItem(start.str, null,start.articlelist);
+        WikiItem word, tmp, newUniqeWord;
+
+        for(word=start; word!=null; word=word.next) {   // Go though all the words
+            
+            for (tmp = uniqeWordsStart; tmp!=null; tmp=tmp.next){ // Go though the linked list of uniqeWords
+                if (tmp.str.equals(word.str)){ // The word already exist in the linked list uniqeWords
+                    break;
+                }
+            }
+            if (tmp == null) { // word wasn't found in the linked list uniqeWords
+                newUniqeWord = new WikiItem(word.str,uniqeWordsStart,word.articlelist); //word is added as the head of uniqeWords
+                uniqeWordsStart = newUniqeWord;
+            } 
+        }
+        
+        return uniqeWordsStart;
     }
 }

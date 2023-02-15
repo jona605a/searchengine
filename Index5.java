@@ -1,39 +1,11 @@
 import java.io.*;
 import java.util.Scanner;
  
-class Index5 {
+class Index5 implements Index{
  
     int n = 1_000; //Size of hash table
     int uniqeWords = 0;
     WikiItem[] wikiItems = new WikiItem[n]; // Hash table
-
-    private class ArticleItem {        
-    /*
-    Objects used to create linked list of article titles 
-    */
-        String str;
-        ArticleItem next;
-
-        ArticleItem(String s, ArticleItem n) {
-            str = s;
-            next = n;
-        }
-    }
- 
-    private class WikiItem {
-    /*
-    Objects used to store words hased to same value in hash table as linked list  
-    */
-        String word;
-        ArticleItem articlelist;
-        WikiItem next;
- 
-        WikiItem(String s, ArticleItem a, WikiItem w) {
-            word = s;
-            articlelist = a;
-            next = w;
-        }
-    }
 
     private int hashString(String s) {
         
@@ -88,13 +60,13 @@ class Index5 {
         // Checks if place in hashtable is empty
         if (wikiItems[hash] == null) {
             newArticle = new ArticleItem(title, null);
-            wikiItems[hash] = new WikiItem(word, newArticle, null);
+            wikiItems[hash] = new WikiItem(word, null, newArticle);
             uniqeWords ++;
         // If not emty then go though linked list of word hashed to this hash value and find word 
         } else {
             WikiItem item = wikiItems[hash];
             for (; item != null; item = item.next) {
-                if (item.word.equals(word)) {
+                if (item.str.equals(word)) {
                     // check if the article title already is there
                     if (!item.articlelist.str.equals(title)) {
                         newArticle = new ArticleItem(title, item.articlelist);
@@ -106,7 +78,7 @@ class Index5 {
             //If article not in list put article in list
             if (item == null) {
                 newArticle = new ArticleItem(title, null);
-                WikiItem newItem = new WikiItem(word, newArticle, wikiItems[hash]);
+                WikiItem newItem = new WikiItem(word, wikiItems[hash],newArticle);
                 wikiItems[hash] = newItem;
                 uniqeWords ++;
             }
@@ -122,13 +94,15 @@ class Index5 {
                 continue;
             }
             for(WikiItem item = wikiItems[i];item != null; item = item.next){
-                int hash = hashString(item.word);
+                int hash = hashString(item.str);
                 item.next = NewwikiItems[hash];
                 NewwikiItems[hash] = item;   
             }
         }
         wikiItems = NewwikiItems;
     }
+
+    @Override
     public ArticleItem search(String searchstr) {
         /*
         Returns the Article list of titles where searchstr is present. If searchstr is not present in any articles return null.
@@ -138,7 +112,7 @@ class Index5 {
             return null;
         }
         for (WikiItem item = wikiItems[hash]; item != null; item = item.next) {
-            if (item.word.equals(searchstr)) {
+            if (item.str.equals(searchstr)) {
                 return wikiItems[hash].articlelist;
             }
         }
@@ -148,7 +122,7 @@ class Index5 {
     public static void main(String[] args) {
        // Run test
         if (args.length > 1) {
-            test(args);
+            testCollisions(args);
             return;
         }
         // Else run main
@@ -175,7 +149,7 @@ class Index5 {
         console.close();
     }
 
-    public static void test(String[] args) {
+    public static void testCollisions(String[] args) {
         System.out.println("Preprocessing " + args[0]);
         Index5 i = new Index5(args[0]);
         int[] sizes = new int[i.n];
@@ -198,5 +172,24 @@ class Index5 {
         }
         System.out.println("Unique hashes: " + unique);
         System.out.println("Unique words: " + n_words);
+    }
+
+    @Override
+    public WikiItem getUniqueWords() {
+        WikiItem uniqeWordsStart = null;
+        WikiItem word, newUniqeWord;
+    
+        for(int i = 0; i!=n; i++) {   // Go though the hashmap
+            
+            if(wikiItems[i] != null){
+                for (word = wikiItems[i]; word!=null; word=word.next){ // Go though the linked list listed of words with hashvalue i
+                    newUniqeWord = new WikiItem(word.str,uniqeWordsStart,word.articlelist); //word is added as the head of uniqeWords
+                    uniqeWordsStart = newUniqeWord;
+                }    
+            }
+
+        }
+        
+        return uniqeWordsStart;
     }
 }

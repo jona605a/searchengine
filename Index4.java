@@ -1,33 +1,11 @@
 import java.io.*;
 import java.util.Scanner;
  
-class Index4 {
+class Index4 implements Index{
  
     int n = 10_007; // Prime
     WikiItem[] wikiItems = new WikiItem[n];
 
-
-    private class ArticleItem {
-        String str;
-        ArticleItem next;
-
-        ArticleItem(String s, ArticleItem n) {
-            str = s;
-            next = n;
-        }
-    }
- 
-    private class WikiItem {
-        String word;
-        ArticleItem articlelist;
-        WikiItem next;
- 
-        WikiItem(String s, ArticleItem a, WikiItem w) {
-            word = s;
-            articlelist = a;
-            next = w;
-        }
-    }
 
     private int hashString(String s) {
         
@@ -72,11 +50,11 @@ class Index4 {
             
             if (wikiItems[hash] == null) {
                 newArticle = new ArticleItem(title, null);
-                wikiItems[hash] = new WikiItem(word, newArticle, null);
+                wikiItems[hash] = new WikiItem(word, null, newArticle);
             } else {
                 WikiItem item = wikiItems[hash];
                 for (; item != null; item = item.next) {
-                    if (item.word.equals(word)) {
+                    if (item.str.equals(word)) {
                         if (!item.articlelist.str.equals(title)) {
                             newArticle = new ArticleItem(title, item.articlelist);
                             item.articlelist = newArticle;
@@ -86,28 +64,23 @@ class Index4 {
                 }
                 if (item == null) {
                     newArticle = new ArticleItem(title, null);
-                    WikiItem newItem = new WikiItem(word, newArticle, wikiItems[hash]);
+                    WikiItem newItem = new WikiItem(word, wikiItems[hash],newArticle );
                     wikiItems[hash] = newItem;
                 }
 
-                // if (!wikiItems[hash].word.equals(word)) {
-                //     collisionCounter++;
-                //     System.out.println("Collision nr " + collisionCounter + "! Between words " + word + " and " + wikiItems[hash].word);
-                //     System.out.println(word.hashCode() + " and " + wikiItems[hash].word.hashCode());
-                // }
             }
             
         }
         input.close();
     }
- 
+    @Override
     public ArticleItem search(String searchstr) {
         int hash = hashString(searchstr);
         if (wikiItems[hash] == null) {
             return null;
         }
         for (WikiItem item = wikiItems[hash]; item != null; item = item.next) {
-            if (item.word.equals(searchstr)) {
+            if (item.str.equals(searchstr)) {
                 return wikiItems[hash].articlelist;
             }
         }
@@ -116,7 +89,7 @@ class Index4 {
     
     public static void main(String[] args) {
         if (args.length > 1) {
-            test(args);
+            testCollisions(args);
             return;
         }
         System.out.println("Preprocessing " + args[0]);
@@ -142,7 +115,7 @@ class Index4 {
         console.close();
     }
 
-    public static void test(String[] args) {
+    public static void testCollisions(String[] args) {
         System.out.println("Preprocessing " + args[0]);
         Index4 i = new Index4(args[0]);
         int[] sizes = new int[i.n];
@@ -165,5 +138,24 @@ class Index4 {
         }
         System.out.println("Unique hashes: " + unique);
         System.out.println("Unique words: " + n_words);
+    }
+
+    @Override
+    public WikiItem getUniqueWords() {
+        WikiItem uniqeWordsStart = null;
+        WikiItem word, newUniqeWord;
+    
+        for(int i = 0; i!=n; i++) {   // Go though the hashmap
+            
+            if(wikiItems[i] != null){
+                for (word = wikiItems[i]; word!=null; word=word.next){ // Go though the linked list listed of words with hashvalue i
+                    newUniqeWord = new WikiItem(word.str,uniqeWordsStart,word.articlelist); //word is added as the head of uniqeWords
+                    uniqeWordsStart = newUniqeWord;
+                }    
+            }
+
+        }
+        
+        return uniqeWordsStart;
     }
 }

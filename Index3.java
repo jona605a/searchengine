@@ -100,6 +100,6 @@ class Index3 implements Index {
 
     @Override
     public WikiItem getUniqueWords() {
-        return null;
+        return start;
     }
 }
