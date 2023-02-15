@@ -8,22 +8,25 @@ class Index2 implements Index{
     public Index2(String filename) {
         String word;
         WikiItem current, tmp;
+        Scanner input;
         try {
-            Scanner input = new Scanner(new File(filename), "UTF-8");
-            word = input.next();
-            start = new WikiItem(word, null, null);
-            current = start;
-            while (input.hasNext()) {   // Read all words in input
-                word = input.next();
-                System.out.println(word);
-                tmp = new WikiItem(word, null, null);
-                current.next = tmp;
-                current = tmp;
-            }
-            input.close();
+            input = new Scanner(new File(filename), "UTF-8");
         } catch (FileNotFoundException e) {
             System.out.println("Error reading file " + filename);
+            return;
         }
+        word = input.next();
+        start = new WikiItem(word, null, null);
+        current = start;
+        while (input.hasNext()) {   // Read all words in input
+            word = input.next();
+            // System.out.println(word);
+            tmp = new WikiItem(word, null, null);
+            current.next = tmp;
+            current = tmp;
+        }
+        input.close();
+    
     }
  
     @Override
