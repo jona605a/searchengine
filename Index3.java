@@ -1,31 +1,9 @@
 import java.io.*;
 import java.util.Scanner;
  
-class Index3 {
+class Index3 implements Index {
  
     WikiItem start;
-
-    private class ArticleItem {
-        String str;
-        ArticleItem next;
-
-        ArticleItem(String s, ArticleItem n) {
-            str = s;
-            next = n;
-        }
-    }
- 
-    private class WikiItem {
-        String str;
-        WikiItem next;
-        ArticleItem articlelist;
- 
-        WikiItem(String s, WikiItem n, ArticleItem a) {
-            str = s;
-            next = n;
-            articlelist = a;
-        }
-    }
  
     public Index3(String filename) {
         String word, title, previousWord;
@@ -79,7 +57,8 @@ class Index3 {
         input.close();
     
     }
- 
+
+    @Override
     public ArticleItem search(String searchstr) {
         ArticleItem titles = new ArticleItem(null, null);
 
@@ -117,5 +96,10 @@ class Index3 {
             }
         }
         console.close();
+    }
+
+    @Override
+    public WikiItem getUniqueWords() {
+        return null;
     }
 }
