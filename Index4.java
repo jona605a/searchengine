@@ -8,11 +8,11 @@ class Index4 {
 
 
     private class ArticleItem {
-        String title;
+        String str;
         ArticleItem next;
 
         ArticleItem(String s, ArticleItem n) {
-            title = s;
+            str = s;
             next = n;
         }
     }
@@ -77,7 +77,7 @@ class Index4 {
                 WikiItem item = wikiItems[hash];
                 for (; item != null; item = item.next) {
                     if (item.word.equals(word)) {
-                        if (!item.articlelist.title.equals(title)) {
+                        if (!item.articlelist.str.equals(title)) {
                             newArticle = new ArticleItem(title, item.articlelist);
                             item.articlelist = newArticle;
                         }
@@ -133,8 +133,8 @@ class Index4 {
                 System.out.println(searchstr + " does not exist");
             } else {
                 System.out.print("\""+searchstr+"\"" + " exists in the following articles:\n   ");
-                for (ArticleItem current = titles; current != null && current.title != null; current=current.next) {
-                    System.out.print(current.title + " ");
+                for (ArticleItem current = titles; current != null && current.str != null; current=current.next) {
+                    System.out.print(current.str + " ");
                 }
                 System.out.println("\n");
             }

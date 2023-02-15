@@ -6,11 +6,11 @@ class Index3 {
     WikiItem start;
 
     private class ArticleItem {
-        String title;
+        String str;
         ArticleItem next;
 
         ArticleItem(String s, ArticleItem n) {
-            title = s;
+            str = s;
             next = n;
         }
     }
@@ -24,16 +24,6 @@ class Index3 {
             str = s;
             next = n;
             articlelist = a;
-        }
-    }
-
-    private class LinkedList {
-        String str;
-        LinkedList next;
-
-        LinkedList(String s, LinkedList l) {
-            str = s;
-            next = l;
         }
     }
  
@@ -66,7 +56,7 @@ class Index3 {
                 if (tmp.str.equals(word)){
                     ArticleItem tmp_article = tmp.articlelist;
                     for (; tmp_article!=null; tmp_article = tmp_article.next) {
-                        if (tmp_article.title.equals(title)) {
+                        if (tmp_article.str.equals(title)) {
                             break;
                         }
                     }
@@ -90,13 +80,13 @@ class Index3 {
     
     }
  
-    public LinkedList search(String searchstr) {
-        LinkedList titles = new LinkedList(null, null);
+    public ArticleItem search(String searchstr) {
+        ArticleItem titles = new ArticleItem(null, null);
 
         for (WikiItem current = start; current != null; current = current.next) {
             if (current.str.equals(searchstr)) {
                 for (ArticleItem ai = current.articlelist; ai!=null; ai=ai.next) {
-                    LinkedList tmp = new LinkedList(ai.title, titles);
+                    ArticleItem tmp = new ArticleItem(ai.str, titles);
                     titles = tmp;
                 }
                 break;
@@ -115,12 +105,12 @@ class Index3 {
             if (searchstr.equals("exit")) {
                 break;
             }
-            LinkedList titles = i.search(searchstr);
+            ArticleItem titles = i.search(searchstr);
             if (titles.next == null) {
                 System.out.println(searchstr + " does not exist");
             } else {
                 System.out.print("\""+searchstr+"\"" + " exists in the following articles:\n   ");
-                for (LinkedList current = titles; current != null && current.str != null; current=current.next) {
+                for (ArticleItem current = titles; current != null && current.str != null; current=current.next) {
                     System.out.print(current.str + " ");
                 }
                 System.out.println("\n");

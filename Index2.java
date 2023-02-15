@@ -15,11 +15,11 @@ class Index2 {
         }
     }
 
-    private class LinkedList {
+    private class ArticleItem {
         String str;
-        LinkedList next;
+        ArticleItem next;
 
-        LinkedList(String s, LinkedList l) {
+        ArticleItem(String s, ArticleItem l) {
             str = s;
             next = l;
         }
@@ -46,14 +46,14 @@ class Index2 {
         }
     }
  
-    public LinkedList search(String searchstr) {
+    public ArticleItem search(String searchstr) {
         String title = start.str;
         title = title.substring(0, title.length()-1); // Remove "."
-        LinkedList titles = new LinkedList(null, null);
+        ArticleItem titles = new ArticleItem(null, null);
 
         for (WikiItem current = start; current != null; current = current.next) {
             if (current.str.equals(searchstr) && (titles.next == null || !titles.str.equals(title))) {
-                LinkedList tmp = new LinkedList(title, titles);
+                ArticleItem tmp = new ArticleItem(title, titles);
                 titles = tmp;
             } else if (current.str.equals("---END.OF.DOCUMENT---") && current.next != null) {
                 title = current.next.str;
@@ -62,6 +62,8 @@ class Index2 {
         }
         return titles;
     }
+
+    
  
     public static void main(String[] args) {
         System.out.println("Preprocessing " + args[0]);
@@ -73,12 +75,12 @@ class Index2 {
             if (searchstr.equals("exit")) {
                 break;
             }
-            LinkedList titles = i.search(searchstr);
+            ArticleItem titles = i.search(searchstr);
             if (titles.next == null) {
                 System.out.println(searchstr + " does not exist");
             } else {
                 System.out.print("\""+searchstr+"\"" + " exists in the following articles:\n   ");
-                for (LinkedList current = titles; current != null && current.str != null; current=current.next) {
+                for (ArticleItem current = titles; current != null && current.str != null; current=current.next) {
                     System.out.print(current.str + " ");
                 }
                 System.out.println("\n");
