@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.HashSet;
 import java.util.Scanner;
  
 class Index2 implements Index{
@@ -20,7 +21,6 @@ class Index2 implements Index{
         current = start;
         while (input.hasNext()) {   // Read all words in input
             word = input.next();
-            // System.out.println(word);
             tmp = new WikiItem(word, null, null);
             current.next = tmp;
             current = tmp;
@@ -33,15 +33,16 @@ class Index2 implements Index{
     public ArticleItem search(String searchstr) {
         String title = start.str;
         title = title.substring(0, title.length()-1); // Remove "."
-        ArticleItem titles = new ArticleItem(null, null);
+        ArticleItem titles = null;
 
         for (WikiItem current = start; current != null; current = current.next) {
-            if (current.str.equals(searchstr) && (titles.next == null || !titles.str.equals(title))) {
-                ArticleItem tmp = new ArticleItem(title, titles);
-                titles = tmp;
-            } else if (current.str.equals("---END.OF.DOCUMENT---") && current.next != null) {
+            if (current.str.equals("---END.OF.DOCUMENT---") && current.next != null) {
                 title = current.next.str;
                 title = title.substring(0, title.length()-1); // Remove "."
+                continue;
+            } else if (current.str.equals(searchstr) && (titles == null || !titles.str.equals(title))) {
+                ArticleItem tmp = new ArticleItem(title, titles);
+                titles = tmp;
             }
         }
         return titles;
@@ -58,7 +59,7 @@ class Index2 implements Index{
                 break;
             }
             ArticleItem titles = i.search(searchstr);
-            if (titles.next == null) {
+            if (titles == null) {
                 System.out.println(searchstr + " does not exist");
             } else {
                 System.out.print("\""+searchstr+"\"" + " exists in the following articles:\n   ");
@@ -72,23 +73,21 @@ class Index2 implements Index{
     }
 
     @Override
-    public WikiItem getUniqueWords() {  
-        WikiItem uniqeWordsStart = new WikiItem(start.str, null,start.articlelist);
-        WikiItem word, tmp, newUniqeWord;
-
-        for(word=start; word!=null; word=word.next) {   // Go though all the words
-            
-            for (tmp = uniqeWordsStart; tmp!=null; tmp=tmp.next){ // Go though the linked list of uniqeWords
-                if (tmp.str.equals(word.str)){ // The word already exist in the linked list uniqeWords
-                    break;
-                }
-            }
-            if (tmp == null) { // word wasn't found in the linked list uniqeWords
-                newUniqeWord = new WikiItem(word.str,uniqeWordsStart,word.articlelist); //word is added as the head of uniqeWords
-                uniqeWordsStart = newUniqeWord;
-            } 
+    public WikiItem getUniqueWords() {
+        HashSet<String> uniqueWords = new HashSet<String>();
+        int count = 0;
+        for (WikiItem item = start; item!=null; item=item.next) {
+            if (item.str.equals("---END.OF.DOCUMENT---")){continue;}
+            count++;
+            uniqueWords.add(item.str);
         }
-        
-        return uniqeWordsStart;
+
+        WikiItem uniqueStart = null;
+        for (String word : uniqueWords) {
+            WikiItem newItem = new WikiItem(word, uniqueStart, null);
+            uniqueStart = newItem;
+        }
+        System.out.println("From Index2. There are "+count+" total words in the text, and "+uniqueWords.size()+" unique words. ");
+        return uniqueStart;
     }
 }

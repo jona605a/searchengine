@@ -1,5 +1,5 @@
 IDX ?= 5
-SIZE ?= "5MB"
+SIZE ?= "100KB"
 FILE ?= "Data/WestburyLab.wikicorp.201004_$(SIZE).txt"
 
 run:
@@ -11,3 +11,6 @@ testCollisions:
 
 testU:
 	java --enable-preview -cp bin Tester $(FILE) 4 5
+
+tester:
+	java --enable-preview -cp bin Tester $(FILE) $(i) $(j)

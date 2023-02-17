@@ -16,14 +16,16 @@ class Index3 implements Index {
             System.out.println("Error reading file " + filename);
             return;
         }
-        word = input.next();
-        start = new WikiItem(word, null, null);
-        title = word.substring(0,word.length()-1); // Assume that the first word is a title
+        word = "---END.OF.DOCUMENT---"; // Assume that the first word is a title
+        title = "";
+        start = null;
+        
         while (input.hasNext()) {   // Read all words in input
             previousWord = word;
             word = input.next();
-            // System.out.println(word);
-            
+            if (word.equals("---END.OF.DOCUMENT---")) {
+                continue;
+            }
             // Update the current title
             if (previousWord.equals("---END.OF.DOCUMENT---")) {
                 title = word.substring(0,word.length()-1);
@@ -60,18 +62,21 @@ class Index3 implements Index {
 
     @Override
     public ArticleItem search(String searchstr) {
-        ArticleItem titles = new ArticleItem(null, null);
+        // ArticleItem titles = new ArticleItem(null, null);
 
         for (WikiItem current = start; current != null; current = current.next) {
             if (current.str.equals(searchstr)) {
-                for (ArticleItem ai = current.articlelist; ai!=null; ai=ai.next) {
-                    ArticleItem tmp = new ArticleItem(ai.str, titles);
-                    titles = tmp;
-                }
-                break;
+                return current.articlelist;
             }
+            // if (current.str.equals(searchstr)) {
+            //     for (ArticleItem ai = current.articlelist; ai!=null; ai=ai.next) {
+            //         ArticleItem tmp = new ArticleItem(ai.str, titles);
+            //         titles = tmp;
+            //     }
+            //     break;
+            // }
         }
-        return titles;
+        return null;
     }
     
     public static void main(String[] args) {
@@ -85,7 +90,7 @@ class Index3 implements Index {
                 break;
             }
             ArticleItem titles = i.search(searchstr);
-            if (titles.next == null) {
+            if (titles == null) {
                 System.out.println(searchstr + " does not exist");
             } else {
                 System.out.print("\""+searchstr+"\"" + " exists in the following articles:\n   ");
