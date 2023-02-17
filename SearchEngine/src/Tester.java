@@ -34,6 +34,16 @@ public class Tester {
             if (words2.get(str) != words1.get(str)) {
                 System.out.println(words1.get(str)+" is not "+words2.get(str)+" for word "+str);
             }
+            Index.ArticleItem a1 = i1.search(str);
+            Index.ArticleItem a2 = i2.search(str);
+            // Assume articleitems must be in the same order (file-read order)
+            while (a1 != null){
+                if (!a1.str.equals(a2.str)) {
+                    System.out.println("Article "+a1.str+" is not "+a2.str+" for word\t"+str);
+                }
+                a1=a1.next;
+                a2=a2.next;
+            }
         }
 
         if (l1!=l2) {

@@ -10,15 +10,6 @@ class Index5 implements Index{
     private int hashString(String s) {
         
         return (s.hashCode() % n + n) % n;
-        
-        // int base = 109;
-        // int acc = 1;
-        // double sum = 0;
-        // for (int i = 0; i < s.length(); i++) {
-        //     sum = sum + s.charAt(i)*acc;
-        //     acc = acc*base;
-        // }
-        // return (((int) sum) % n + n) % n;
     }
  
     public Index5(String filename) {
@@ -33,7 +24,6 @@ class Index5 implements Index{
         word = "---END.OF.DOCUMENT---"; // Assume that the first word is a title
         title = "";
         
-        // int collisionCounter = 0;
         while (input.hasNext()) {   // Read all words in input
             previousWord = word;
             word = input.next();
@@ -54,7 +44,6 @@ class Index5 implements Index{
     }
  
     public void insertWord(String word, String title){
-        //int hash = word.hashCode();
         int hash = hashString(word);
         ArticleItem newArticle;
         // Checks if place in hashtable is empty
@@ -75,14 +64,14 @@ class Index5 implements Index{
                     break;
                 }
             }
-            //If article not in list put article in list
+            // Hash existed, but word wasn't found (collision). Add the new word. 
             if (item == null) {
                 newArticle = new ArticleItem(title, null);
                 WikiItem newItem = new WikiItem(word, wikiItems[hash],newArticle);
                 wikiItems[hash] = newItem;
                 uniqeWords ++;
             }
-            }
+        }
     }
 
     public void rehash(){
@@ -116,7 +105,7 @@ class Index5 implements Index{
         }
         for (WikiItem item = wikiItems[hash]; item != null; item = item.next) {
             if (item.str.equals(searchstr)) {
-                return wikiItems[hash].articlelist;
+                return item.articlelist;
             }
         }
         return null;

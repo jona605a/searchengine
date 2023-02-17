@@ -10,15 +10,6 @@ class Index4 implements Index{
     private int hashString(String s) {
         
         return (s.hashCode() % n + n) % n;
-        
-        // int base = 109;
-        // int acc = 1;
-        // double sum = 0;
-        // for (int i = 0; i < s.length(); i++) {
-        //     sum = sum + s.charAt(i)*acc;
-        //     acc = acc*base;
-        // }
-        // return (((int) sum) % n + n) % n;
     }
  
     public Index4(String filename) {
@@ -34,18 +25,15 @@ class Index4 implements Index{
         word = "---END.OF.DOCUMENT---";
         title = "";
 
-        // int collisionCounter = 0;
         while (input.hasNext()) {   // Read all words in input
             previousWord = word;
             word = input.next();
-            // System.out.println(word);
             
             // Update the current title
             if (previousWord.equals("---END.OF.DOCUMENT---")) {
                 title = word.substring(0,word.length()-1);
             }
 
-            //int hash = word.hashCode();
             int hash = hashString(word);
             
             if (wikiItems[hash] == null) {
@@ -64,7 +52,7 @@ class Index4 implements Index{
                 }
                 if (item == null) {
                     newArticle = new ArticleItem(title, null);
-                    WikiItem newItem = new WikiItem(word, wikiItems[hash],newArticle );
+                    WikiItem newItem = new WikiItem(word, wikiItems[hash], newArticle);
                     wikiItems[hash] = newItem;
                 }
 
@@ -73,6 +61,7 @@ class Index4 implements Index{
         }
         input.close();
     }
+
     @Override
     public ArticleItem search(String searchstr) {
         int hash = hashString(searchstr);
@@ -81,7 +70,7 @@ class Index4 implements Index{
         }
         for (WikiItem item = wikiItems[hash]; item != null; item = item.next) {
             if (item.str.equals(searchstr)) {
-                return wikiItems[hash].articlelist;
+                return item.articlelist;
             }
         }
         return null;
