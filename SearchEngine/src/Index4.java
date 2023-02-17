@@ -31,9 +31,9 @@ class Index4 implements Index{
             System.out.println("Error reading file " + filename);
             return;
         }
-        word = input.next();
-        title = word.substring(0,word.length()-1); // Assume that the first word is a title
-        
+        word = "---END.OF.DOCUMENT---";
+        title = "";
+
         // int collisionCounter = 0;
         while (input.hasNext()) {   // Read all words in input
             previousWord = word;
