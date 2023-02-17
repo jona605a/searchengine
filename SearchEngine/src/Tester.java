@@ -1,3 +1,5 @@
+import java.util.HashMap;
+
 public class Tester {
     public static void main(String[] args) throws Exception {
         if (args.length <= 2) {
@@ -11,14 +13,29 @@ public class Tester {
         Index.WikiItem uWords1 = i1.getUniqueWords();
         Index.WikiItem uWords2 = i2.getUniqueWords();
 
+        HashMap<String,Integer> words1 = new HashMap<String,Integer>();
+        HashMap<String,Integer> words2 = new HashMap<String,Integer>();
+
         int l1 = 0;
         for (;uWords1 != null; uWords1=uWords1.next) {
+            words1.computeIfPresent(uWords1.str, (str,x) -> x+1);
+            words1.computeIfAbsent(uWords1.str, (str) -> 1);
             l1++;
+
         }
         int l2 = 0;
         for (;uWords2 != null; uWords2=uWords2.next) {
+            words2.computeIfPresent(uWords2.str, (str,x) -> x+1);
+            words2.computeIfAbsent(uWords2.str, (str) -> 1);
             l2++;
         }
+
+        for (String str : words1.keySet()) {
+            if (words2.get(str) != words1.get(str)) {
+                System.out.println(words1.get(str)+" is not "+words2.get(str)+" for word "+str);
+            }
+        }
+
         if (l1!=l2) {
             throw new Exception("Index"+args[1]+" encounters "+l1+" unique words, but Index"+args[2]+" encounters "+l2+".");
         }

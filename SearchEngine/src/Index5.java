@@ -30,8 +30,8 @@ class Index5 implements Index{
             System.out.println("Error reading file " + filename);
             return;
         }
-        word = input.next();
-        title = word.substring(0,word.length()-1); // Assume that the first word is a title
+        word = "---END.OF.DOCUMENT---"; // Assume that the first word is a title
+        title = "";
         
         // int collisionCounter = 0;
         while (input.hasNext()) {   // Read all words in input
@@ -93,10 +93,13 @@ class Index5 implements Index{
             if (wikiItems[i] == null){
                 continue;
             }
-            for(WikiItem item = wikiItems[i];item != null; item = item.next){
+            WikiItem item = wikiItems[i];
+            while (item!=null) {
                 int hash = hashString(item.str);
+                WikiItem tmp = item.next;
                 item.next = NewwikiItems[hash];
-                NewwikiItems[hash] = item;   
+                NewwikiItems[hash] = item;
+                item = tmp;
             }
         }
         wikiItems = NewwikiItems;
