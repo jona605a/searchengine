@@ -14,3 +14,6 @@ testU:
 
 tester:
 	java --enable-preview -cp bin Tester $(FILE) $(i) $(j)
+test:
+	java --enable-preview -cp bin Tester $(FILE) 3 4 time
+
