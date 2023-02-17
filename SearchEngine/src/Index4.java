@@ -28,7 +28,9 @@ class Index4 implements Index{
         while (input.hasNext()) {   // Read all words in input
             previousWord = word;
             word = input.next();
-            
+            if (word.equals("---END.OF.DOCUMENT---")) {
+                continue;
+            }
             // Update the current title
             if (previousWord.equals("---END.OF.DOCUMENT---")) {
                 title = word.substring(0,word.length()-1);

@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Date;
 
@@ -8,35 +9,46 @@ public class Tester {
             return;
         }
 
-        if(args[3].equals("correctness")){
-            correctnessTest(args);
-        }
+        switch (args[3]) {
+            case "correctness":
+                correctnessTest(args);
+                break;
         
-        if(args[3].equals("time")){
+            case "time":
             timeTest(args);
+                break;
+        
+            case "memory":
+                memoryTest(args);
+                break;
+        
+            default:
+                break;
         }
-
+        return;
     }
 
     public static void correctnessTest (String[] args) throws Exception {
-        
-        //initizise
-        String filename = args[0];
-        Index i1 = interpretIdx(filename, args[1]);
-        Index i2 = interpretIdx(filename, args[2]);
+        // Initialize
+        System.out.println(Arrays.toString(args));
 
+        Index i1 = interpretIdx(args[0], args[1]);
+        Index i2 = interpretIdx(args[0], args[2]);
+        
+        // Call getUniqueWords
         Index.WikiItem uWords1 = i1.getUniqueWords();
         Index.WikiItem uWords2 = i2.getUniqueWords();
 
+        System.out.println("Done finding unique words");
+        
+        //Count Unique words and add them to a hashset
         HashSet<String> words1 = new HashSet<String>();
         HashSet<String> words2 = new HashSet<String>();
 
-        //Count Uniqe words and add them to a hashmap
         int l1 = 0;
         for (;uWords1 != null; uWords1=uWords1.next) {
             words1.add(uWords1.str);
             l1++;
-
         }
         int l2 = 0;
         for (;uWords2 != null; uWords2=uWords2.next) {
@@ -51,7 +63,7 @@ public class Tester {
         //run though all elements in Index args[1]
         for (String str : words1) {
             
-            //Test that they have the same uniqe words
+            //Test that they have the same unique words
             if (!words2.contains(str)) {
                 throw new Exception(str + "not in Index"+args[2]);
             }
@@ -93,6 +105,47 @@ public class Tester {
             System.out.println("IndexTime Index"+i+": \t"+TimeIndex1 + "ms");
             System.out.println("SearchTime Index"+i+": \t"+TimeSearch1 + "ms \n");
         }
+    }
+
+
+    public static void memoryTest(String[] args) {
+        String filename = args[0];
+        
+        // Prepare memory test
+        System.gc();
+        Runtime runtime = Runtime.getRuntime();
+
+        // Memory test i1
+        long memory1before = runtime.totalMemory() - runtime.freeMemory();
+        System.out.println("Before running index"+args[1]+". Memory before: "+memory1before);
+        
+        Index i1 = interpretIdx(filename, args[1]);
+        
+        long memory1after  = runtime.totalMemory() - runtime.freeMemory();
+        System.out.println("After  running index"+args[1]+". Memory after:  "+memory1after);
+        
+        // Prepare memory test
+        System.gc();
+        
+        // Memory test i2
+        long memory2before = runtime.totalMemory() - runtime.freeMemory();
+        System.out.println("Index"+args[1]+" initial memory usage: "+ (memory1after-memory1before) + ". And \"actual\" memory usage: " + (memory2before-memory1before));
+        System.out.println("Before running index"+args[2]+". Memory before: "+memory2before);
+        
+        Index i2 = interpretIdx(filename, args[2]);
+        
+        long memory2after  = runtime.totalMemory() - runtime.freeMemory();
+        System.out.println("After  running index"+args[2]+". Memory after:  "+memory2after);
+        
+        System.gc();
+        long memory2aftergc  = runtime.totalMemory() - runtime.freeMemory();
+        System.out.println("After  garbage index"+args[2]+". Memory after:  "+memory2aftergc);
+        System.out.println("Index"+args[2]+" initial memory usage: "+ (memory2after-memory2before) + ". And \"actual\" memory usage: " + (memory2aftergc-memory2before));
+        
+        // Ignore errors
+        i2 = i1;
+        i1 = i2;
+        return;
     }
 
     private static Index interpretIdx(String filename, String id) {

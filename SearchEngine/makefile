@@ -9,6 +9,12 @@ testCollisions:
 	java --enable-preview -cp bin Index$(IDX) Data/WestburyLab.wikicorp.201004_100KB.txt "Test"
 	java --enable-preview -cp bin Index$(IDX) Data/WestburyLab.wikicorp.201004_5MB.txt "Test"
 
-test:
-	java --enable-preview -cp bin Tester $(FILE) x x time
+testcorrect:
+	java --enable-preview -cp bin Tester $(FILE) $(i) $(j) correctness
+
+testmem:
+	java --enable-preview -cp bin Tester $(FILE) $(i) $(j) memory
+
+testtime:
+	java --enable-preview -cp bin Tester $(FILE) $(i) $(j) time
 
