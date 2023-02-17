@@ -9,42 +9,46 @@ public class Tester {
             return;
         }
 
-        if(args[3].equals("correctness")){
-            correctnessTest(args);
-        }
+        switch (args[3]) {
+            case "correctness":
+                correctnessTest(args);
+                break;
         
-        if(args[3].equals("time")){
+            case "time":
             timeTest(args);
+                break;
+        
+            case "memory":
+                memoryTest(args);
+                break;
+        
+            default:
+                break;
         }
-
+        return;
     }
 
     public static void correctnessTest (String[] args) throws Exception {
-        
-        //initizise
-        String filename = args[0];
+        // Initialize
         System.out.println(Arrays.toString(args));
 
-        Index[] r = memoryTest(args);
-        Index i1 = r[0];
-        Index i2 = r[1];
+        Index i1 = interpretIdx(args[0], args[1]);
+        Index i2 = interpretIdx(args[0], args[2]);
         
         // Call getUniqueWords
-
         Index.WikiItem uWords1 = i1.getUniqueWords();
         Index.WikiItem uWords2 = i2.getUniqueWords();
 
         System.out.println("Done finding unique words");
-
+        
+        //Count Unique words and add them to a hashset
         HashSet<String> words1 = new HashSet<String>();
         HashSet<String> words2 = new HashSet<String>();
 
-        //Count Uniqe words and add them to a hashmap
         int l1 = 0;
         for (;uWords1 != null; uWords1=uWords1.next) {
             words1.add(uWords1.str);
             l1++;
-
         }
         int l2 = 0;
         for (;uWords2 != null; uWords2=uWords2.next) {
@@ -59,7 +63,7 @@ public class Tester {
         //run though all elements in Index args[1]
         for (String str : words1) {
             
-            //Test that they have the same uniqe words
+            //Test that they have the same unique words
             if (!words2.contains(str)) {
                 throw new Exception(str + "not in Index"+args[2]);
             }
@@ -99,13 +103,13 @@ public class Tester {
 
         startTime = System.currentTimeMillis();
         for(Index.WikiItem item = uWords1; item != null; item = item.next) {
-            Index.ArticleItem a1 = i1.search(item.str);
+            i1.search(item.str);
         }
         long TimeSearch1 = (new Date()).getTime() - startTime;
 
         startTime = System.currentTimeMillis();
         for(Index.WikiItem item = uWords2; item != null; item = item.next) {
-            Index.ArticleItem a1 = i1.search(item.str);
+            i2.search(item.str);
         }
         long TimeSearch2 = (new Date()).getTime() - startTime;
 
@@ -118,7 +122,7 @@ public class Tester {
     }
 
 
-    public static Index[] memoryTest(String[] args) {
+    public static void memoryTest(String[] args) {
         String filename = args[0];
         
         // Prepare memory test
@@ -152,9 +156,10 @@ public class Tester {
         System.out.println("After  garbage index"+args[2]+". Memory after:  "+memory2aftergc);
         System.out.println("Index"+args[2]+" initial memory usage: "+ (memory2after-memory2before) + ". And \"actual\" memory usage: " + (memory2aftergc-memory2before));
         
-        Index[] r = new Index[2];
-        r[0] = i1; r[1] = i2;
-        return r;
+        // Ignore errors
+        i2 = i1;
+        i1 = i2;
+        return;
     }
 
     private static Index interpretIdx(String filename, String id) {
