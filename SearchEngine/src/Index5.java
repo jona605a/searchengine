@@ -37,7 +37,7 @@ class Index5 implements Index{
 
             if(n <= uniqeWords){ //double space in hash table
                 rehash();
-                System.out.println(n);
+                //System.out.println(n);
             }
         }
         input.close();

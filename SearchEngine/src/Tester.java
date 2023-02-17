@@ -75,38 +75,24 @@ public class Tester {
 
     public static void timeTest(String[] args) {
         String filename = args[0];
-        
-        long startTime = System.currentTimeMillis();
-        Index i1 = interpretIdx(filename, args[1]);
-        long TimeIndex1 = (new Date()).getTime() - startTime;
+        long startTime;
 
-        startTime = System.currentTimeMillis();
-        Index i2 = interpretIdx(filename, args[2]);
-        long TimeIndex2 = (new Date()).getTime() - startTime;
+        for(int i=2; i!=6; i++){
+            startTime = System.currentTimeMillis();
+            Index index = interpretIdx(filename, String.valueOf(i));
+            long TimeIndex1 = (new Date()).getTime() - startTime;
 
+            Index.WikiItem uWords1 = index.getUniqueWords();
 
-        Index.WikiItem uWords1 = i1.getUniqueWords();
-        Index.WikiItem uWords2 = i2.getUniqueWords();
-
-
-        startTime = System.currentTimeMillis();
-        for(Index.WikiItem item = uWords1; item != null; item = item.next) {
-            Index.ArticleItem a1 = i1.search(item.str);
+            startTime = System.currentTimeMillis();
+            for(Index.WikiItem item = uWords1; item != null; item = item.next) {
+                Index.ArticleItem a1 = index.search(item.str);
+            }
+            long TimeSearch1 = (new Date()).getTime() - startTime;
+            
+            System.out.println("IndexTime Index"+i+": \t"+TimeIndex1 + "ms");
+            System.out.println("SearchTime Index"+i+": \t"+TimeSearch1 + "ms \n");
         }
-        long TimeSearch1 = (new Date()).getTime() - startTime;
-
-        startTime = System.currentTimeMillis();
-        for(Index.WikiItem item = uWords2; item != null; item = item.next) {
-            Index.ArticleItem a1 = i1.search(item.str);
-        }
-        long TimeSearch2 = (new Date()).getTime() - startTime;
-
-        System.out.println("IndexTime Index"+args[1]+": \t"+TimeIndex1 + "ms");
-        System.out.println("IndexTime Index"+args[1]+": \t"+TimeSearch1 + "ms \n");
-        
-        System.out.println("IndexTime Index"+args[2]+": \t"+TimeIndex2 + "ms");
-        System.out.println("IndexTime Index"+args[2]+": \t"+TimeSearch2 + "ms");
-
     }
 
     private static Index interpretIdx(String filename, String id) {

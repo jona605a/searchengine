@@ -1,5 +1,5 @@
 IDX ?= 5
-SIZE ?= "5MB"
+SIZE ?= "100KB"
 FILE ?= "Data/WestburyLab.wikicorp.201004_$(SIZE).txt"
 
 run:
@@ -10,5 +10,5 @@ testCollisions:
 	java --enable-preview -cp bin Index$(IDX) Data/WestburyLab.wikicorp.201004_5MB.txt "Test"
 
 test:
-	java --enable-preview -cp bin Tester $(FILE) 3 4 time
+	java --enable-preview -cp bin Tester $(FILE) x x time
 
