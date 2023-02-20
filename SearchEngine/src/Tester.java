@@ -1,11 +1,10 @@
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Date;
 
 public class Tester {
     public static void main(String[] args) throws Exception {
-        if (args.length <= 2) {
-            System.out.println("Test expects the command line arguments: [filename] [i] [j] [testetype] , where i and j are index numbers to compare");
+        if (args.length <= 3) {
+            System.out.println("Test expects the command line arguments: [filename] [i] [j] [testtype] , where i and j are index numbers to compare");
             return;
         }
 
@@ -15,7 +14,7 @@ public class Tester {
                 break;
         
             case "time":
-            timeTest(args);
+                timeTest(args);
                 break;
         
             case "memory":
@@ -34,7 +33,7 @@ public class Tester {
 
         Index i1 = interpretIdx(args[0], args[1]);
         Index i2 = interpretIdx(args[0], args[2]);
-        
+
         // Call getUniqueWords
         Index.WikiItem uWords1 = i1.getUniqueWords();
         Index.WikiItem uWords2 = i2.getUniqueWords();
@@ -45,19 +44,15 @@ public class Tester {
         HashSet<String> words1 = new HashSet<String>();
         HashSet<String> words2 = new HashSet<String>();
 
-        int l1 = 0;
         for (;uWords1 != null; uWords1=uWords1.next) {
             words1.add(uWords1.str);
-            l1++;
         }
-        int l2 = 0;
         for (;uWords2 != null; uWords2=uWords2.next) {
             words2.add(uWords2.str);
-            l2++;
         }
 
-        if (l1!=l2) {
-            throw new Exception("Index"+args[1]+" encounters "+l1+" unique words, but Index"+args[2]+" encounters "+l2+".");
+        if (words1.size() != words2.size()) {
+            throw new Exception("Error! Index"+args[1]+" encounters "+words1.size()+" unique words, but Index"+args[2]+" encounters "+words2.size()+".");
         }
 
         //run though all elements in Index args[1]
@@ -80,9 +75,7 @@ public class Tester {
                 a2=a2.next;
             }
         }
-
         System.out.println("Test passed!");
-        
     }
 
     public static void timeTest(String[] args) {
@@ -92,18 +85,18 @@ public class Tester {
         for(int i=2; i!=6; i++){
             startTime = System.currentTimeMillis();
             Index index = interpretIdx(filename, String.valueOf(i));
-            long TimeIndex1 = (new Date()).getTime() - startTime;
+            long TimeIndex = System.currentTimeMillis() - startTime;
 
-            Index.WikiItem uWords1 = index.getUniqueWords();
+            Index.WikiItem uWords = index.getUniqueWords();
 
             startTime = System.currentTimeMillis();
-            for(Index.WikiItem item = uWords1; item != null; item = item.next) {
-                Index.ArticleItem a1 = index.search(item.str);
+            for(Index.WikiItem item = uWords; item != null; item = item.next) {
+                /*Index.ArticleItem a1 = */ index.search(item.str);
             }
-            long TimeSearch1 = (new Date()).getTime() - startTime;
-            
-            System.out.println("IndexTime Index"+i+": \t"+TimeIndex1 + "ms");
-            System.out.println("SearchTime Index"+i+": \t"+TimeSearch1 + "ms \n");
+            long TimeSearch = System.currentTimeMillis() - startTime;
+
+            System.out.println("IndexTime Index"+i+": \t"+TimeIndex + "ms");
+            System.out.println("SearchTime Index"+i+": \t"+TimeSearch + "ms \n");
         }
     }
 
@@ -129,7 +122,7 @@ public class Tester {
         
         // Memory test i2
         long memory2before = runtime.totalMemory() - runtime.freeMemory();
-        System.out.println("Index"+args[1]+" initial memory usage: "+ (memory1after-memory1before) + ". And \"actual\" memory usage: " + (memory2before-memory1before));
+        System.out.println("Index"+args[1]+" total memory usage: "+ (memory1after-memory1before) + ". And \"actual\" memory usage: " + (memory2before-memory1before));
         System.out.println("Before running index"+args[2]+". Memory before: "+memory2before);
         
         Index i2 = interpretIdx(filename, args[2]);
@@ -140,7 +133,7 @@ public class Tester {
         System.gc();
         long memory2aftergc  = runtime.totalMemory() - runtime.freeMemory();
         System.out.println("After  garbage index"+args[2]+". Memory after:  "+memory2aftergc);
-        System.out.println("Index"+args[2]+" initial memory usage: "+ (memory2after-memory2before) + ". And \"actual\" memory usage: " + (memory2aftergc-memory2before));
+        System.out.println("Index"+args[2]+" total memory usage: "+ (memory2after-memory2before) + ". And \"actual\" memory usage: " + (memory2aftergc-memory2before));
         
         // Ignore errors
         i2 = i1;

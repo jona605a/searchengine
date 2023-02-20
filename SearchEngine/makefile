@@ -1,6 +1,8 @@
 IDX ?= 5
 SIZE ?= "100KB"
 FILE ?= "Data/WestburyLab.wikicorp.201004_$(SIZE).txt"
+i ?= 4
+j ?= 5
 
 run:
 	java --enable-preview -cp bin Index$(IDX) $(FILE)
