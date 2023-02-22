@@ -133,20 +133,20 @@ class Index4 implements Index{
 
     @Override
     public WikiItem getUniqueWords() {
-        WikiItem uniqeWordsStart = null;
-        WikiItem word, newUniqeWord;
+        WikiItem uniqueWordsStart = null;
+        WikiItem word, newUniqueWord;
     
         for(int i = 0; i!=n; i++) {   // Go though the hashmap
             
             if(wikiItems[i] != null){
                 for (word = wikiItems[i]; word!=null; word=word.next){ // Go though the linked list listed of words with hashvalue i
-                    newUniqeWord = new WikiItem(word.str,uniqeWordsStart,word.articlelist); //word is added as the head of uniqeWords
-                    uniqeWordsStart = newUniqeWord;
+                    newUniqueWord = new WikiItem(word.str,uniqueWordsStart,word.articlelist); //word is added as the head of uniqueWords
+                    uniqueWordsStart = newUniqueWord;
                 }    
             }
 
         }
         
-        return uniqeWordsStart;
+        return uniqueWordsStart;
     }
 }

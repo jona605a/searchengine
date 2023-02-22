@@ -39,7 +39,6 @@ class Index2 implements Index{
             if (current.str.equals("---END.OF.DOCUMENT---") && current.next != null) {
                 title = current.next.str;
                 title = title.substring(0, title.length()-1); // Remove "."
-                continue;
             } else if (current.str.equals(searchstr) && (titles == null || !titles.str.equals(title))) {
                 ArticleItem tmp = new ArticleItem(title, titles);
                 titles = tmp;
