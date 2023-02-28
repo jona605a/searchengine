@@ -25,42 +25,45 @@ impl Config {
 }
 
 pub struct Index<T> {
-    pub indexno: String,
-    pub database: T,
+    indexno: String,
+    database: T,
 }
 
-impl Index<HashMap<&str,HashSet<&str>>> {
-    pub fn build<'a>(config: Config) -> Result<Index<HashMap<&'a str,HashSet<&'a str>>>, Box<dyn Error>> {
+impl Index<HashMap<String,HashSet<String>>> {
+    pub fn build(config: &Config) -> Result<Index<HashMap<String,HashSet<String>>>, Box<dyn Error>> {
         
-        let mut database: HashMap<&str,HashSet<&str>> = HashMap::new();
+        let mut database: HashMap<String,HashSet<String>> = HashMap::new();
         
-        // Do the indexing
-        let filecontents = read_file_to_string(config.file_path)?;
+        let filecontents = read_file_to_string(&config.file_path)?;
 
-        let mut prev_word = "---END.OF.DOCUMENT---";
-        let mut cur_title = "";
+        let mut prev_word = String::from("---END.OF.DOCUMENT---");
+        let mut cur_title = String::new();
         for word in filecontents.split_whitespace() {
-            if word == "---END.OF.DOCUMENT---" {continue}
+            if word == "---END.OF.DOCUMENT---" {
+                prev_word = word.to_string();
+                continue;
+            }
             // Update title
             if prev_word == "---END.OF.DOCUMENT---" {
-                cur_title = word;
+                cur_title = word.to_string();
+                prev_word = String::new();
             }
 
-            database.entry(word)
+            database.entry(word.to_string())
                 .or_default()
-                .insert(cur_title);
-
-
-
-            prev_word = word;
+                .insert(cur_title.clone());
         }
 
-        let index: Index<HashMap<&str,HashSet<&str>>> = Index {indexno: config.indexno, database};
+        let index: Index<HashMap<String,HashSet<String>>> = Index {indexno: config.indexno.clone(), database};
         Ok(index)
+    }
+
+    pub fn search(&self, word: &String) -> Option<&HashSet<String>> {
+        self.database.get(word)
     }
 }
 
-fn read_file_to_string(file_path: String) -> Result<String, Box<dyn Error>> {
+fn read_file_to_string(file_path: &String) -> Result<String, Box<dyn Error>> {
     let contents = fs::read_to_string(file_path)?;
     Ok(contents)
 }
@@ -68,7 +71,15 @@ fn read_file_to_string(file_path: String) -> Result<String, Box<dyn Error>> {
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     
 
-    let index: Index<HashMap<String,HashSet<String>>>  = Index { indexno: String::from("6"), database: HashMap::new()};
+    let index = Index::build(&config)?;
+    println!("indexno: {}",index.indexno);
+
+    match index.search(&config.query) {
+        Some(result) => {
+            println!("{:?}", result)
+        }
+        None => println!("Word not found"),
+    }
 
     Ok(())
 }
