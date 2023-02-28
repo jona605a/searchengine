@@ -2,6 +2,8 @@ use std::collections::{HashMap, HashSet};
 use std::error::Error;
 use std::fs;
 
+// mod index;
+
 pub struct Config {
     pub query: String,
     pub file_path: String,
@@ -9,7 +11,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn build(args: &[String]) -> Result<Config, &'static str> {
+    pub fn build(args: &[String]) -> Result<Config, &str> {
         if args.len() < 4 {
             return Err("not enough arguments");
         }
@@ -27,31 +29,46 @@ pub struct Index<T> {
     pub database: T,
 }
 
-impl Index<HashMap<String,HashSet<String>>> {
-    pub fn build(config: Config) {
-        let mut database: HashMap<String,HashSet<String>> = HashMap::new();
-        let mut index: Index<HashMap<String,HashSet<String>>> = Index {indexno: config.indexno, database};
-        // Do the indexing
+impl Index<HashMap<&str,HashSet<&str>>> {
+    pub fn build<'a>(config: Config) -> Result<Index<HashMap<&'a str,HashSet<&'a str>>>, Box<dyn Error>> {
         
+        let mut database: HashMap<&str,HashSet<&str>> = HashMap::new();
+        
+        // Do the indexing
+        let filecontents = read_file_to_string(config.file_path)?;
+
+        let mut prev_word = "---END.OF.DOCUMENT---";
+        let mut cur_title = "";
+        for word in filecontents.split_whitespace() {
+            if word == "---END.OF.DOCUMENT---" {continue}
+            // Update title
+            if prev_word == "---END.OF.DOCUMENT---" {
+                cur_title = word;
+            }
+
+            database.entry(word)
+                .or_default()
+                .insert(cur_title);
 
 
+
+            prev_word = word;
+        }
+
+        let index: Index<HashMap<&str,HashSet<&str>>> = Index {indexno: config.indexno, database};
+        Ok(index)
     }
 }
 
-
+fn read_file_to_string(file_path: String) -> Result<String, Box<dyn Error>> {
+    let contents = fs::read_to_string(file_path)?;
+    Ok(contents)
+}
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
-    let contents = fs::read_to_string(config.file_path)?;
+    
 
-    // let index: Index<HashMap<String,HashSet<String>>> = Index {
-    //     indexno: String::from("6"),
-    //     database: HashMap<String,HashSet<String>>::new();
-    // } ;
     let index: Index<HashMap<String,HashSet<String>>>  = Index { indexno: String::from("6"), database: HashMap::new()};
-
-    for line in search(&config.query, &contents) {
-        println!("{line}");
-    }
 
     Ok(())
 }
