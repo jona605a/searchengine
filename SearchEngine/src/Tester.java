@@ -13,8 +13,12 @@ public class Tester {
                 correctnessTest(args);
                 break;
         
-            case "time":
-                timeTest(args);
+            case "timeIDX":
+                timeTestIDX(args);
+                break;
+            
+            case "timeFILE":
+                timeTestFile(args);
                 break;
         
             case "memory":
@@ -78,7 +82,7 @@ public class Tester {
         System.out.println("Test passed!");
     }
 
-    public static void timeTest(String[] args) {
+    public static void timeTestFile(String[] args) {
         String filename = args[0];
         long startTime;
 
@@ -86,6 +90,8 @@ public class Tester {
             startTime = System.currentTimeMillis();
             Index index = interpretIdx(filename, String.valueOf(i));
             long TimeIndex = System.currentTimeMillis() - startTime;
+            
+            System.out.println("IndexTime Index"+i+": \t"+TimeIndex + "ms");
 
             Index.WikiItem uWords = index.getUniqueWords();
 
@@ -95,8 +101,43 @@ public class Tester {
             }
             long TimeSearch = System.currentTimeMillis() - startTime;
 
-            System.out.println("IndexTime Index"+i+": \t"+TimeIndex + "ms");
             System.out.println("SearchTime Index"+i+": \t"+TimeSearch + "ms \n");
+        }
+    }
+
+    public static void timeTestIDX(String[] args) {
+        long startTime;
+
+        String[] files = {"Data/WestburyLab.wikicorp.201004_100KB.txt",
+                            "Data/WestburyLab.wikicorp.201004_1MB.txt",
+                            "Data/WestburyLab.wikicorp.201004_2MB.txt",
+                            "Data/WestburyLab.wikicorp.201004_5MB.txt",
+                            "Data/WestburyLab.wikicorp.201004_10MB.txt",
+                            "Data/WestburyLab.wikicorp.201004_20MB.txt",
+                            "Data/WestburyLab.wikicorp.201004_50MB.txt",
+                            "Data/WestburyLab.wikicorp.201004_100MB.txt",
+                            "Data/WestburyLab.wikicorp.201004_200MB.txt",
+                            "Data/WestburyLab.wikicorp.201004_400MB.txt",
+                            "Data/WestburyLab.wikicorp.201004_800MB.txt"};
+
+        for(int i=0; i!=4; i++){
+            System.out.println(files[i]);
+
+            startTime = System.currentTimeMillis();
+            Index index = interpretIdx(files[4], String.valueOf(args[1]));
+            long TimeIndex = System.currentTimeMillis() - startTime;
+            
+            System.out.println("IndexTime Index"+args[1]+": \t"+TimeIndex);
+
+            Index.WikiItem uWords = index.getUniqueWords();
+
+            startTime = System.currentTimeMillis();
+            for(Index.WikiItem item = uWords; item != null; item = item.next) {
+                /*Index.ArticleItem a1 = */ index.search(item.str);
+            }
+            long TimeSearch = System.currentTimeMillis() - startTime;
+
+            System.out.println("SearchTime Index"+i+": \t"+TimeSearch + "\n");
         }
     }
 

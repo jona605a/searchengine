@@ -17,6 +17,9 @@ testcorrect:
 testmem:
 	java --enable-preview -cp bin Tester $(FILE) $(i) $(j) memory
 
-testtime:
-	java --enable-preview -cp bin Tester $(FILE) $(i) $(j) time
+testtimeIDX:
+	java --enable-preview -cp bin Tester $(FILE) $(i) $(j) timeIDX
+
+testtimeFile:
+	java --enable-preview -cp bin Tester $(FILE) $(i) $(j) timeFILE
 
