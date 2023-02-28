@@ -62,19 +62,10 @@ class Index3 implements Index {
 
     @Override
     public ArticleItem search(String searchstr) {
-        // ArticleItem titles = new ArticleItem(null, null);
-
         for (WikiItem current = start; current != null; current = current.next) {
             if (current.str.equals(searchstr)) {
                 return current.articlelist;
             }
-            // if (current.str.equals(searchstr)) {
-            //     for (ArticleItem ai = current.articlelist; ai!=null; ai=ai.next) {
-            //         ArticleItem tmp = new ArticleItem(ai.str, titles);
-            //         titles = tmp;
-            //     }
-            //     break;
-            // }
         }
         return null;
     }
