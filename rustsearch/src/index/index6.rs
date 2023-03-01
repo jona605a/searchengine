@@ -6,7 +6,7 @@ use crate::index::Index;
 use crate::helpers::*;
 
 
-impl Index<HashMap<String,HashSet<String>>> {
+impl Index<HashMap<String,HashSet<String>>,None> {
     pub fn index6(config: &Config) -> Result<Index<HashMap<String,HashSet<String>>>, Box<dyn Error>> {
         
         let mut database: HashMap<String,HashSet<String>> = HashMap::new();
