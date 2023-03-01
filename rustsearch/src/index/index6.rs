@@ -17,10 +17,11 @@ impl Index<HashMap<String,HashSet<String>>,None> {
         let mut prev_word = String::from("---END.OF.DOCUMENT---");
         let mut cur_title = String::new();
 
-        let x: Vec<&str> = re.split(&filecontents).collect();
-        // println!("{:?}",x);
+        let mut x = re.split(&filecontents);
+        x.next();
 
         for word in  x{
+
             if word == "---END.OF.DOCUMENT---" {
                 prev_word = word.to_string();
                 continue;
