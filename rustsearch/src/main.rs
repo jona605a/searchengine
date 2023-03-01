@@ -1,7 +1,11 @@
-use std::env;
-use std::process;
+use std::collections::{HashMap,HashSet};
+use std::{env,io,process};
 
-use rustsearch::Config;
+mod index;
+mod helpers;
+
+use crate::index::Index;
+use crate::helpers::*;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -11,11 +15,31 @@ fn main() {
         process::exit(1);
     });
 
-    println!("Searching for {}", config.query);
     println!("In file {}", config.file_path);
 
-    if let Err(e) = rustsearch::run(config) {
-        eprintln!("Application error: {e}");
-        process::exit(1);
+    let index = Index::index6(&config)
+        .expect("Config should have valid filename");
+
+    user_dialog(&index);
+    
+    // if let Err(e) = rustsearch::run(config) {
+    //     eprintln!("Application error: {e}");
+    //     process::exit(1);
+    // }
+}
+
+
+fn user_dialog(index: &Index<HashMap<String,HashSet<String>>>) {
+    loop {
+        println!("Please input your query.");
+
+        let mut query = String::new();
+
+        io::stdin()
+            .read_line(&mut query)
+            .expect("Failed to read line");
+        if query == "exit\n" {break}
+        print!("Searching for {query}");
+        println!("Found in articles: {:?}\n", index.search(&query.strip_suffix('\n').unwrap().to_string()));
     }
 }
