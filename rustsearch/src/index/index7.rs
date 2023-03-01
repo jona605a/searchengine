@@ -4,13 +4,14 @@ use regex::Regex;
 
 use crate::index::Index;
 use crate::helpers::*;
+use crate::index::Index7ExtraVariables;
 
 
 
 
-impl Index<HashMap<String,Vec<u64>>> {
+impl Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
 
-    pub fn index7(config: &Config) -> Result<Index<HashMap<String,Vec<u64>>>, Box<dyn Error>> {
+    pub fn index7(config: &Config) -> Result<Index<HashMap<String,Vec<u64>>,Index7ExtraVariables>, Box<dyn Error>> {
         let mut database: HashMap<String,Vec<u64>> = HashMap::new();
         
         let filecontents = read_file_to_string(&config.file_path)?;
@@ -18,6 +19,7 @@ impl Index<HashMap<String,Vec<u64>>> {
 
         let mut prev_word = String::from("---END.OF.DOCUMENT---");
         let mut cur_title = String::new();
+        let mut article_titles: Vec<String> = Vec::new();
         
         let mut x = re.split(&filecontents);
         x.next();
@@ -33,6 +35,7 @@ impl Index<HashMap<String,Vec<u64>>> {
             // Update title
             if prev_word == "---END.OF.DOCUMENT---" {
                 cur_title = word.to_string();
+                article_titles.push(word.to_string());
                 prev_word = String::new();
                 n_titles += 1;
             }
@@ -51,7 +54,9 @@ impl Index<HashMap<String,Vec<u64>>> {
             v[(n_titles-1)/64] = v[(n_titles-1)/64] | title_bit;
         }
 
-        let index = Index {database};
+
+        let index : Index<HashMap<String, Vec<u64>>, Index7ExtraVariables>  = Index {database, extra_variables: Some(Index7ExtraVariables{article_titles})};
+
         Ok(index)
     }
 

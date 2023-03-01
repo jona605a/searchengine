@@ -19,7 +19,6 @@ fn main() {
 
     let index = Index::index6(&config)
         .expect("Config should have valid filename");
-
     user_dialog(&index);
     
     // if let Err(e) = rustsearch::run(config) {
@@ -29,7 +28,7 @@ fn main() {
 }
 
 
-fn user_dialog(index: &Index<HashMap<String,HashSet<String>>>) {
+fn user_dialog(index: &Index<HashMap<String,HashSet<String>>,Option<u128>>) {
     loop {
         println!("Please input your query.");
 

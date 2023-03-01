@@ -6,8 +6,8 @@ use crate::index::Index;
 use crate::helpers::*;
 
 
-impl Index<HashMap<String,HashSet<String>>,None> {
-    pub fn index6(config: &Config) -> Result<Index<HashMap<String,HashSet<String>>>, Box<dyn Error>> {
+impl Index<HashMap<String,HashSet<String>>,Option<u128>> {
+    pub fn index6(config: &Config) -> Result<Index<HashMap<String,HashSet<String>>,Option<u128>>, Box<dyn Error>> {
         
         let mut database: HashMap<String,HashSet<String>> = HashMap::new();
         
@@ -37,8 +37,9 @@ impl Index<HashMap<String,HashSet<String>>,None> {
                 .insert(cur_title.clone());
         }
 
-        let index: Index<HashMap<String,HashSet<String>>> = Index {database};
+        let index: Index<HashMap<String,HashSet<String>>,Option<u128>> = Index { database, extra_variables: None};
         Ok(index)
+        
     }
 
     pub fn search(&self, word: &String) -> Option<&HashSet<String>> {
