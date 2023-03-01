@@ -1,10 +1,10 @@
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
+use regex::Regex;
 
 use crate::index::Index;
 use crate::helpers::*;
 
-// use rustsearch::
 
 impl Index<HashMap<String,HashSet<String>>> {
     pub fn index6(config: &Config) -> Result<Index<HashMap<String,HashSet<String>>>, Box<dyn Error>> {
@@ -12,10 +12,15 @@ impl Index<HashMap<String,HashSet<String>>> {
         let mut database: HashMap<String,HashSet<String>> = HashMap::new();
         
         let filecontents = read_file_to_string(&config.file_path)?;
+        let re = Regex::new(r"\. |\.\n|\n\n|[\[\]\{\}\\\n\() ,;:/=?!*&]").unwrap();
 
         let mut prev_word = String::from("---END.OF.DOCUMENT---");
         let mut cur_title = String::new();
-        for word in filecontents.split_whitespace() {
+
+        let x: Vec<&str> = re.split(&filecontents).collect();
+        // println!("{:?}",x);
+
+        for word in  x{
             if word == "---END.OF.DOCUMENT---" {
                 prev_word = word.to_string();
                 continue;
