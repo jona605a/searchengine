@@ -17,9 +17,9 @@ fn main() {
 
     println!("In file {}", config.file_path);
 
-    let index = Index::index6(&config)
+    let index = Index::index7(&config)
         .expect("Config should have valid filename");
-    user_dialog(&index);
+    //user_dialog(&index);
     
     // if let Err(e) = rustsearch::run(config) {
     //     eprintln!("Application error: {e}");

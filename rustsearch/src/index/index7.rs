@@ -18,7 +18,6 @@ impl Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
         let re = Regex::new(r"\. |\.\n|\n\n|[\[\]\{\}\\\n\() ,;:/=?!*&]").unwrap();
 
         let mut prev_word = String::from("---END.OF.DOCUMENT---");
-        let mut cur_title = String::new();
         let mut article_titles: Vec<String> = Vec::new();
         
         let mut x = re.split(&filecontents);
@@ -34,7 +33,6 @@ impl Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
             }
             // Update title
             if prev_word == "---END.OF.DOCUMENT---" {
-                cur_title = word.to_string();
                 article_titles.push(word.to_string());
                 prev_word = String::new();
                 n_titles += 1;
@@ -50,13 +48,13 @@ impl Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
             let v = database.entry(word.to_string())
                 .or_default();
             while v.len() < v_len {v.push(0)}
-            let title_bit = 1 << (n_titles-1);
+            let title_bit = 1 << ((n_titles-1)%64);
             v[(n_titles-1)/64] = v[(n_titles-1)/64] | title_bit;
         }
 
 
         let index : Index<HashMap<String, Vec<u64>>, Index7ExtraVariables>  = Index {database, extra_variables: Some(Index7ExtraVariables{article_titles})};
-
+        println!("{:#?}", &index.extra_variables.as_ref().unwrap().article_titles);
         Ok(index)
     }
 

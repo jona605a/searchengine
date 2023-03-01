@@ -9,6 +9,7 @@ pub struct Index<T,G> {
     extra_variables: Option<G>,
 }
 
+#[derive(Debug)]
 pub struct Index7ExtraVariables {
     article_titles: Vec<String>,
 }
