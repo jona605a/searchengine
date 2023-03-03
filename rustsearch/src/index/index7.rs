@@ -6,6 +6,7 @@ use regex::Regex;
 
 use crate::index::Index;
 use crate::helpers::*;
+use crate::parsing::*;
 
 #[derive(Debug)]
 pub struct Index7ExtraVariables {
@@ -85,9 +86,28 @@ impl Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
         Some(output)
     }
 
-    pub fn search(&self, word: &String) -> Option<HashSet<String>> {
-        let bitvecs = self.database.get(word)?;
-        self.bitvec_to_articleset(bitvecs)
+    pub fn boolean_search(&self, exp: &String) -> Option<HashSet<String>>{
+        let ast: Expr = Expr::from_string(&exp).unwrap();
+        let bit_vec_result = match ast {
+            Expr(nodes) => match nodes {
+                    ExprData::HasNodes(node) => Some(self.recursive_tree(node,7)),
+                    ExprData::Empty => return None,
+            }
+        };
+        self.bitvec_to_articleset(&bit_vec_result.unwrap())
+    }
+
+    fn recursive_tree(&self, node:AstNode,bit_vector_length:usize)-> Vec<u64> {
+        match node{
+            AstNode::Invert(child) => self.recursive_tree(*child,bit_vector_length).iter().map(|bv| !bv).collect() ,
+            AstNode::Binary(BinaryOp::And,leftChild,rightChild) => self.recursive_tree(*leftChild,bit_vector_length).iter()
+                                                                                                    .zip(self.recursive_tree(*rightChild,bit_vector_length).iter())
+                                                                                                    .map(|(l,r)| l&r).collect(),
+            AstNode::Binary(BinaryOp::Or,leftChild,rightChild) => self.recursive_tree(*leftChild,bit_vector_length).iter()
+                                                                                                    .zip(self.recursive_tree(*rightChild,bit_vector_length).iter())
+                                                                                                    .map(|(l,r)| l&r).collect(),
+            AstNode::Name(word) => self.database.get(&word).unwrap_or(&vec![0;bit_vector_length]).to_vec()
+        }
     }
 }
 

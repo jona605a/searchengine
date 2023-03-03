@@ -5,7 +5,7 @@ const MAX_RECURSION: u16 = 20;
 const MAX_LEN: usize = 200;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-enum BinaryOp {
+pub enum BinaryOp {
     And,
     Or,
 }
@@ -34,7 +34,7 @@ impl BinaryOp {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-enum Token {
+pub enum Token {
     OpenBracket,
     CloseBracket,
     Invert,
@@ -125,7 +125,8 @@ fn lex(s: &str) -> Result<Vec<Token>, &'static str> {
 
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-enum AstNode {
+
+pub enum AstNode {
     Invert(Box<AstNode>),
     Binary(BinaryOp, Box<AstNode>, Box<AstNode>),
     Name(String),
@@ -237,16 +238,15 @@ impl AstNode {
         }
     }
 }
-
 #[derive(Debug, Clone, PartialEq, Eq)]
-enum ExprData {
+pub enum ExprData {
     Empty,
     HasNodes(AstNode),
 }
 
-#[wasm_bindgen]
+//#[wasm_bindgen]
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Expr(ExprData); // wrap internal implementation details
+pub struct Expr(pub ExprData); // wrap internal implementation details
 
 impl Expr {
     pub fn from_string(s: &str) -> Result<Self, &'static str> {
@@ -276,7 +276,7 @@ mod test {
 
     #[test]
     fn mytest() {
-        dbg!(Expr::from_string("(a & b) | (c & d)").unwrap().0);
+        dbg!(Expr::from_string("(a & b) | (c & d)").unwrap());
     }
 
     #[test]
