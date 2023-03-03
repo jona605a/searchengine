@@ -1,7 +1,5 @@
 use std::collections::{HashMap,HashSet};
 use std::error::Error;
-use std::process::Command;
-use std::string;
 use regex::Regex;
 
 use crate::index::Index;
@@ -51,7 +49,7 @@ impl Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
                 v_len += 1;
             }
 
-            dbg!(word);
+            // dbg!(word);
 
             let v = database.entry(word.to_string())
                 .or_default();
@@ -72,10 +70,10 @@ impl Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
 
     pub fn bitvec_to_articleset(&self, bitvecs: &Vec<u64>) -> Option<HashSet<String>> {
         let mut output: HashSet<String> = HashSet::new();
+        let titles = &self.extra_variables.as_ref().unwrap().article_titles;
         for i in 0..bitvecs.len() {
             for bit in 0..64 {
                 if (1<<(bit)) & bitvecs[i] > 0 {
-                    let titles = &self.extra_variables.as_ref().unwrap().article_titles;
                     if titles.len() <= i*64+bit {
                         panic!("Error, looked-up word refers to an article with a larger index than there are titles: {}",i*64+bit)
                     }
@@ -159,13 +157,13 @@ mod tests {
     fn searches_for_words_in_wiki100_kb() {
         let index = setup_real();
         let search_match = |word: &str, titles: Vec<String>| {
-            assert_eq!(index.search(&word.to_string()).unwrap(), HashSet::from_iter(titles))
+            dbg!(&word.to_string());
+            assert_eq!(index.search(&word.to_string()).unwrap_or(HashSet::default()), HashSet::from_iter(titles))
         };
         search_match("the", vec!["Anarchism".to_string(),"Autism".to_string(),"A".to_string(),"Albedo".to_string()]);
         search_match("autism", vec!["Autism".to_string()]); // A word that should only be in one article
-        search_match("hemispherical", vec!["Albedo".to_string()]); // Check for splitting of 'bi-hemispherical'
-        search_match("\"&amp;#65;\"", vec!["A".to_string()]); // Check for splitting of 'bi-hemispherical'
-        
+        search_match("\"&amp;#65;\"", vec!["A".to_string()]); // A word that has special characters
+        search_match("bi-hemispherical", vec!["Albedo".to_string()]); // Check for no splitting of 'bi-hemispherical'
     }
 }
 
