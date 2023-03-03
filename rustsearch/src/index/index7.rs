@@ -1,5 +1,7 @@
 use std::collections::{HashMap,HashSet};
 use std::error::Error;
+use std::process::Command;
+use std::string;
 use regex::Regex;
 
 use crate::index::Index;
@@ -9,6 +11,7 @@ use crate::helpers::*;
 pub struct Index7ExtraVariables {
     article_titles: Vec<String>,
 }
+
 
 #[allow(dead_code)]
 impl Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
