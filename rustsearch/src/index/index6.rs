@@ -5,6 +5,7 @@ use regex::Regex;
 use crate::index::Index;
 use crate::helpers::*;
 
+#[allow(dead_code)]
 
 impl Index<HashMap<String,HashSet<String>>,Option<u128>> {
     pub fn index6(config: &Config) -> Result<Index<HashMap<String,HashSet<String>>,Option<u128>>, Box<dyn Error>> {

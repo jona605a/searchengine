@@ -7,6 +7,8 @@ mod helpers;
 use crate::index::Index;
 use crate::helpers::*;
 
+#[allow(unused_variables)]
+
 fn main() {
     let args: Vec<String> = env::args().collect();
 
@@ -27,7 +29,7 @@ fn main() {
     // }
 }
 
-
+#[allow(dead_code)]
 fn user_dialog(index: &Index<HashMap<String,HashSet<String>>,Option<u128>>) {
     loop {
         println!("Please input your query.");
