@@ -1,7 +1,5 @@
 use std::collections::{HashMap,HashSet};
 use std::error::Error;
-use std::process::Command;
-use std::string;
 use regex::Regex;
 
 use crate::index::Index;

@@ -3,7 +3,6 @@ use std::{env,io,process};
 
 mod index;
 mod helpers;
-mod lexing;
 
 use crate::index::Index;
 use crate::helpers::*;

@@ -38,7 +38,11 @@ impl Index<HashMap<String,HashSet<String>>,Option<u128>> {
                 .insert(cur_title.clone());
         }
 
-        let index: Index<HashMap<String,HashSet<String>>,Option<u128>> = Index { database, extra_variables: None};
+        let index: Index<HashMap<String,HashSet<String>>,Option<u128>> = 
+            Index { 
+                database, 
+                extra_variables: None
+            };
         Ok(index)
         
     }
