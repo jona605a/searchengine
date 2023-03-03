@@ -13,18 +13,18 @@ pub struct Article<'a> {
     contents: regex::Split<'a, 'a>,
 }
 
-impl Article<'_> {
-    pub fn build_from_filecontents(filecontents: &String) -> Vec<Article> {
-        let articles = filecontents.split("---END.OF.DOCUMENT---");
-        let re = Regex::new(r"\. |\.\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
+// impl Article<'_> {
+//     pub fn build_from_filecontents(filecontents: &String) -> Vec<Article> {
+//         let articles = filecontents.split("---END.OF.DOCUMENT---");
+//         let re = Regex::new(r"\. |\.\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
         
-        articles
-            .map(move |a| {
-                let (title, contents) = a.split_once("\n").expect("There should be a newline character in every article");
-                Article {
-                    title: title.to_string(),
-                    contents: re.split(contents),
-                }
-            }).collect()
-    }
-}
+//         articles
+//             .map(move |a| {
+//                 let (title, contents) = a.split_once("\n").expect("There should be a newline character in every article");
+//                 Article {
+//                     title: title.to_string(),
+//                     contents: re.split(contents),
+//                 }
+//             }).collect()
+//     }
+// }

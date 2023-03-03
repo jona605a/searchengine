@@ -103,7 +103,7 @@ impl Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
                                                                                                     .map(|(l,r)| l&r).collect(),
             AstNode::Binary(BinaryOp::Or,leftChild,rightChild) => self.recursive_tree(*leftChild,bit_vector_length).iter()
                                                                                                     .zip(self.recursive_tree(*rightChild,bit_vector_length).iter())
-                                                                                                    .map(|(l,r)| l&r).collect(),
+                                                                                                    .map(|(l,r)| l|r).collect(),
             AstNode::Name(word) => self.database.get(&word).unwrap_or(&vec![0;bit_vector_length]).to_vec()
         }
     }
@@ -160,7 +160,7 @@ mod tests {
             dbg!(&word.to_string());
             assert_eq!(index.boolean_search(&word.to_string()).unwrap_or(HashSet::default()), HashSet::from_iter(titles))
         };
-        search_match("the", vec!["Anarchism".to_string(),"Autism".to_string(),"A".to_string(),"Albedo".to_string()]);
+        search_match("the | autism", vec!["Anarchism".to_string(),"Autism".to_string(),"A".to_string(),"Albedo".to_string()]);
         search_match("autism", vec!["Autism".to_string()]); // A word that should only be in one article
         //search_match("\"&amp;#65;\"", vec!["A".to_string()]); // A word that has special characters
         search_match("bi-hemispherical", vec!["Albedo".to_string()]); // Check for no splitting of 'bi-hemispherical'
