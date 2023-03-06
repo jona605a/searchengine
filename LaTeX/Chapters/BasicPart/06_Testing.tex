@@ -1,0 +1,27 @@
+\section{Testing framework}
+To test the correctness, time complexity, and space complexity of the Indexes a testing framework was implemented. For indexes 2-5, a testing function was implemented to return a linked list of all the unique words and their corresponding article in their data structure.
+
+\subsubsection{Correctness}
+The correctness of the indexes is tested using the approach that index 2 is correct. This is argued for in \ref{section:Index2}.
+
+The correctness of index 3-4 were tested on 3 different levels:
+
+\begin{enumerate}
+    \item[] \textbf{Level 1:} Number of unique words 
+    \item[] \textbf{Level 2:} Same unique words
+    \item[] \textbf{Level 3:} Same article list pr unique word
+\end{enumerate}
+
+Based on the assumption of the correctness of index 2, it is given that the data structure of a given index that passes all 3 levels will have all the unique words and their belonging article lists in the data frame and no more. The indexes correctness was verified based on testing using the file \textit{WestburyLab.wikicorp.201004\_100KB.txt}.
+
+\subsubsection{Time complexity}
+The time of constructing the data frame for each index was measured along size the time of searching all unique words in the text. Index 2-3 was tested using the text files of size 100KB,1MB,2MB,5MB, and 10MB. Index 4-5 was tested using the text files of size 100KB,1MB,2MB,5MB,10MB, 10MB, 20MB, 50MB, 100MB, 200MB, 400MB, and 800MB.
+
+\subsubsection{Memory}
+Memory allocation was measured when constructing the data structures of the different indexes. Measures of the allocated memory are tested using the same files used for testing time complexity for the indexes.  
+
+
+
+
+
+

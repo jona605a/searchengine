@@ -1,3 +1,18 @@
+\section{Introduction to the Basic part}
+Building an effective search engine is a challenging task that requires efficient algorithms and data structures to manage large amounts of data. Two straight forwards approaches to building search engines are using linked lists or hash functions. However, when working with a large dataset, managing and searching for data can be even more challenging. The implementations of search engines using linked lists or hash functions are therefore just a starting point.
+
+In this context, the focus is on building a search engine for a large dataset consisting of a snapshot of Wikipedia from 2010, which has been converted into a simple text format. The goal is to support queries such as "which documents contain the word X" while compactly representing the dataset and supporting fast searches.
+
+5 different Indexes will be implemented. Index 2-5 are all expansions of Index1 and the previous index. The initial code for Index1 was given by our supervisors to start from. All other code has been written by us. 
+
+\begin{enumerate}
+    \item[] \textbf{Index1:} Creates a linked list of all words in the database. The search functions return a boolean value of the presence of the search string in the database.
+    \item[] \textbf{Index2:} Creates a linked list of all words in the database alongside an article list of the titles where each word is present. The search function returns an article list of the titles the search appears in. 
+    \item[] \textbf{Index3:} Creates a linked list of all the unique words in the database alongside an article list of the titles where each word is present. The search function return an article list of the titles the search appears in.
+    \item[] \textbf{Index4:} Creates a hash table of a fixed size of all the unique words in the database alongside an article list of the titles where each word is present. The search function return an article list of the titles the search appears in.
+    \item[] \textbf{Index5:} Creates a dynamic hash table of all the unique words in the database alongside an article list of the titles where each word is present. The search function return an article list of the titles the search appears in.
+\end{enumerate}
+
 
 
 

@@ -4,6 +4,7 @@
 \input{Setup/Settings.tex}
 
 \begin{document}
+\RaggedRight
 
 \pagenumbering{roman}
 \input{Frontmatter/Frontpage.tex}
@@ -25,12 +26,19 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \pagenumbering{arabic}
+
+\input{LaTeX/Chapters/01Introduction}
+
+\clearpage 
+\input{LaTeX/Frontmatter/Symboldescription}
+\clearpage
+
 \subfile{Chapters/BasicPart/BasicPart.tex}
  
  
 
 %%LaTeX/Chapters/BasicPart/01_Index1%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+\newpage \cite{biblatex} % to remove the yellow error
 \printbibliography[heading=bibintoc,title={Bibliography}]
 \cleardoublepage 
 \appendix
