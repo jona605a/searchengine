@@ -1,4 +1,8 @@
-\subsection{overskrift fra index5}
-Hej
+\section{Index5}
+\label{section:Index5}
 
-123
+Index5 is an addition to Index4 that uses a dynamic instead of static size of the hash table. The size, $k$, of the hash table is doubled whenever $u^*\geq k$, where $u^*$ is the number of unique words currently hashed in the hash table. When the hash table is doubled, all of the words already put into the hash table need to be rehashed. The average length of the linked list for each cell of the hash table will thereby be $\frac{u}{k} \leq 1$. The hash table is initialized to have size $k=k_0$. It is therefore expected to rehash $log_2(u)-log_2(k_0)$ times. The total number of words rehashed will thereby never exceed $2\cdot u$ as $u + \frac{u}{2} + \frac{u}{4} + ... + k_0 < 2\cdot u$. The expected time for constructing the database is therefore running in $n\cdot \frac{u}{k} + 2u = O(n)$ as $u\leq n$.
+
+As the average length of the linked list for each cell of the hash table is bounded by a constant, the expected search time runs in $O(1)$ as it also takes constant time to calculate the hash value for the search string.
+
+The index stores a link for each unique word in the input, using $u$ space. Furthermore, the hash table takes up $k$ space making it $O(u+k)$ space. The search uses only constant, $O(1)$, additional space. 

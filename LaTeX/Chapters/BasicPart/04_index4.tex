@@ -1,0 +1,14 @@
+\section{Index4}
+\label{section:Index4}
+
+Index4 uses a new data structure, the hash table, to allow for direct accessing instead of linear searching for a given word. The index uses a hash table of static size $k$ and chained hashing to store the unique words of the input text. Each word in the text is hashed and inserted into the hash table along with its corresponding linked list of articles. In case of hash collisions, the method of chained hashing simply chains the collided words together in a linked list. 
+
+The worst case for Index4 would be if all words of the input file hashed to the same value. In this case, the index would be almost identical to Index3 that checks for unique words in a linked list and uses $O(n^2)$ time. However, assuming a good hash function that spreads words roughly evenly, the expected length of each linked list is $\frac{u}{k}$. The expected time to index is then $O(n\cdot \frac{u}{k})$. When $k$ is chosen wisely, this becomes close to $O(n)$, but for fixed $k$ and large inputs, this equates to $O(n\cdot u)$. 
+
+%Index4 uses a hash table to keep track of the unique words of the input text. For each word, the hash value is calculated and it is checked if the hash table at the hash value is empty, if the word already has been hashed to there, or if other words have been hashed to there. 
+
+%A worst-case input for Index4 would be a text where all the words are unique, so $u=n$, where all words would hash to the same value. Building the data structure would then take $O(n^2)$ time. In the average scenario, the average length of the linked list pr hash value would be $\frac{u}{k}$, making the total running time of constructing the data structure $O(n\cdot \frac{u}{k})$. As $m$ isn't increased when $u$ increases $\frac{u}{k}$ is only bounded by $n$. 
+
+The expected search time of Index4 is $O(\frac{u}{k})$ as it takes constant time to calculate the hash value and $O(\frac{u}{k})$ time to go through the linked list. 
+
+The index stores a link for each unique word in the input and its article list, using $O(u\cdot a)$ space. Furthermore, the hash table itself takes up $k$ space making it $O(u\cdot a+k)$ space. The search uses only constant, $O(1)$, additional space. 
