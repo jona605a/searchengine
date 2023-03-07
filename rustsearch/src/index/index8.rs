@@ -7,84 +7,60 @@ use crate::helpers::*;
 use crate::parsing::*;
 
 #[derive(Debug)]
-pub struct Index7ExtraVariables {
+pub struct Index8ExtraVariables {
     article_titles: Vec<String>,
 }
 
 
 #[allow(dead_code)]
-impl Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
+impl Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
 
-    pub fn index8(config: &Config) -> Result<Index<HashMap<String,Vec<u64>>,Index7ExtraVariables>, Box<dyn Error>> {
-        let mut database: HashMap<String,Vec<u64>> = HashMap::new();
+    pub fn index8(config: &Config) -> Result<Index<HashMap<String,Vec<usize>>,Index8ExtraVariables>, Box<dyn Error>> {
+        let mut database: HashMap<String,Vec<usize>> = HashMap::new();
         
         let filecontents = read_file_to_string(&config.file_path)?;
         let re = Regex::new(r"\. |\.\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
 
-        let mut prev_word = String::from("---END.OF.DOCUMENT---");
+        // Articles are seperated by the delimiter "---END.OF.DOCUMENT---"
+        // In each article, it is assumed that the first line is the title, ending in a '.'
+        // The contents of each article is split according to the regular expression. 
+        let articles_iter = filecontents.split("---END.OF.DOCUMENT---")
+            .map(|a| {
+                let (title, contents) = a.trim().split_once(".\n").unwrap_or(("",""));
+                (title.to_string(), re.split(contents))
+            });
         let mut article_titles: Vec<String> = Vec::new();
         
-        let mut x = re.split(&filecontents);
-        x.next();
-
-        let mut n_titles = 0;
-        let mut v_len = 1;
-
-        for word in  x{
-            if word == "---END.OF.DOCUMENT---" {
-                prev_word = word.to_string();
-                continue;
+        for (title, contents) in articles_iter {
+            article_titles.push(title.to_string());
+            for word in contents {
+                database.entry(word.to_string()).or_default().push(article_titles.len()-1)
             }
-            // Update title
-            if prev_word == "---END.OF.DOCUMENT---" {
-                article_titles.push(word.to_string());
-                prev_word = String::new();
-                n_titles += 1;
-            }
-            if n_titles > v_len*64 {
-                // Extend the length of all vectors by 1
-                for v in database.values_mut() {
-                    v.push(0);
-                }
-                v_len += 1;
-            }
-
-            // dbg!(word);
-
-            let v = database.entry(word.to_string())
-                .or_default();
-            v.push(n_titles-1)
         }
 
-
-        
         Ok(Index {
             database, 
-            extra_variables: Some(Index7ExtraVariables{article_titles})
+            extra_variables: Some(Index8ExtraVariables{article_titles})
         })
     }
 
-    pub fn vec_to_articleset(&self, vec: Vec<u64>) -> Option<Vec<String>> {
+    pub fn vec_to_articleset(&self, vec: Vec<usize>) -> Option<Vec<String>> {
         let mut output: Vec<String> = Vec::new();
         let titles = &self.extra_variables.as_ref().unwrap().article_titles;
         for i in vec {
-                    output.push(titles[i as usize].clone());
-                }
+            output.push(titles[i as usize].clone());
+        }
         Some(output)
     }
 
     pub fn boolean_search(&self, exp: &String) -> Option<Vec<String>>{
-        let ast: Expr = Expr::from_string(&exp).unwrap();
-        let result = match ast {
-            Expr(nodes) => match nodes {
-                    ExprData::HasNodes(node) => Some(self.recursive_tree(node)),
-                    ExprData::Empty => return None,
-            }
-        };
-        self.vec_to_articleset(result.unwrap())
+        match Expr::from_string(&exp) {
+            Ok(Expr(ExprData::HasNodes(node))) => self.vec_to_articleset(self.recursive_tree(node)),
+            _ => None // Either an error or the expression has no nodes
+        }
     }
 
-    fn recursive_tree(&self, node:AstNode)-> Vec<u64> {
+    fn recursive_tree(&self, node: AstNode)-> Vec<usize> {
         match node{
             AstNode::Invert(child) => self.invert(self.recursive_tree(*child)),
             AstNode::Binary(BinaryOp::And,left_child,right_child) => self.and(self.recursive_tree(*left_child),self.recursive_tree(*right_child)),
@@ -93,8 +69,8 @@ impl Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
         }
     }
 
-    fn and(&self, left_child:Vec<u64>,right_child:Vec<u64>)-> Vec<u64> {
-        let mut result: Vec<u64> = Vec::new();
+    fn and(&self, left_child:Vec<usize>,right_child:Vec<usize>)-> Vec<usize> {
+        let mut result: Vec<usize> = Vec::new();
         let mut l = 0;
         let mut r = 0;
     
@@ -116,8 +92,8 @@ impl Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
         result
     }
 
-    fn or(&self, left_child:Vec<u64>,right_child:Vec<u64>)-> Vec<u64> {
-        let mut result: Vec<u64> = Vec::new();
+    fn or(&self, left_child:Vec<usize>,right_child:Vec<usize>)-> Vec<usize> {
+        let mut result: Vec<usize> = Vec::new();
         let mut l = 0;
         let mut r = 0;
 
@@ -150,11 +126,11 @@ impl Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
         result
     }
 
-    fn invert(&self, child:Vec<u64>) -> Vec<u64> {
-        let mut result: Vec<u64> = Vec::new();
+    fn invert(&self, child:Vec<usize>) -> Vec<usize> {
+        let mut result: Vec<usize> = Vec::new();
         let mut p = 0;
 
-        for i in 0u64 .. self.extra_variables.as_ref().unwrap().article_titles.len() as u64{
+        for i in 0usize .. self.extra_variables.as_ref().unwrap().article_titles.len() as usize{
             
             if (p >= child.len()) || (i<child[p]){
                 result.push(i)
@@ -178,19 +154,19 @@ mod tests {
     use super::*;
     use std::collections::HashSet;
 
-    fn setup_real() -> Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
+    fn setup_real() -> Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
         let config = Config::build(&["".to_string(),"data/WestburyLab.wikicorp.201004_100KB.txt".to_string(),"8".to_string()]).unwrap();
         Index::index8(&config).unwrap()
     }
 
-    fn setup_test() -> Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
+    fn setup_test() -> Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
         let mut article_titles: Vec<String> = Vec::new();
         for i in 0..100 {
             article_titles.push(format!("Article {}", i).to_string());
         }
         Index {
             database: HashMap::new(), // Empty database
-            extra_variables: Some(Index7ExtraVariables{
+            extra_variables: Some(Index8ExtraVariables{
                 article_titles
             })
         }
@@ -200,7 +176,7 @@ mod tests {
     fn bitvec_to_articleset_works() {
         let test_index = setup_test();
 
-        let bitvec: Vec<u64> = vec![0,1];
+        let bitvec: Vec<usize> = vec![0,1];
 
         let hs = vec!["Article 0".to_string(),"Article 1".to_string()];
         assert_eq!(test_index.vec_to_articleset(bitvec).unwrap() , hs)
@@ -211,13 +187,13 @@ mod tests {
     fn bitvec_to_articleset_panics_when_out_of_range() {
         let test_index = setup_test();
 
-        let bitvec: Vec<u64> = vec![100000000];
+        let bitvec: Vec<usize> = vec![100000000];
 
         test_index.vec_to_articleset(bitvec).unwrap();
     }
 
     fn search_match (
-        index: &Index<HashMap<String,Vec<u64>>,Index7ExtraVariables>, 
+        index: &Index<HashMap<String,Vec<usize>>,Index8ExtraVariables>, 
         word: &str, 
         titles: Vec<String>
     ) {
@@ -236,14 +212,6 @@ mod tests {
         search_match(&index, "bi-hemispherical", vec!["Albedo".to_string()]); // Check for no splitting of 'bi-hemispherical'
         // search_match(&index, "\"&amp;#65;\"", vec!["A".to_string()]); // A word that has special characters
     }
-
-    #[test]
-    fn boolean_correctness() {
-        let mut database: HashMap<String,Vec<u64>> = HashMap::new();
-        
-    }
-
-
 
 
 

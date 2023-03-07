@@ -21,53 +21,42 @@ impl Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
         let filecontents = read_file_to_string(&config.file_path)?;
         let re = Regex::new(r"\. |\.\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
 
-        let articles = filecontents.split("---END.OF.DOCUMENT---");
-        let articles_iter =  articles
+        let articles_iter = filecontents.split("---END.OF.DOCUMENT---")
             .map(|a| {
-                let (title, contents) = a.trim().split_once("\n").unwrap_or(("empty title",""));
-                dbg!(title, contents);
-                (title.trim_end_matches('.').to_string(), re.split(contents))
+                let (title, contents) = a.trim().split_once(".\n").unwrap_or(("empty title",""));
+                // dbg!(title, contents);
+                (title.to_string(), re.split(contents))
             });
-        // let mut prev_word = String::from("---END.OF.DOCUMENT---");
         let mut article_titles: Vec<String> = Vec::new();
         
-        // let mut x = re.split(&filecontents);
-        // x.next();
-
         let mut n_titles = 0;
         let mut v_len = 1;
 
         for (title, contents) in articles_iter {
-            for word in contents {
-                article_titles.push(title.to_string());
-                n_titles += 1;
-                if n_titles > v_len*64 {
-                    // Extend the length of all vectors by 1
-                    for v in database.values_mut() {
-                        v.push(0);
-                    }
-                    v_len += 1;
+            article_titles.push(title.to_string());
+            n_titles += 1;
+            if n_titles > v_len*64 {
+                // Extend the length of all vectors by 1
+                for v in database.values_mut() {
+                    v.push(0);
                 }
-    
-                // dbg!(word);
-    
-                let v = database.entry(word.to_string())
-                    .or_default();
+                v_len += 1;
+            }
+            for word in contents {
+                let v = database.entry(word.to_string()).or_default();
                 while v.len() < v_len {v.push(0)}
                 let title_bit: u64 = 1 << ((n_titles-1)%64);
                 v[(n_titles-1)/64] = v[(n_titles-1)/64] | title_bit;
             }
         }
 
-
-        
         Ok(Index {
             database, 
             extra_variables: Some(Index7ExtraVariables{article_titles})
         })
     }
 
-    pub fn bitvec_to_articleset(&self, bitvecs: &Vec<u64>) -> Option<Vec<String>> {
+    pub fn bitvec_to_articleset(&self, bitvecs: Vec<u64>) -> Option<Vec<String>> {
         let mut output: Vec<String> = Vec::new();
         let titles = &self.extra_variables.as_ref().unwrap().article_titles;
         for i in 0..bitvecs.len() {
@@ -84,17 +73,13 @@ impl Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
     }
 
     pub fn boolean_search(&self, exp: &String) -> Option<Vec<String>>{
-        let ast: Expr = Expr::from_string(&exp).unwrap();
-        let bit_vec_result = match ast {
-            Expr(nodes) => match nodes {
-                    ExprData::HasNodes(node) => Some(self.recursive_tree(node)),
-                    ExprData::Empty => return None,
-            }
-        };
-        self.bitvec_to_articleset(&bit_vec_result.unwrap())
+        match Expr::from_string(&exp) {
+            Ok(Expr(ExprData::HasNodes(node))) => self.bitvec_to_articleset(self.recursive_tree(node)),
+            _ => None // Either an error or the expression has no nodes
+        }
     }
 
-    fn recursive_tree(&self, node:AstNode)-> Vec<u64> {
+    fn recursive_tree(&self, node: AstNode)-> Vec<u64> {
         match node{
             AstNode::Invert(child) => self.recursive_tree(*child).iter().map(|bv| !bv).collect() ,
             AstNode::Binary(BinaryOp::And,left_child,right_child) => self.recursive_tree(*left_child).iter()
@@ -145,7 +130,7 @@ mod tests {
         let bitvec: Vec<u64> = vec![0b0000_0011];
 
         let hs = vec!["article 1".to_string(),"article 2".to_string()];
-        assert_eq!(test_index.bitvec_to_articleset(&bitvec).unwrap() , hs)
+        assert_eq!(test_index.bitvec_to_articleset(bitvec).unwrap() , hs)
     }
 
     #[should_panic]
@@ -155,7 +140,7 @@ mod tests {
 
         let bitvec: Vec<u64> = vec![0 , 0b11111111_00000000_00000000_00000000_00000000_00000000_00000000_00000000];
 
-        test_index.bitvec_to_articleset(&bitvec).unwrap();
+        test_index.bitvec_to_articleset(bitvec).unwrap();
     }
 
     fn search_match (
@@ -224,5 +209,17 @@ mod tests {
     fn words_in_database_together_not_in_database() {
         let index = setup_test();
         search_match(&index, "word1 & word4", vec![]);
+    }
+
+    #[test]
+    fn the_empty_query() {
+        let index = setup_test();
+        search_match(&index, "", vec![]);
+    }
+
+    #[test]
+    fn erroneous_query_finds_nothing() {
+        let index = setup_test();
+        search_match(&index, "word1((", vec![]);
     }
 }
