@@ -21,41 +21,42 @@ impl Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
         let filecontents = read_file_to_string(&config.file_path)?;
         let re = Regex::new(r"\. |\.\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
 
-        let mut prev_word = String::from("---END.OF.DOCUMENT---");
+        let articles = filecontents.split("---END.OF.DOCUMENT---");
+        let articles_iter =  articles
+            .map(|a| {
+                let (title, contents) = a.trim().split_once("\n").unwrap_or(("empty title",""));
+                dbg!(title, contents);
+                (title.trim_end_matches('.').to_string(), re.split(contents))
+            });
+        // let mut prev_word = String::from("---END.OF.DOCUMENT---");
         let mut article_titles: Vec<String> = Vec::new();
         
-        let mut x = re.split(&filecontents);
-        x.next();
+        // let mut x = re.split(&filecontents);
+        // x.next();
 
         let mut n_titles = 0;
         let mut v_len = 1;
 
-        for word in  x{
-            if word == "---END.OF.DOCUMENT---" {
-                prev_word = word.to_string();
-                continue;
-            }
-            // Update title
-            if prev_word == "---END.OF.DOCUMENT---" {
-                article_titles.push(word.to_string());
-                prev_word = String::new();
+        for (title, contents) in articles_iter {
+            for word in contents {
+                article_titles.push(title.to_string());
                 n_titles += 1;
-            }
-            if n_titles > v_len*64 {
-                // Extend the length of all vectors by 1
-                for v in database.values_mut() {
-                    v.push(0);
+                if n_titles > v_len*64 {
+                    // Extend the length of all vectors by 1
+                    for v in database.values_mut() {
+                        v.push(0);
+                    }
+                    v_len += 1;
                 }
-                v_len += 1;
+    
+                // dbg!(word);
+    
+                let v = database.entry(word.to_string())
+                    .or_default();
+                while v.len() < v_len {v.push(0)}
+                let title_bit: u64 = 1 << ((n_titles-1)%64);
+                v[(n_titles-1)/64] = v[(n_titles-1)/64] | title_bit;
             }
-
-            // dbg!(word);
-
-            let v = database.entry(word.to_string())
-                .or_default();
-            while v.len() < v_len {v.push(0)}
-            let title_bit: u64 = 1 << ((n_titles-1)%64);
-            v[(n_titles-1)/64] = v[(n_titles-1)/64] | title_bit;
         }
 
 
@@ -120,12 +121,17 @@ mod tests {
     }
 
     fn setup_test() -> Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
+        let mut database: HashMap<String,Vec<u64>> = HashMap::new();
+        database.insert("word1".to_string(), vec![0b0000_0001]);
+        database.insert("word2".to_string(), vec![0b1111_1111]);
+        database.insert("word3".to_string(), vec![0b0101_0101]);
+        database.insert("word4".to_string(), vec![0b0000_1110]);
         let mut article_titles: Vec<String> = Vec::new();
         for i in 1..101 {
-            article_titles.push(format!("Article {}", i).to_string());
-        }
+            article_titles.push(format!("article {}", i).to_string());
+        };
         Index {
-            database: HashMap::new(), // Empty database
+            database,
             extra_variables: Some(Index7ExtraVariables{
                 article_titles
             })
@@ -138,7 +144,7 @@ mod tests {
 
         let bitvec: Vec<u64> = vec![0b0000_0011];
 
-        let hs = vec!["Article 1".to_string(),"Article 2".to_string()];
+        let hs = vec!["article 1".to_string(),"article 2".to_string()];
         assert_eq!(test_index.bitvec_to_articleset(&bitvec).unwrap() , hs)
     }
 
@@ -147,40 +153,76 @@ mod tests {
     fn bitvec_to_articleset_panics_when_out_of_range() {
         let test_index = setup_test();
 
-        let bitvec: Vec<u64> = vec![0,0b11111111_00000000_00000000_00000000_00000000_00000000_00000000_00000000];
+        let bitvec: Vec<u64> = vec![0 , 0b11111111_00000000_00000000_00000000_00000000_00000000_00000000_00000000];
 
         test_index.bitvec_to_articleset(&bitvec).unwrap();
     }
 
     fn search_match (
         index: &Index<HashMap<String,Vec<u64>>,Index7ExtraVariables>, 
-        word: &str, 
-        titles: Vec<String>
+        query: &str, 
+        titles: Vec<&str>
     ) {
-        // dbg!(&word.to_string());
-        let index_result: HashSet<String> = HashSet::from_iter(index.boolean_search(&word.to_string()).unwrap_or(Vec::default()));
-        assert_eq!(index_result, HashSet::from_iter(titles))
+        dbg!(&query.to_string());
+        let index_result: HashSet<String> = HashSet::from_iter(index.boolean_search(&query.to_string()).unwrap_or(Vec::default()));
+        assert_eq!(index_result, HashSet::from_iter(titles.iter().map(|s| s.to_string())))
     }
 
     #[test]
     fn boolean_search_for_words_in_wiki100_kb() {
         let index = setup_real();
         
-        search_match(&index, "the | autism", vec!["Anarchism".to_string(),"Autism".to_string(),"A".to_string(),"Albedo".to_string()]);
-        search_match(&index, "autism", vec!["Autism".to_string()]); // A word that should only be in one article
-        search_match(&index, "bi-hemispherical", vec!["Albedo".to_string()]); // Check for no splitting of 'bi-hemispherical'
-        // search_match(&index, "\"&amp;#65;\"", vec!["A".to_string()]); // A word that has special characters
+        search_match(&index, "the | autism", vec!["Anarchism","Autism","A","Albedo"]);
+        search_match(&index, "autism", vec!["Autism"]); // A word that should only be in one article
+        search_match(&index, "bi-hemispherical", vec!["Albedo"]); // Check for no splitting of 'bi-hemispherical'
+        // search_match(&index, "\"&amp;#65;\"", vec!["A"]); // A word that has special characters
     }
 
     #[test]
-    fn boolean_correctness() {
-        let mut database: HashMap<String,Vec<u64>> = HashMap::new();
-        
+    fn find_a_word() {
+        let index = setup_test();
+        search_match(&index, "  word1 ", vec!["article 1"]);
     }
 
+    #[test]
+    fn ands_two_words() {
+        let index = setup_test();
+        search_match(&index, "word1 & word3", vec!["article 1"]);
+    }
 
+    #[test]
+    fn or_two_words() {
+        let index = setup_test();
+        search_match(&index, "word1 | word4", vec!["article 1","article 2","article 3","article 4"]);
+    }
 
+    #[test]
+    fn or_and_and() {
+        let index = setup_test();
+        search_match(&index, "word1 | (word3 & word4)", vec!["article 1","article 3"]);
+    }
 
+    #[test]
+    fn or_with_word_not_in_database() {
+        let index = setup_test();
+        search_match(&index, "word1 | nowhere", vec!["article 1"]);
+    }
 
+    #[test]
+    fn and_with_word_not_in_database() {
+        let index = setup_test();
+        search_match(&index, "word1 & nowhere", vec![]);
+    }
+
+    #[test]
+    fn word_not_in_database() {
+        let index = setup_test();
+        search_match(&index, "nowhere", vec![]);
+    }
+
+    #[test]
+    fn words_in_database_together_not_in_database() {
+        let index = setup_test();
+        search_match(&index, "word1 & word4", vec![]);
+    }
 }
-
