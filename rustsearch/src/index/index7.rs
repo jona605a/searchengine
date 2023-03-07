@@ -1,4 +1,4 @@
-use std::collections::{HashMap,HashSet};
+use std::collections::HashMap;
 use std::error::Error;
 use regex::Regex;
 
@@ -59,17 +59,15 @@ impl Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
         }
 
 
-        let index : Index<HashMap<String, Vec<u64>>, Index7ExtraVariables> = 
-            Index {
-                database, 
-                extra_variables: Some(Index7ExtraVariables{article_titles})
-            };
-        dbg!(&index.extra_variables.as_ref().unwrap().article_titles);
-        Ok(index)
+        
+        Ok(Index {
+            database, 
+            extra_variables: Some(Index7ExtraVariables{article_titles})
+        })
     }
 
-    pub fn bitvec_to_articleset(&self, bitvecs: &Vec<u64>) -> Option<HashSet<String>> {
-        let mut output: HashSet<String> = HashSet::new();
+    pub fn bitvec_to_articleset(&self, bitvecs: &Vec<u64>) -> Option<Vec<String>> {
+        let mut output: Vec<String> = Vec::new();
         let titles = &self.extra_variables.as_ref().unwrap().article_titles;
         for i in 0..bitvecs.len() {
             for bit in 0..64 {
@@ -77,34 +75,34 @@ impl Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
                     if titles.len() <= i*64+bit {
                         panic!("Error, looked-up word refers to an article with a larger index than there are titles: {}",i*64+bit)
                     }
-                    output.insert(titles[i*64+bit].clone());
+                    output.push(titles[i*64+bit].clone());
                 }
             }
         }
         Some(output)
     }
 
-    pub fn boolean_search(&self, exp: &String) -> Option<HashSet<String>>{
+    pub fn boolean_search(&self, exp: &String) -> Option<Vec<String>>{
         let ast: Expr = Expr::from_string(&exp).unwrap();
         let bit_vec_result = match ast {
             Expr(nodes) => match nodes {
-                    ExprData::HasNodes(node) => Some(self.recursive_tree(node,7)),
+                    ExprData::HasNodes(node) => Some(self.recursive_tree(node)),
                     ExprData::Empty => return None,
             }
         };
         self.bitvec_to_articleset(&bit_vec_result.unwrap())
     }
 
-    fn recursive_tree(&self, node:AstNode, bit_vector_length:usize)-> Vec<u64> {
+    fn recursive_tree(&self, node:AstNode)-> Vec<u64> {
         match node{
-            AstNode::Invert(child) => self.recursive_tree(*child,bit_vector_length).iter().map(|bv| !bv).collect() ,
-            AstNode::Binary(BinaryOp::And,left_child,right_child) => self.recursive_tree(*left_child,bit_vector_length).iter()
-                                                                                                    .zip(self.recursive_tree(*right_child,bit_vector_length).iter())
+            AstNode::Invert(child) => self.recursive_tree(*child).iter().map(|bv| !bv).collect() ,
+            AstNode::Binary(BinaryOp::And,left_child,right_child) => self.recursive_tree(*left_child).iter()
+                                                                                                    .zip(self.recursive_tree(*right_child).iter())
                                                                                                     .map(|(l,r)| l&r).collect(),
-            AstNode::Binary(BinaryOp::Or,left_child,right_child) => self.recursive_tree(*left_child,bit_vector_length).iter()
-                                                                                                    .zip(self.recursive_tree(*right_child,bit_vector_length).iter())
+            AstNode::Binary(BinaryOp::Or,left_child,right_child) => self.recursive_tree(*left_child).iter()
+                                                                                                    .zip(self.recursive_tree(*right_child).iter())
                                                                                                     .map(|(l,r)| l|r).collect(),
-            AstNode::Name(word) => self.database.get(&word).unwrap_or(&vec![0;bit_vector_length]).to_vec()
+            AstNode::Name(word) => self.database.get(&word).unwrap_or(&vec![0;self.extra_variables.as_ref().unwrap().article_titles.len()]).to_vec()
         }
     }
 }
@@ -114,6 +112,7 @@ impl Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::collections::HashSet;
 
     fn setup_real() -> Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
         let config = Config::build(&["".to_string(),"data/WestburyLab.wikicorp.201004_100KB.txt".to_string(),"7".to_string()]).unwrap();
@@ -126,7 +125,7 @@ mod tests {
             article_titles.push(format!("Article {}", i).to_string());
         }
         Index {
-            database: HashMap::new(),
+            database: HashMap::new(), // Empty database
             extra_variables: Some(Index7ExtraVariables{
                 article_titles
             })
@@ -139,13 +138,13 @@ mod tests {
 
         let bitvec: Vec<u64> = vec![0b0000_0011];
 
-        let hs: HashSet<String> = HashSet::from_iter(vec!["Article 1".to_string(),"Article 2".to_string()]);
+        let hs = vec!["Article 1".to_string(),"Article 2".to_string()];
         assert_eq!(test_index.bitvec_to_articleset(&bitvec).unwrap() , hs)
     }
 
     #[should_panic]
     #[test]
-    fn bitvec_to_articleset_panics() {
+    fn bitvec_to_articleset_panics_when_out_of_range() {
         let test_index = setup_test();
 
         let bitvec: Vec<u64> = vec![0,0b11111111_00000000_00000000_00000000_00000000_00000000_00000000_00000000];
@@ -153,17 +152,35 @@ mod tests {
         test_index.bitvec_to_articleset(&bitvec).unwrap();
     }
 
-    #[test]
-    fn searches_for_words_in_wiki100_kb() {
-        let index = setup_real();
-        let search_match = |word: &str, titles: Vec<String>| {
-            dbg!(&word.to_string());
-            assert_eq!(index.boolean_search(&word.to_string()).unwrap_or(HashSet::default()), HashSet::from_iter(titles))
-        };
-        search_match("the | autism", vec!["Anarchism".to_string(),"Autism".to_string(),"A".to_string(),"Albedo".to_string()]);
-        search_match("autism", vec!["Autism".to_string()]); // A word that should only be in one article
-        //search_match("\"&amp;#65;\"", vec!["A".to_string()]); // A word that has special characters
-        search_match("bi-hemispherical", vec!["Albedo".to_string()]); // Check for no splitting of 'bi-hemispherical'
+    fn search_match (
+        index: &Index<HashMap<String,Vec<u64>>,Index7ExtraVariables>, 
+        word: &str, 
+        titles: Vec<String>
+    ) {
+        // dbg!(&word.to_string());
+        let index_result: HashSet<String> = HashSet::from_iter(index.boolean_search(&word.to_string()).unwrap_or(Vec::default()));
+        assert_eq!(index_result, HashSet::from_iter(titles))
     }
+
+    #[test]
+    fn boolean_search_for_words_in_wiki100_kb() {
+        let index = setup_real();
+        
+        search_match(&index, "the | autism", vec!["Anarchism".to_string(),"Autism".to_string(),"A".to_string(),"Albedo".to_string()]);
+        search_match(&index, "autism", vec!["Autism".to_string()]); // A word that should only be in one article
+        search_match(&index, "bi-hemispherical", vec!["Albedo".to_string()]); // Check for no splitting of 'bi-hemispherical'
+        // search_match(&index, "\"&amp;#65;\"", vec!["A".to_string()]); // A word that has special characters
+    }
+
+    #[test]
+    fn boolean_correctness() {
+        let mut database: HashMap<String,Vec<u64>> = HashMap::new();
+        
+    }
+
+
+
+
+
 }
 
