@@ -33,7 +33,7 @@ fn main() {
 #[allow(dead_code)]
 fn user_dialog(index: &Index<HashMap<String,HashSet<String>>,Option<u128>>) {
     loop {
-        println!("Please input your query.");
+        println!("Please input your query. (exit to stop)");
 
         let mut query = String::new();
 

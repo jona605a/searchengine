@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use std::collections::VecDeque;
 use wasm_bindgen::prelude::*;
 
@@ -273,7 +274,7 @@ impl Expr {
 #[cfg(test)]
 mod test {
     use super::*;
-
+    
     #[test]
     fn mytest() {
         dbg!(Expr::from_string("(a & b) | (c & d)").unwrap());

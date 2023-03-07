@@ -95,14 +95,14 @@ impl Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
         self.bitvec_to_articleset(&bit_vec_result.unwrap())
     }
 
-    fn recursive_tree(&self, node:AstNode,bit_vector_length:usize)-> Vec<u64> {
+    fn recursive_tree(&self, node:AstNode, bit_vector_length:usize)-> Vec<u64> {
         match node{
             AstNode::Invert(child) => self.recursive_tree(*child,bit_vector_length).iter().map(|bv| !bv).collect() ,
-            AstNode::Binary(BinaryOp::And,leftChild,rightChild) => self.recursive_tree(*leftChild,bit_vector_length).iter()
-                                                                                                    .zip(self.recursive_tree(*rightChild,bit_vector_length).iter())
+            AstNode::Binary(BinaryOp::And,left_child,right_child) => self.recursive_tree(*left_child,bit_vector_length).iter()
+                                                                                                    .zip(self.recursive_tree(*right_child,bit_vector_length).iter())
                                                                                                     .map(|(l,r)| l&r).collect(),
-            AstNode::Binary(BinaryOp::Or,leftChild,rightChild) => self.recursive_tree(*leftChild,bit_vector_length).iter()
-                                                                                                    .zip(self.recursive_tree(*rightChild,bit_vector_length).iter())
+            AstNode::Binary(BinaryOp::Or,left_child,right_child) => self.recursive_tree(*left_child,bit_vector_length).iter()
+                                                                                                    .zip(self.recursive_tree(*right_child,bit_vector_length).iter())
                                                                                                     .map(|(l,r)| l|r).collect(),
             AstNode::Name(word) => self.database.get(&word).unwrap_or(&vec![0;bit_vector_length]).to_vec()
         }

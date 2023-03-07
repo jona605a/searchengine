@@ -1,18 +1,19 @@
 pub mod index6;
 pub mod index7;
 
-use regex::Regex;
 
 pub struct Index<T,G> {
     database: T,
     extra_variables: Option<G>,
 }
 
+#[cfg(ignore)]
 pub struct Article<'a> {
     title: String,
     contents: regex::Split<'a, 'a>,
 }
 
+// use regex::Regex;
 // impl Article<'_> {
 //     pub fn build_from_filecontents(filecontents: &String) -> Vec<Article> {
 //         let articles = filecontents.split("---END.OF.DOCUMENT---");
