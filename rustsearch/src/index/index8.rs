@@ -128,24 +128,18 @@ impl Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
 
     fn invert(&self, child:Vec<usize>) -> Vec<usize> {
         let mut result: Vec<usize> = Vec::new();
-        let mut p = 0;
+        let mut p: usize = 0;
 
-        for i in 0usize .. self.extra_variables.as_ref().unwrap().article_titles.len() as usize{
-            
+        for i in 0 .. self.extra_variables.as_ref().unwrap().article_titles.len() {
             if (p >= child.len()) || (i<child[p]){
                 result.push(i)
             }
             else{
                 p = p + 1;
-
             }
-
         }
-
         result
     }
-        
-
 }
 
 
@@ -160,12 +154,17 @@ mod tests {
     }
 
     fn setup_test() -> Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
+        let mut database: HashMap<String,Vec<usize>> = HashMap::new();
+        database.insert("word1".to_string(), vec![0b0000_0001]);
+        database.insert("word2".to_string(), vec![0b1111_1111]);
+        database.insert("word3".to_string(), vec![0b0101_0101]);
+        database.insert("word4".to_string(), vec![0b0000_1110]);
         let mut article_titles: Vec<String> = Vec::new();
         for i in 0..100 {
-            article_titles.push(format!("Article {}", i).to_string());
-        }
+            article_titles.push(format!("article {}", i).to_string());
+        };
         Index {
-            database: HashMap::new(), // Empty database
+            database,
             extra_variables: Some(Index8ExtraVariables{
                 article_titles
             })
@@ -178,7 +177,7 @@ mod tests {
 
         let bitvec: Vec<usize> = vec![0,1];
 
-        let hs = vec!["Article 0".to_string(),"Article 1".to_string()];
+        let hs = vec!["article 0".to_string(),"article 1".to_string()];
         assert_eq!(test_index.vec_to_articleset(bitvec).unwrap() , hs)
     }
 
@@ -194,26 +193,83 @@ mod tests {
 
     fn search_match (
         index: &Index<HashMap<String,Vec<usize>>,Index8ExtraVariables>, 
-        word: &str, 
-        titles: Vec<String>
+        query: &str, 
+        titles: Vec<&str>
     ) {
-        // dbg!(&word.to_string());
-        let index_result: HashSet<String> = HashSet::from_iter(index.boolean_search(&word.to_string()).unwrap_or(Vec::default()));
-        dbg!(&index_result);
-        assert_eq!(index_result, HashSet::from_iter(titles))
+        dbg!(&query.to_string());
+        let index_result: HashSet<String> = HashSet::from_iter(index.boolean_search(&query.to_string()).unwrap_or(Vec::default()));
+        assert_eq!(index_result, HashSet::from_iter(titles.iter().map(|s| s.to_string())))
     }
 
     #[test]
     fn boolean_search_for_words_in_wiki100_kb() {
         let index = setup_real();
         
-        search_match(&index, "the | autism", vec!["Anarchism".to_string(),"Autism".to_string(),"A".to_string(),"Albedo".to_string()]);
-        search_match(&index, "autism", vec!["Autism".to_string()]); // A word that should only be in one article
-        search_match(&index, "bi-hemispherical", vec!["Albedo".to_string()]); // Check for no splitting of 'bi-hemispherical'
-        // search_match(&index, "\"&amp;#65;\"", vec!["A".to_string()]); // A word that has special characters
+        search_match(&index, "the | autism", vec!["Anarchism","Autism","A","Albedo"]);
+        search_match(&index, "autism", vec!["Autism"]); // A word that should only be in one article
+        search_match(&index, "bi-hemispherical", vec!["Albedo"]); // Check for no splitting of 'bi-hemispherical'
+        // search_match(&index, "\"&amp;#65;\"", vec!["A"]); // A word that has special characters
     }
 
+    #[test]
+    fn find_a_word() {
+        let index = setup_test();
+        search_match(&index, "  word1 ", vec!["article 0"]);
+    }
 
+    #[test]
+    fn ands_two_words() {
+        let index = setup_test();
+        search_match(&index, "word1 & word3", vec!["article 0"]);
+    }
+
+    #[test]
+    fn or_two_words() {
+        let index = setup_test();
+        search_match(&index, "word1 | word4", vec!["article 0","article 1","article 2","article 3"]);
+    }
+
+    #[test]
+    fn or_and_and() {
+        let index = setup_test();
+        search_match(&index, "word1 | (word3 & word4)", vec!["article 0","article 2"]);
+    }
+
+    #[test]
+    fn or_with_word_not_in_database() {
+        let index = setup_test();
+        search_match(&index, "word1 | nowhere", vec!["article 0"]);
+    }
+
+    #[test]
+    fn and_with_word_not_in_database() {
+        let index = setup_test();
+        search_match(&index, "word1 & nowhere", vec![]);
+    }
+
+    #[test]
+    fn word_not_in_database() {
+        let index = setup_test();
+        search_match(&index, "nowhere", vec![]);
+    }
+
+    #[test]
+    fn words_in_database_together_not_in_database() {
+        let index = setup_test();
+        search_match(&index, "word1 & word4", vec![]);
+    }
+
+    #[test]
+    fn the_empty_query() {
+        let index = setup_test();
+        search_match(&index, "", vec![]);
+    }
+
+    #[test]
+    fn erroneous_query_finds_nothing() {
+        let index = setup_test();
+        search_match(&index, "word1((", vec![]);
+    }
 
 }
 

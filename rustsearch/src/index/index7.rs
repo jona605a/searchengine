@@ -112,7 +112,7 @@ mod tests {
         database.insert("word3".to_string(), vec![0b0101_0101]);
         database.insert("word4".to_string(), vec![0b0000_1110]);
         let mut article_titles: Vec<String> = Vec::new();
-        for i in 1..101 {
+        for i in 0..100 {
             article_titles.push(format!("article {}", i).to_string());
         };
         Index {
@@ -129,7 +129,7 @@ mod tests {
 
         let bitvec: Vec<u64> = vec![0b0000_0011];
 
-        let hs = vec!["article 1".to_string(),"article 2".to_string()];
+        let hs = vec!["article 0".to_string(),"article 1".to_string()];
         assert_eq!(test_index.bitvec_to_articleset(bitvec).unwrap() , hs)
     }
 
@@ -166,31 +166,31 @@ mod tests {
     #[test]
     fn find_a_word() {
         let index = setup_test();
-        search_match(&index, "  word1 ", vec!["article 1"]);
+        search_match(&index, "  word1 ", vec!["article 0"]);
     }
 
     #[test]
     fn ands_two_words() {
         let index = setup_test();
-        search_match(&index, "word1 & word3", vec!["article 1"]);
+        search_match(&index, "word1 & word3", vec!["article 0"]);
     }
 
     #[test]
     fn or_two_words() {
         let index = setup_test();
-        search_match(&index, "word1 | word4", vec!["article 1","article 2","article 3","article 4"]);
+        search_match(&index, "word1 | word4", vec!["article 0","article 1","article 2","article 3"]);
     }
 
     #[test]
     fn or_and_and() {
         let index = setup_test();
-        search_match(&index, "word1 | (word3 & word4)", vec!["article 1","article 3"]);
+        search_match(&index, "word1 | (word3 & word4)", vec!["article 0","article 2"]);
     }
 
     #[test]
     fn or_with_word_not_in_database() {
         let index = setup_test();
-        search_match(&index, "word1 | nowhere", vec!["article 1"]);
+        search_match(&index, "word1 | nowhere", vec!["article 0"]);
     }
 
     #[test]
