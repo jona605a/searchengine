@@ -8,20 +8,20 @@ pub struct Index<T,G> {
     extra_variables: Option<G>,
 }
 
-#[cfg(ignore)]
-pub struct Article<'a> {
-    title: String,
-    contents: regex::Split<'a, 'a>,
-}
+
+// pub struct Article {
+//     title: String,
+//     contents: regex::Split,
+// }
 
 // use regex::Regex;
-// impl Article<'_> {
+// impl Article {
 //     pub fn build_from_filecontents(filecontents: &String) -> Vec<Article> {
 //         let articles = filecontents.split("---END.OF.DOCUMENT---");
 //         let re = Regex::new(r"\. |\.\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
         
 //         articles
-//             .map(move |a| {
+//             .map(|a| {
 //                 let (title, contents) = a.split_once("\n").expect("There should be a newline character in every article");
 //                 Article {
 //                     title: title.to_string(),
