@@ -33,20 +33,25 @@ impl Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
         let mut v_len = 1;
 
         for (title, contents) in articles_iter {
-            article_titles.push(title.to_string());
-            n_titles += 1;
-            if n_titles > v_len*64 {
-                // Extend the length of all vectors by 1
-                for v in database.values_mut() {
-                    v.push(0);
-                }
-                v_len += 1;
+            if title == ""{
+                ()
             }
-            for word in contents {
-                let v = database.entry(word.to_string()).or_default();
-                while v.len() < v_len {v.push(0)}
-                let title_bit: u64 = 1 << ((n_titles-1)%64);
-                v[(n_titles-1)/64] = v[(n_titles-1)/64] | title_bit;
+            else{
+                article_titles.push(title.to_string());
+                n_titles += 1;
+                if n_titles > v_len*64 {
+                    // Extend the length of all vectors by 1
+                    for v in database.values_mut() {
+                        v.push(0);
+                    }
+                    v_len += 1;
+                }
+                for word in contents {
+                    let v = database.entry(word.to_string()).or_default();
+                    while v.len() < v_len {v.push(0)}
+                    let title_bit: u64 = 1 << ((n_titles-1)%64);
+                    v[(n_titles-1)/64] = v[(n_titles-1)/64] | title_bit;
+                }
             }
         }
 
