@@ -15,7 +15,7 @@ pub struct Index8ExtraVariables {
 #[allow(dead_code)]
 impl Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
 
-    pub fn index8(config: &Config) -> Result<Index<HashMap<String,Vec<usize>>,Index8ExtraVariables>, Box<dyn Error>> {
+    pub fn index8_2(config: &Config) -> Result<Index<HashMap<String,Vec<usize>>,Index8ExtraVariables>, Box<dyn Error>> {
         let mut database: HashMap<String,Vec<usize>> = HashMap::new();
         
         let filecontents = read_file_to_string(&config.file_path)?;
@@ -71,7 +71,21 @@ impl Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
     fn recursive_tree(&self, node: AstNode)-> Vec<usize> {
         match node {
             AstNode::Invert(child) => self.invert(self.recursive_tree(*child)),
-            AstNode::Binary(BinaryOp::And,left_child,right_child) => self.and(self.recursive_tree(*left_child),self.recursive_tree(*right_child)),
+            AstNode::Binary(BinaryOp::And,left_child,right_child) => {
+                
+                let left_child = self.recursive_tree(*left_child);
+                let right_child = self.recursive_tree(*right_child);
+
+                if left_child.len() + right_child.len() > left_child.len().ilog2() as usize * right_child.len(){
+                    self.and_binary_search(left_child,right_child)
+                }
+                else if left_child.len() + right_child.len() > right_child.len().ilog2() as usize * left_child.len(){
+                    self.and_binary_search(right_child,left_child)
+                }
+                else{
+                    self.and(left_child,right_child)
+                }
+            },
             AstNode::Binary(BinaryOp::Or,left_child,right_child) => self.or(self.recursive_tree(*left_child),self.recursive_tree(*right_child)),
             AstNode::Name(word) => dbg!(self.database.get(&word).unwrap_or(&vec![]).to_vec()),
         }
@@ -96,6 +110,19 @@ impl Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
                 result.push(left_child[l]);
                 l = l +1;
                 r = r +1;
+            }
+        }
+
+        result
+    }
+
+    fn and_binary_search(&self, small_child:Vec<usize>,large_child:Vec<usize>)-> Vec<usize> {
+        let mut result: Vec<usize> = Vec::new();
+        
+        for s in small_child{
+            match large_child.binary_search(&s){
+                Ok(_) => result.push(s),
+                Err(_) => ()    
             }
         }
 
@@ -160,7 +187,7 @@ mod tests {
 
     fn setup_real() -> Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
         let config = Config::build(&["".to_string(),"data/WestburyLab.wikicorp.201004_100KB.txt".to_string(),"8".to_string()]).unwrap();
-        Index::index8(&config).unwrap()
+        Index::index8_2(&config).unwrap()
     }
 
     fn setup_test() -> Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {

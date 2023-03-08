@@ -15,7 +15,7 @@ pub struct Index8ExtraVariables {
 #[allow(dead_code)]
 impl Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
 
-    pub fn index8(config: &Config) -> Result<Index<HashMap<String,Vec<usize>>,Index8ExtraVariables>, Box<dyn Error>> {
+    pub fn index8_1(config: &Config) -> Result<Index<HashMap<String,Vec<usize>>,Index8ExtraVariables>, Box<dyn Error>> {
         let mut database: HashMap<String,Vec<usize>> = HashMap::new();
         
         let filecontents = read_file_to_string(&config.file_path)?;
@@ -69,11 +69,21 @@ impl Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
     }
 
     fn recursive_tree(&self, node: AstNode)-> Vec<usize> {
-        match node {
+        match node{
             AstNode::Invert(child) => self.invert(self.recursive_tree(*child)),
-            AstNode::Binary(BinaryOp::And,left_child,right_child) => self.and(self.recursive_tree(*left_child),self.recursive_tree(*right_child)),
-            AstNode::Binary(BinaryOp::Or,left_child,right_child) => self.or(self.recursive_tree(*left_child),self.recursive_tree(*right_child)),
-            AstNode::Name(word) => dbg!(self.database.get(&word).unwrap_or(&vec![]).to_vec()),
+            AstNode::Binary(BinaryOp::And,left_child,right_child) => 
+            match (*left_child, *right_child){
+                (AstNode::Invert(left_child),AstNode::Invert(right_child))=> self.invert(self.or(self.recursive_tree(*left_child),self.recursive_tree(*right_child))),
+                (left_child,right_child) => self.and(self.recursive_tree(left_child),self.recursive_tree(right_child)),
+
+            }
+            AstNode::Binary(BinaryOp::Or,left_child,right_child) => 
+            match (*left_child, *right_child){
+                (AstNode::Invert(left_child),AstNode::Invert(right_child))=> self.invert(self.and(self.recursive_tree(*left_child),self.recursive_tree(*right_child))),
+                (left_child,right_child) => self.or(self.recursive_tree(left_child),self.recursive_tree(right_child)),
+
+            }
+            AstNode::Name(word) => dbg!(self.database.get(&word).unwrap_or(&vec![]).to_vec())
         }
     }
 
@@ -81,9 +91,6 @@ impl Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
         let mut result: Vec<usize> = Vec::new();
         let mut l = 0;
         let mut r = 0;
-    
-        // dbg!(&left_child);
-        // dbg!(&right_child);
 
         while (left_child.len() > l) & (right_child.len()> r) {
             if left_child[l] > right_child[r]{
@@ -160,7 +167,7 @@ mod tests {
 
     fn setup_real() -> Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
         let config = Config::build(&["".to_string(),"data/WestburyLab.wikicorp.201004_100KB.txt".to_string(),"8".to_string()]).unwrap();
-        Index::index8(&config).unwrap()
+        Index::index8_1(&config).unwrap()
     }
 
     fn setup_test() -> Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
