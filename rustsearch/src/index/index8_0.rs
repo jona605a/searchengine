@@ -15,7 +15,7 @@ pub struct Index8ExtraVariables {
 #[allow(dead_code)]
 impl Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
 
-    pub fn index8(config: &Config) -> Result<Index<HashMap<String,Vec<usize>>,Index8ExtraVariables>, Box<dyn Error>> {
+    pub fn index8_0(config: &Config) -> Result<Index<HashMap<String,Vec<usize>>,Index8ExtraVariables>, Box<dyn Error>> {
         let mut database: HashMap<String,Vec<usize>> = HashMap::new();
         
         let filecontents = read_file_to_string(&config.file_path)?;
@@ -160,7 +160,7 @@ mod tests {
 
     fn setup_real() -> Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
         let config = Config::build(&["".to_string(),"data/WestburyLab.wikicorp.201004_100KB.txt".to_string(),"8".to_string()]).unwrap();
-        Index::index8(&config).unwrap()
+        Index::index8_0(&config).unwrap()
     }
 
     fn setup_test() -> Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
