@@ -9,8 +9,8 @@ edition = "2021"
 regex = "1"
 wasm-bindgen = "0.2"
 
-[profile.release]
-lto = true # link-time optimizations (noget med at filer compileres bedre sammen)
+# [profile.release]
+# lto = true # link-time optimizations (noget med at filer compileres bedre sammen)
 
 [dev-dependencies]
 criterion = "0.3"
