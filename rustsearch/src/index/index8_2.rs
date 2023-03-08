@@ -1,119 +1,40 @@
 use std::collections::HashMap;
-use std::error::Error;
-use regex::Regex;
 
 use crate::index::Index;
-use crate::helpers::*;
+use crate::index::index8_0::Index8ExtraVariables;
 use crate::parsing::*;
-
-#[derive(Debug)]
-pub struct Index8ExtraVariables {
-    article_titles: Vec<String>,
-}
-
 
 #[allow(dead_code)]
 impl Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
 
-    pub fn index8_2(config: &Config) -> Result<Index<HashMap<String,Vec<usize>>,Index8ExtraVariables>, Box<dyn Error>> {
-        let mut database: HashMap<String,Vec<usize>> = HashMap::new();
-        
-        let filecontents = read_file_to_string(&config.file_path)?;
-        let re = Regex::new(r"\. |\.\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
-
-        // Articles are seperated by the delimiter "---END.OF.DOCUMENT---"
-        // In each article, it is assumed that the first line is the title, ending in a '.'
-        // The contents of each article is split according to the regular expression. 
-        let articles_iter = filecontents.split("---END.OF.DOCUMENT---")
-            .map(|a| {
-                let (title, contents) = a.trim().split_once(".\n").unwrap_or(("",""));
-                (title.to_string(), re.split(contents))
-            });
-        let mut article_titles: Vec<String> = Vec::new();
-        
-        for (title, contents) in articles_iter {
-            if title == ""{
-                ()
-            }
-            else{
-                article_titles.push(title.to_string());
-                for word in contents {
-                    let v = database.entry(word.to_string()).or_default();
-                    if (v.len() == 0) || (v[v.len()-1] != article_titles.len()-1){
-                        v.push(article_titles.len()-1)
-                    }
-                }
-            }
-        }
-
-        Ok(Index {
-            database, 
-            extra_variables: Some(Index8ExtraVariables{article_titles})
-        })
-    }
-
-    pub fn vec_to_articleset(&self, vec: Vec<usize>) -> Option<Vec<String>> {
-        let mut output: Vec<String> = Vec::new();
-        let titles = &self.extra_variables.as_ref().unwrap().article_titles;
-        for i in vec {
-            output.push(titles[i as usize].clone());
-        }
-        Some(output)
-    }
-
-    pub fn boolean_search(&self, exp: &String) -> Option<Vec<String>>{
+    pub fn boolean_search_binary_search(&self, exp: &String) -> Option<Vec<String>>{
         match Expr::from_string(&exp) {
-            Ok(Expr(ExprData::HasNodes(node))) => self.vec_to_articleset(self.recursive_tree(node)),
+            Ok(Expr(ExprData::HasNodes(node))) => self.vec_to_articleset(self.evaluate_syntex_tree_binary_search(node)),
             _ => None // Either an error or the expression has no nodes
         }
     }
 
-    fn recursive_tree(&self, node: AstNode)-> Vec<usize> {
+    fn evaluate_syntex_tree_binary_search(&self, node: AstNode)-> Vec<usize> {
         match node {
-            AstNode::Invert(child) => self.invert(self.recursive_tree(*child)),
+            AstNode::Invert(child) => self.invert(self.evaluate_syntex_tree_binary_search(*child)),
             AstNode::Binary(BinaryOp::And,left_child,right_child) => {
                 
-                let left_child = self.recursive_tree(*left_child);
-                let right_child = self.recursive_tree(*right_child);
+                let left_child = self.evaluate_syntex_tree_binary_search(*left_child);
+                let right_child = self.evaluate_syntex_tree_binary_search(*right_child);
 
                 if left_child.len() + right_child.len() > left_child.len().ilog2() as usize * right_child.len(){
-                    self.and_binary_search(left_child,right_child)
+                    self.and_binary_search(right_child,left_child)
                 }
                 else if left_child.len() + right_child.len() > right_child.len().ilog2() as usize * left_child.len(){
-                    self.and_binary_search(right_child,left_child)
+                    self.and_binary_search(left_child,right_child)
                 }
                 else{
                     self.and(left_child,right_child)
                 }
             },
-            AstNode::Binary(BinaryOp::Or,left_child,right_child) => self.or(self.recursive_tree(*left_child),self.recursive_tree(*right_child)),
+            AstNode::Binary(BinaryOp::Or,left_child,right_child) => self.or(self.evaluate_syntex_tree_binary_search(*left_child),self.evaluate_syntex_tree_binary_search(*right_child)),
             AstNode::Name(word) => dbg!(self.database.get(&word).unwrap_or(&vec![]).to_vec()),
         }
-    }
-
-    fn and(&self, left_child:Vec<usize>,right_child:Vec<usize>)-> Vec<usize> {
-        let mut result: Vec<usize> = Vec::new();
-        let mut l = 0;
-        let mut r = 0;
-    
-        // dbg!(&left_child);
-        // dbg!(&right_child);
-
-        while (left_child.len() > l) & (right_child.len()> r) {
-            if left_child[l] > right_child[r]{
-                r = r+1;
-            }
-            else if left_child[l] < right_child[r]{
-                l = l+1;
-            }
-            else{
-                result.push(left_child[l]);
-                l = l +1;
-                r = r +1;
-            }
-        }
-
-        result
     }
 
     fn and_binary_search(&self, small_child:Vec<usize>,large_child:Vec<usize>)-> Vec<usize> {
@@ -128,55 +49,6 @@ impl Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
 
         result
     }
-
-    fn or(&self, left_child:Vec<usize>,right_child:Vec<usize>)-> Vec<usize> {
-        let mut result: Vec<usize> = Vec::new();
-        let mut l = 0;
-        let mut r = 0;
-
-        while (left_child.len() > l) || (right_child.len() > r) {
-            
-            if l == left_child.len(){
-                result.push(right_child[r]);
-                r += 1;
-            }
-
-            else if r == right_child.len(){
-                result.push(left_child[l]);
-                l += 1;
-            }
-
-            else if left_child[l] > right_child[r]{
-                result.push(right_child[r]);
-                r += 1;
-            }
-            else if left_child[l] < right_child[r]{
-                result.push(left_child[l]);
-                l += 1;
-            }
-            else{
-                result.push(left_child[l]);
-                l += 1;
-                r += 1;
-            }
-        }
-        result
-    }
-
-    fn invert(&self, child:Vec<usize>) -> Vec<usize> {
-        let mut result: Vec<usize> = Vec::new();
-        let mut p: usize = 0;
-
-        for i in 0 .. self.extra_variables.as_ref().unwrap().article_titles.len() {
-            if (p >= child.len()) || (i<child[p]){
-                result.push(i)
-            }
-            else{
-                p = p + 1;
-            }
-        }
-        result
-    }
 }
 
 
@@ -186,8 +58,8 @@ mod tests {
     use std::collections::HashSet;
 
     fn setup_real() -> Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
-        let config = Config::build(&["".to_string(),"data/WestburyLab.wikicorp.201004_100KB.txt".to_string(),"8".to_string()]).unwrap();
-        Index::index8_2(&config).unwrap()
+        let config = crate::helpers::Config::build(&["".to_string(),"data/WestburyLab.wikicorp.201004_100KB.txt".to_string(),"8".to_string()]).unwrap();
+        Index::index8(&config).unwrap()
     }
 
     fn setup_test() -> Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
@@ -234,12 +106,12 @@ mod tests {
         titles: Vec<&str>
     ) {
         dbg!(&query.to_string());
-        let index_result: HashSet<String> = HashSet::from_iter(index.boolean_search(&query.to_string()).unwrap_or(Vec::default()));
+        let index_result: HashSet<String> = HashSet::from_iter(index.boolean_search_binary_search(&query.to_string()).unwrap_or(Vec::default()));
         assert_eq!(index_result, HashSet::from_iter(titles.iter().map(|s| s.to_string())))
     }
 
     #[test]
-    fn boolean_search_for_words_in_wiki100_kb() {
+    fn boolean_search_binary_search_for_words_in_wiki100_kb() {
         let index = setup_real();
         
         search_match(&index, "the | autism", vec!["Anarchism","Autism","A","Albedo"]);
@@ -309,7 +181,7 @@ mod tests {
     }
 
     #[test]
-    fn boolean_search_with_iversions() {
+    fn boolean_search_binary_search_with_iversions() {
         let index = setup_real();
         
         search_match(&index, "!the", vec![]);

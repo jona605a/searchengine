@@ -8,14 +8,14 @@ use crate::parsing::*;
 
 #[derive(Debug)]
 pub struct Index8ExtraVariables {
-    article_titles: Vec<String>,
+    pub article_titles: Vec<String>,
 }
 
 
 #[allow(dead_code)]
 impl Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
 
-    pub fn index8_0(config: &Config) -> Result<Index<HashMap<String,Vec<usize>>,Index8ExtraVariables>, Box<dyn Error>> {
+    pub fn index8(config: &Config) -> Result<Index<HashMap<String,Vec<usize>>,Index8ExtraVariables>, Box<dyn Error>> {
         let mut database: HashMap<String,Vec<usize>> = HashMap::new();
         
         let filecontents = read_file_to_string(&config.file_path)?;
@@ -61,29 +61,26 @@ impl Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
         Some(output)
     }
 
-    pub fn boolean_search(&self, exp: &String) -> Option<Vec<String>>{
+    pub fn boolean_search_naive(&self, exp: &String) -> Option<Vec<String>>{
         match Expr::from_string(&exp) {
-            Ok(Expr(ExprData::HasNodes(node))) => self.vec_to_articleset(self.recursive_tree(node)),
+            Ok(Expr(ExprData::HasNodes(node))) => self.vec_to_articleset(self.evaluate_syntex_tree_naive(node)),
             _ => None // Either an error or the expression has no nodes
         }
     }
 
-    fn recursive_tree(&self, node: AstNode)-> Vec<usize> {
+    fn evaluate_syntex_tree_naive(&self, node: AstNode)-> Vec<usize> {
         match node {
-            AstNode::Invert(child) => self.invert(self.recursive_tree(*child)),
-            AstNode::Binary(BinaryOp::And,left_child,right_child) => self.and(self.recursive_tree(*left_child),self.recursive_tree(*right_child)),
-            AstNode::Binary(BinaryOp::Or,left_child,right_child) => self.or(self.recursive_tree(*left_child),self.recursive_tree(*right_child)),
+            AstNode::Invert(child) => self.invert(self.evaluate_syntex_tree_naive(*child)),
+            AstNode::Binary(BinaryOp::And,left_child,right_child) => self.and(self.evaluate_syntex_tree_naive(*left_child),self.evaluate_syntex_tree_naive(*right_child)),
+            AstNode::Binary(BinaryOp::Or,left_child,right_child) => self.or(self.evaluate_syntex_tree_naive(*left_child),self.evaluate_syntex_tree_naive(*right_child)),
             AstNode::Name(word) => dbg!(self.database.get(&word).unwrap_or(&vec![]).to_vec()),
         }
     }
 
-    fn and(&self, left_child:Vec<usize>,right_child:Vec<usize>)-> Vec<usize> {
+    pub fn and(&self, left_child:Vec<usize>,right_child:Vec<usize>)-> Vec<usize> {
         let mut result: Vec<usize> = Vec::new();
         let mut l = 0;
         let mut r = 0;
-    
-        // dbg!(&left_child);
-        // dbg!(&right_child);
 
         while (left_child.len() > l) & (right_child.len()> r) {
             if left_child[l] > right_child[r]{
@@ -102,7 +99,7 @@ impl Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
         result
     }
 
-    fn or(&self, left_child:Vec<usize>,right_child:Vec<usize>)-> Vec<usize> {
+    pub fn or(&self, left_child:Vec<usize>,right_child:Vec<usize>)-> Vec<usize> {
         let mut result: Vec<usize> = Vec::new();
         let mut l = 0;
         let mut r = 0;
@@ -136,7 +133,7 @@ impl Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
         result
     }
 
-    fn invert(&self, child:Vec<usize>) -> Vec<usize> {
+    pub fn invert(&self, child:Vec<usize>) -> Vec<usize> {
         let mut result: Vec<usize> = Vec::new();
         let mut p: usize = 0;
 
@@ -160,7 +157,7 @@ mod tests {
 
     fn setup_real() -> Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
         let config = Config::build(&["".to_string(),"data/WestburyLab.wikicorp.201004_100KB.txt".to_string(),"8".to_string()]).unwrap();
-        Index::index8_0(&config).unwrap()
+        Index::index8(&config).unwrap()
     }
 
     fn setup_test() -> Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
@@ -207,7 +204,7 @@ mod tests {
         titles: Vec<&str>
     ) {
         dbg!(&query.to_string());
-        let index_result: HashSet<String> = HashSet::from_iter(index.boolean_search(&query.to_string()).unwrap_or(Vec::default()));
+        let index_result: HashSet<String> = HashSet::from_iter(index.boolean_search_naive(&query.to_string()).unwrap_or(Vec::default()));
         assert_eq!(index_result, HashSet::from_iter(titles.iter().map(|s| s.to_string())))
     }
 
