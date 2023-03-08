@@ -9,6 +9,25 @@ pub struct Index<T,G> {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // pub struct Article {
 //     title: String,
 //     contents: regex::Split,

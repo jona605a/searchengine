@@ -1,12 +1,8 @@
 use std::collections::{HashMap,HashSet};
 use std::{env,io,process};
 
-mod index;
-mod helpers;
-mod parsing;
-
-use crate::index::Index;
-use crate::helpers::*;
+use rustsearch::index::Index;
+use rustsearch::helpers::*;
 
 #[allow(unused_variables)]
 
