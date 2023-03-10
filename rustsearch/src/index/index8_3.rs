@@ -7,48 +7,66 @@ use crate::parsing::*;
 #[allow(dead_code)]
 impl Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
 
-    pub fn boolean_search_binary_search(&self, exp: &String) -> Option<Vec<String>>{
+    pub fn boolean_search_hybrid(&self, exp: &String) -> Option<Vec<String>>{
         match Expr::from_string(&exp) {
-            Ok(Expr(ExprData::HasNodes(node))) => self.vec_to_articleset(self.evaluate_syntex_tree_binary_search(node)),
+            Ok(Expr(ExprData::HasNodes(node))) => self.vec_to_articleset(self.evaluate_syntex_tree_hybrid(node)),
             _ => None // Either an error or the expression has no nodes
         }
     }
 
-    pub fn evaluate_syntex_tree_binary_search(&self, node: AstNode)-> Vec<usize> {
+    pub fn evaluate_syntex_tree_hybrid(&self, node: AstNode)-> Vec<usize> {
         match node {
-            AstNode::Invert(child) => self.invert(self.evaluate_syntex_tree_binary_search(*child)),
-            AstNode::Binary(BinaryOp::And,left_child,right_child) => {
-                
-                let left_articlelist = self.evaluate_syntex_tree_binary_search(*left_child);
-                let right_articlelist = self.evaluate_syntex_tree_binary_search(*right_child);
+            AstNode::Invert(child) => self.invert(self.evaluate_syntex_tree_hybrid(*child)),
+            
+            AstNode::Binary(BinaryOp::And,left_child,right_child) => 
+            match (*left_child, *right_child) {
+                (AstNode::Invert(left_grandchild),AstNode::Invert(right_grandchild))=> {
+                    self.invert(self.or(self.evaluate_syntex_tree_demorgan(*left_grandchild),self.evaluate_syntex_tree_demorgan(*right_grandchild)))
+                }
+                ,
+                (left_child,right_child) => {
+                    
+                    let left_articlelist = self.evaluate_syntex_tree_binary_search(left_child);
+                    let right_articlelist = self.evaluate_syntex_tree_binary_search(right_child);
 
-                if left_articlelist.len() > 0 && left_articlelist.len() + right_articlelist.len() > left_articlelist.len().ilog2() as usize * right_articlelist.len() {
-                    self.and_binary_search(right_articlelist,left_articlelist)
+                    if left_articlelist.len() > 0 && left_articlelist.len() + right_articlelist.len() > left_articlelist.len().ilog2() as usize * right_articlelist.len() {
+                        self.and_binary_search(right_articlelist,left_articlelist)
+                    }
+                    else if right_articlelist.len() > 0 && left_articlelist.len() + right_articlelist.len() > right_articlelist.len().ilog2() as usize * left_articlelist.len() {
+                        self.and_binary_search(left_articlelist,right_articlelist)
+                    }
+                    else {
+                        self.and(left_articlelist,right_articlelist)
+                    }
                 }
-                else if right_articlelist.len() > 0 && left_articlelist.len() + right_articlelist.len() > right_articlelist.len().ilog2() as usize * left_articlelist.len() {
-                    self.and_binary_search(left_articlelist,right_articlelist)
-                }
-                else {
-                    self.and(left_articlelist,right_articlelist)
-                }
-            },
-            AstNode::Binary(BinaryOp::Or,left_child,right_child) => self.or(self.evaluate_syntex_tree_binary_search(*left_child),self.evaluate_syntex_tree_binary_search(*right_child)),
-            AstNode::Name(word) => self.database.get(&word).unwrap_or(&vec![]).to_vec(),
-        }
-    }
 
-    pub fn and_binary_search(&self, small_child:Vec<usize>,large_child:Vec<usize>)-> Vec<usize> {
-        let mut result: Vec<usize> = Vec::new();
-        
-        for s in small_child{
-            match large_child.binary_search(&s){
-                Ok(_) => result.push(s),
-                Err(_) => ()    
             }
-        }
+            
+            AstNode::Binary(BinaryOp::Or,left_child,right_child) => 
+            match (*left_child, *right_child){
+                (AstNode::Invert(left_grandchild),AstNode::Invert(right_grandchild))=> {
+                    
+                    let left_articlelist = self.evaluate_syntex_tree_binary_search(*left_grandchild);
+                    let right_articlelist = self.evaluate_syntex_tree_binary_search(*right_grandchild);
 
-        result
+                    if left_articlelist.len() > 0 && left_articlelist.len() + right_articlelist.len() > left_articlelist.len().ilog2() as usize * right_articlelist.len() {
+                        self.invert(self.and_binary_search(right_articlelist,left_articlelist))
+                    }
+                    else if right_articlelist.len() > 0 && left_articlelist.len() + right_articlelist.len() > right_articlelist.len().ilog2() as usize * left_articlelist.len() {
+                        self.invert(self.and_binary_search(left_articlelist,right_articlelist))
+                    }
+                    else {
+                        self.invert(self.and(left_articlelist,right_articlelist))
+                    }
+                }
+
+                (left_child,right_child) => self.or(self.evaluate_syntex_tree_hybrid(left_child),self.evaluate_syntex_tree_hybrid(right_child)),
+
+            }
+            AstNode::Name(word) => self.database.get(&word).unwrap_or(&vec![]).to_vec()
+        }
     }
+
 }
 
 
@@ -106,7 +124,7 @@ mod tests {
         titles: Vec<&str>
     ) {
         dbg!(&query.to_string());
-        let index_result: HashSet<String> = HashSet::from_iter(index.boolean_search_binary_search(&query.to_string()).unwrap_or(Vec::default()));
+        let index_result: HashSet<String> = HashSet::from_iter(index.boolean_search_hybrid(&query.to_string()).unwrap_or(Vec::default()));
         assert_eq!(index_result, HashSet::from_iter(titles.iter().map(|s| s.to_string())))
     }
 

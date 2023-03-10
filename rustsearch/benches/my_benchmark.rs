@@ -54,9 +54,9 @@ pub fn searching_index_8_100_kb(c: &mut Criterion) {
     let mut depth = 0;
     for depth_vec in ast_vec {
         depth += 1;
-        c.bench_function(&format!("searching index 8 in file 5 MB, depth {}", depth), |b| b.iter(|| {
+        c.bench_function(&format!("searching index 8_0 in file 5 MB, depth {}", depth), |b| b.iter(|| {
             for ast in &depth_vec {
-                index.vec_to_articleset(index.evaluate_syntex_tree_naive(*ast.clone()));
+                index.vec_to_articleset(index.evaluate_syntex_tree_hybrid(*ast.clone()));
             }
         }));
     }
