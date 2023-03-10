@@ -10,6 +10,18 @@ use rustsearch::parsing::AstNode;
 
 
 // Timing the indexing on different files
+pub fn indexing_7_file_100_kb(c: &mut Criterion) {
+    c.bench_function("index 8 indexing 100 KB", |b| b.iter(|| {
+        index::Index::index7(&rustsearch::helpers::Config {file_path : "data/WestburyLab.wikicorp.201004_100KB.txt".to_string(), indexno : "7_0".to_string()})
+    }));
+}
+
+pub fn indexing_7_file_5_mb(c: &mut Criterion) {
+    c.bench_function("index 8 indexing 5 MB", |b| b.iter(|| {
+        index::Index::index7(&rustsearch::helpers::Config {file_path : "data/WestburyLab.wikicorp.201004_5MB.txt".to_string(), indexno : "7_0".to_string()})
+    }));
+}
+
 pub fn indexing_8_file_100_kb(c: &mut Criterion) {
     c.bench_function("index 8 indexing 100 KB", |b| b.iter(|| {
         index::Index::index8(&rustsearch::helpers::Config {file_path : "data/WestburyLab.wikicorp.201004_100KB.txt".to_string(), indexno : "8_0".to_string()})
@@ -18,9 +30,6 @@ pub fn indexing_8_file_100_kb(c: &mut Criterion) {
 
 pub fn indexing_8_file_5_mb(c: &mut Criterion) {
     c.bench_function("index 8 indexing 5 MB", |b| b.iter(|| {
-        index::Index::index8(&rustsearch::helpers::Config {file_path : "data/WestburyLab.wikicorp.201004_5MB.txt".to_string(), indexno : "8_0".to_string()})
-    }));
-    c.bench_function("index 8 indexing 5 MB again", |b| b.iter(|| {
         index::Index::index8(&rustsearch::helpers::Config {file_path : "data/WestburyLab.wikicorp.201004_5MB.txt".to_string(), indexno : "8_0".to_string()})
     }));
 }
@@ -40,14 +49,30 @@ fn gen_a_lot_of_runs(file_path: String, number : usize) -> Vec<Vec<Box<AstNode>>
     database_words.sort();
     
     
-    let boolean_queries = (1..=7).map(|depth| {
+    let boolean_queries = (1..=8).map(|depth| {
         (1..=number).map(|i| boolean_ast_gen(&database_words, depth, &mut rng)).collect::<Vec<Box<AstNode>>>()
     }).collect::<Vec<Vec<Box<AstNode>>>>();
     
     boolean_queries
 }
 
-pub fn searching_index_8_100_kb(c: &mut Criterion) {
+
+pub fn searching_index_7_0_5MB(c: &mut Criterion) {
+    let file = "data/WestburyLab.wikicorp.201004_5MB.txt";
+    let ast_vec = gen_a_lot_of_runs(file.to_string(), 1000);
+    let index = index::Index::index7(&rustsearch::helpers::Config {file_path : file.to_string(), indexno : "7".to_string()}).unwrap();
+    let mut depth = 0;
+    for depth_vec in ast_vec {
+        depth += 1;
+        c.bench_function(&format!("searching index 7_0 in file 5 MB, depth {}", depth), |b| b.iter(|| {
+            for ast in &depth_vec {
+                index.bitvec_to_articleset(index.evaluate_syntax_tree(*ast.clone()));
+            }
+        }));
+    }
+}
+
+pub fn searching_index_8_0_5MB(c: &mut Criterion) {
     let file = "data/WestburyLab.wikicorp.201004_5MB.txt";
     let ast_vec = gen_a_lot_of_runs(file.to_string(), 1000);
     let index = index::Index::index8(&rustsearch::helpers::Config {file_path : file.to_string(), indexno : "8".to_string()}).unwrap();
@@ -56,16 +81,57 @@ pub fn searching_index_8_100_kb(c: &mut Criterion) {
         depth += 1;
         c.bench_function(&format!("searching index 8_0 in file 5 MB, depth {}", depth), |b| b.iter(|| {
             for ast in &depth_vec {
+                index.vec_to_articleset(index.evaluate_syntex_tree_naive(*ast.clone()));
+            }
+        }));
+    }
+}
+
+pub fn searching_index_8_1_5MB(c: &mut Criterion) {
+    let file = "data/WestburyLab.wikicorp.201004_5MB.txt";
+    let ast_vec = gen_a_lot_of_runs(file.to_string(), 1000);
+    let index = index::Index::index8(&rustsearch::helpers::Config {file_path : file.to_string(), indexno : "8".to_string()}).unwrap();
+    let mut depth = 0;
+    for depth_vec in ast_vec {
+        depth += 1;
+        c.bench_function(&format!("searching index 8_1 in file 5 MB, depth {}", depth), |b| b.iter(|| {
+            for ast in &depth_vec {
+                index.vec_to_articleset(index.evaluate_syntex_tree_demorgan(*ast.clone()));
+            }
+        }));
+    }
+}
+
+pub fn searching_index_8_2_5MB(c: &mut Criterion) {
+    let file = "data/WestburyLab.wikicorp.201004_5MB.txt";
+    let ast_vec = gen_a_lot_of_runs(file.to_string(), 1000);
+    let index = index::Index::index8(&rustsearch::helpers::Config {file_path : file.to_string(), indexno : "8".to_string()}).unwrap();
+    let mut depth = 0;
+    for depth_vec in ast_vec {
+        depth += 1;
+        c.bench_function(&format!("searching index 8_2 in file 5 MB, depth {}", depth), |b| b.iter(|| {
+            for ast in &depth_vec {
+                index.vec_to_articleset(index.evaluate_syntex_tree_binary_search(*ast.clone()));
+            }
+        }));
+    }
+}
+
+pub fn searching_index_8_3_5MB(c: &mut Criterion) {
+    let file = "data/WestburyLab.wikicorp.201004_5MB.txt";
+    let ast_vec = gen_a_lot_of_runs(file.to_string(), 1000);
+    let index = index::Index::index8(&rustsearch::helpers::Config {file_path : file.to_string(), indexno : "8".to_string()}).unwrap();
+    let mut depth = 0;
+    for depth_vec in ast_vec {
+        depth += 1;
+        c.bench_function(&format!("searching index 8_3 in file 5 MB, depth {}", depth), |b| b.iter(|| {
+            for ast in &depth_vec {
                 index.vec_to_articleset(index.evaluate_syntex_tree_hybrid(*ast.clone()));
             }
         }));
     }
 }
 
-
-
-
-
-criterion_group!(benches, searching_index_8_100_kb);
+criterion_group!(benches,indexing_7_file_5_mb, indexing_8_file_5_mb);
 criterion_main!(benches);
 

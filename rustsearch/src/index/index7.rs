@@ -68,7 +68,8 @@ impl Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
             for bit in 0..64 {
                 if (1<<(bit)) & bitvecs[i] > 0 {
                     if titles.len() <= i*64+bit {
-                        panic!("Error, looked-up word refers to an article with a larger index than there are titles: {}",i*64+bit)
+                        continue;
+                        panic!("Error, looked-up word refers to an article with a larger index ({}) than there are titles: {}. Bitvec len: {}, bit {}, bitvec: {:b},",i*64+bit, titles.len(), bitvecs.len(),bit, bitvecs[i])
                     }
                     output.push(titles[i*64+bit].clone());
                 }
@@ -79,19 +80,19 @@ impl Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
 
     pub fn boolean_search(&self, exp: &String) -> Option<Vec<String>>{
         match Expr::from_string(&exp) {
-            Ok(Expr(ExprData::HasNodes(node))) => self.bitvec_to_articleset(self.recursive_tree(node)),
+            Ok(Expr(ExprData::HasNodes(node))) => self.bitvec_to_articleset(self.evaluate_syntax_tree(node)),
             _ => None // Either an error or the expression has no nodes
         }
     }
 
-    fn recursive_tree(&self, node: AstNode)-> Vec<u64> {
+    pub fn evaluate_syntax_tree(&self, node: AstNode)-> Vec<u64> {
         match node{
-            AstNode::Invert(child) => self.recursive_tree(*child).iter().map(|bv| !bv).collect() ,
-            AstNode::Binary(BinaryOp::And,left_child,right_child) => self.recursive_tree(*left_child).iter()
-                                                                                                    .zip(self.recursive_tree(*right_child).iter())
+            AstNode::Invert(child) => self.evaluate_syntax_tree(*child).iter().map(|bv| !bv).collect() ,
+            AstNode::Binary(BinaryOp::And,left_child,right_child) => self.evaluate_syntax_tree(*left_child).iter()
+                                                                                                    .zip(self.evaluate_syntax_tree(*right_child).iter())
                                                                                                     .map(|(l,r)| l&r).collect(),
-            AstNode::Binary(BinaryOp::Or,left_child,right_child) => self.recursive_tree(*left_child).iter()
-                                                                                                    .zip(self.recursive_tree(*right_child).iter())
+            AstNode::Binary(BinaryOp::Or,left_child,right_child) => self.evaluate_syntax_tree(*left_child).iter()
+                                                                                                    .zip(self.evaluate_syntax_tree(*right_child).iter())
                                                                                                     .map(|(l,r)| l|r).collect(),
             AstNode::Name(word) => self.database.get(&word).unwrap_or(&vec![0;self.extra_variables.as_ref().unwrap().article_titles.len()]).to_vec()
         }
