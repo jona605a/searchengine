@@ -1,6 +1,5 @@
 #![allow(dead_code)]
 use std::collections::VecDeque;
-//use wasm_bindgen::prelude::*;
 
 const MAX_RECURSION: u16 = 20;
 const MAX_LEN: usize = 200;
