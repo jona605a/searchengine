@@ -1,13 +1,25 @@
 // https://bheisler.github.io/criterion.rs/book/getting_started.html
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{criterion_group, criterion_main, Criterion};
 use rand::SeedableRng;
 use rand::rngs::StdRng;
 
-use rustsearch::helpers::Config;
+use rustsearch::helpers::{Config, read_file_to_string};
 use rustsearch::index::boolean_tests::boolean_ast_gen;
 use rustsearch::index::{self, Index};
 use rustsearch::parsing::AstNode;
 
+
+// Timing reading files
+pub fn opening_and_reading_file(c: &mut Criterion) {
+    let file100kb = "data/WestburyLab.wikicorp.201004_100KB.txt";
+    let file5mb = "data/WestburyLab.wikicorp.201004_5MB.txt";
+    c.bench_function("Opening and reading file 100 KB", |b| b.iter(|| {
+        read_file_to_string(&file100kb.to_string()).unwrap();
+    }));
+    c.bench_function("Opening and reading file 5 MB", |b| b.iter(|| {
+        read_file_to_string(&file5mb.to_string()).unwrap();
+    }));
+}
 
 // Timing the indexing on different files
 pub fn indexing_8_file_100_kb(c: &mut Criterion) {
@@ -26,7 +38,6 @@ pub fn indexing_8_file_5_mb(c: &mut Criterion) {
 }
 
 
-
 // Timing search times
 
 fn gen_a_lot_of_runs(file_path: String, number : usize) -> Vec<Vec<Box<AstNode>>> {
@@ -41,7 +52,7 @@ fn gen_a_lot_of_runs(file_path: String, number : usize) -> Vec<Vec<Box<AstNode>>
     
     
     let boolean_queries = (1..=7).map(|depth| {
-        (1..=number).map(|i| boolean_ast_gen(&database_words, depth, &mut rng)).collect::<Vec<Box<AstNode>>>()
+        (1..=number).map(|_| boolean_ast_gen(&database_words, depth, &mut rng)).collect::<Vec<Box<AstNode>>>()
     }).collect::<Vec<Vec<Box<AstNode>>>>();
     
     boolean_queries
@@ -66,6 +77,6 @@ pub fn searching_index_8_100_kb(c: &mut Criterion) {
 
 
 
-criterion_group!(benches, searching_index_8_100_kb);
+criterion_group!(benches, opening_and_reading_file);
 criterion_main!(benches);
 

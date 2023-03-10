@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
-use crate::parsing::{AstNode, BinaryOp, Expr, ExprData};
-use rand::{Rng, SeedableRng};
+use crate::parsing::{AstNode, BinaryOp};
+use rand::Rng;
 use rand::rngs::StdRng;
 
 pub fn boolean_ast_gen(database_words: &Vec<&String>, depth: usize, rng: &mut StdRng) -> Box<AstNode> {
@@ -23,9 +23,12 @@ pub fn boolean_ast_gen(database_words: &Vec<&String>, depth: usize, rng: &mut St
 #[cfg(test)]
 mod bool_tests {
     use super::*;
+    use rand::SeedableRng;
     use std::collections::HashMap;
+
     use crate::index::Index;
     use crate::index::index8_0::Index8ExtraVariables;
+    use crate::parsing::{Expr, ExprData};
 
     fn setup_test8() -> Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
         let mut database: HashMap<String,Vec<usize>> = HashMap::new();
