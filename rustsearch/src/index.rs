@@ -8,7 +8,7 @@ pub mod boolean_tests;
 
 
 pub struct Index<T,G> {
-    database: T,
+    pub database: T,
     extra_variables: Option<G>,
 }
 

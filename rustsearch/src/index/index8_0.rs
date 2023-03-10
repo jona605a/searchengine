@@ -68,12 +68,12 @@ impl Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
         }
     }
 
-    fn evaluate_syntex_tree_naive(&self, node: AstNode)-> Vec<usize> {
+    pub fn evaluate_syntex_tree_naive(&self, node: AstNode)-> Vec<usize> {
         match node {
             AstNode::Invert(child) => self.invert(self.evaluate_syntex_tree_naive(*child)),
             AstNode::Binary(BinaryOp::And,left_child,right_child) => self.and(self.evaluate_syntex_tree_naive(*left_child),self.evaluate_syntex_tree_naive(*right_child)),
             AstNode::Binary(BinaryOp::Or,left_child,right_child) => self.or(self.evaluate_syntex_tree_naive(*left_child),self.evaluate_syntex_tree_naive(*right_child)),
-            AstNode::Name(word) => dbg!(self.database.get(&word).unwrap_or(&vec![]).to_vec()),
+            AstNode::Name(word) => self.database.get(&word).unwrap_or(&vec![]).to_vec(),
         }
     }
 

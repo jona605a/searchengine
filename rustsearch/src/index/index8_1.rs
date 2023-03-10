@@ -15,11 +15,11 @@ impl Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
         }
     }
 
-    fn evaluate_syntex_tree_demorgan(&self, node: AstNode)-> Vec<usize> {
-        match node{
+    pub fn evaluate_syntex_tree_demorgan(&self, node: AstNode)-> Vec<usize> {
+        match node {
             AstNode::Invert(child) => self.invert(self.evaluate_syntex_tree_demorgan(*child)),
             AstNode::Binary(BinaryOp::And,left_child,right_child) => 
-            match (*left_child, *right_child){
+            match (*left_child, *right_child) {
                 (AstNode::Invert(left_child),AstNode::Invert(right_child))=> self.invert(self.or(self.evaluate_syntex_tree_demorgan(*left_child),self.evaluate_syntex_tree_demorgan(*right_child))),
                 (left_child,right_child) => self.and(self.evaluate_syntex_tree_demorgan(left_child),self.evaluate_syntex_tree_demorgan(right_child)),
 
@@ -30,7 +30,7 @@ impl Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
                 (left_child,right_child) => self.or(self.evaluate_syntex_tree_demorgan(left_child),self.evaluate_syntex_tree_demorgan(right_child)),
 
             }
-            AstNode::Name(word) => dbg!(self.database.get(&word).unwrap_or(&vec![]).to_vec())
+            AstNode::Name(word) => self.database.get(&word).unwrap_or(&vec![]).to_vec()
         }
     }
 }

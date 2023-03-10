@@ -1,6 +1,6 @@
 pub mod index;
 pub mod helpers;
-mod parsing;
+pub mod parsing;
 
 #[inline]
 pub fn fibonacci(n: u64) -> u64 {

@@ -14,7 +14,7 @@ impl Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
         }
     }
 
-    fn evaluate_syntex_tree_binary_search(&self, node: AstNode)-> Vec<usize> {
+    pub fn evaluate_syntex_tree_binary_search(&self, node: AstNode)-> Vec<usize> {
         match node {
             AstNode::Invert(child) => self.invert(self.evaluate_syntex_tree_binary_search(*child)),
             AstNode::Binary(BinaryOp::And,left_child,right_child) => {
@@ -22,18 +22,18 @@ impl Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
                 let left_child = self.evaluate_syntex_tree_binary_search(*left_child);
                 let right_child = self.evaluate_syntex_tree_binary_search(*right_child);
 
-                if left_child.len() + right_child.len() > left_child.len().ilog2() as usize * right_child.len(){
+                if left_child.len() > 0 && left_child.len() + right_child.len() > left_child.len().ilog2() as usize * right_child.len() {
                     self.and_binary_search(right_child,left_child)
                 }
-                else if left_child.len() + right_child.len() > right_child.len().ilog2() as usize * left_child.len(){
+                else if right_child.len() > 0 && left_child.len() + right_child.len() > right_child.len().ilog2() as usize * left_child.len() {
                     self.and_binary_search(left_child,right_child)
                 }
-                else{
+                else {
                     self.and(left_child,right_child)
                 }
             },
             AstNode::Binary(BinaryOp::Or,left_child,right_child) => self.or(self.evaluate_syntex_tree_binary_search(*left_child),self.evaluate_syntex_tree_binary_search(*right_child)),
-            AstNode::Name(word) => dbg!(self.database.get(&word).unwrap_or(&vec![]).to_vec()),
+            AstNode::Name(word) => self.database.get(&word).unwrap_or(&vec![]).to_vec(),
         }
     }
 
