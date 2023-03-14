@@ -1,4 +1,5 @@
 // https://bheisler.github.io/criterion.rs/book/getting_started.html
+#![allow(non_snake_case)]
 use criterion::{criterion_group, criterion_main, Criterion};
 use rand::SeedableRng;
 use rand::rngs::StdRng;

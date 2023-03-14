@@ -69,7 +69,6 @@ impl Index<HashMap<String,Vec<u64>>,Index7ExtraVariables> {
                 if (1<<(bit)) & bitvecs[i] > 0 {
                     if titles.len() <= i*64+bit {
                         continue;
-                        panic!("Error, looked-up word refers to an article with a larger index ({}) than there are titles: {}. Bitvec len: {}, bit {}, bitvec: {:b},",i*64+bit, titles.len(), bitvecs.len(),bit, bitvecs[i])
                     }
                     output.push(titles[i*64+bit].clone());
                 }

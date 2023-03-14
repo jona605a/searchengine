@@ -7,17 +7,20 @@ use rustsearch::helpers::*;
 #[allow(unused_variables)]
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
 
-    let config = Config::build(&args).unwrap_or_else(|err| {
-        eprintln!("Problem parsing arguments: {err}");
-        process::exit(1);
-    });
+    word_freq()
 
-    println!("In file {}", config.file_path);
+    // let args: Vec<String> = env::args().collect();
 
-    let index = Index::index7(&config)
-        .expect("Config should have valid filename");
+    // let config = Config::build(&args).unwrap_or_else(|err| {
+    //     eprintln!("Problem parsing arguments: {err}");
+    //     process::exit(1);
+    // });
+
+    // println!("In file {}", config.file_path);
+
+    // let index = Index::index7(&config)
+    //     .expect("Config should have valid filename");
     //user_dialog(&index);
     
     // if let Err(e) = rustsearch::run(config) {

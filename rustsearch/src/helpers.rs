@@ -1,5 +1,8 @@
+use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
+
+use regex::Regex;
 
 pub struct Config {
     pub file_path: String,
@@ -26,6 +29,26 @@ pub fn read_file_to_string(file_path: &String) -> Result<String, Box<dyn Error>>
 }
 
 
+pub fn word_freq() {
+    let file5mb = "data/WestburyLab.wikicorp.201004_5MB.txt";
+    let file_contents = read_file_to_string(&file5mb.to_string()).unwrap();
+    // let re = Regex::new(r#"^[[:alpha:]/''`\-]"#).unwrap();
+    let re = Regex::new(r#"\. |\.\n|; |[\[\]\{\}\\\n\(\) ",:/=?!*]"#).unwrap();
+    let articles_iter = file_contents.split("---END.OF.DOCUMENT---")
+        .map(|a| {
+            let (title, contents) = a.trim().split_once(".\n").unwrap_or(("",""));
+            (title.to_string(), re.split(contents))
+        });
+    let mut word_freq: HashMap<String,usize> = HashMap::new();
+    for (title, contents) in articles_iter {
+        if title != "" {
+            for word in contents {
+                word_freq.entry(word.to_string()).and_modify(|c| *c+=1).or_insert(1);
+            }
+        }
+    }
+    println!("{:#?}",word_freq)
+}
 
 
 

@@ -32,10 +32,7 @@ impl Index<HashMap<String,Vec<usize>>,Index8ExtraVariables> {
         let mut article_titles: Vec<String> = Vec::new();
         
         for (title, contents) in articles_iter {
-            if title == ""{
-                ()
-            }
-            else{
+            if title != "" {
                 article_titles.push(title.to_string());
                 for word in contents {
                     let v = database.entry(word.to_string()).or_default();
