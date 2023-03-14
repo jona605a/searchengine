@@ -30,6 +30,7 @@ impl Index<HashMap<String, Vec<usize>>, Index7ExtraVariables> {
 
         let mut n_titles = 0;
         let mut v_len = 1;
+        let arch_bits = usize::BITS as usize;
 
         for (title, contents) in articles_iter {
             if title == "" {
@@ -37,7 +38,7 @@ impl Index<HashMap<String, Vec<usize>>, Index7ExtraVariables> {
             } else {
                 article_titles.push(title.to_string());
                 n_titles += 1;
-                if n_titles > v_len * 64 {
+                if n_titles > v_len * arch_bits {
                     // Extend the length of all vectors by 1
                     for v in database.values_mut() {
                         v.push(0);
@@ -49,8 +50,8 @@ impl Index<HashMap<String, Vec<usize>>, Index7ExtraVariables> {
                     while v.len() < v_len {
                         v.push(0)
                     }
-                    let title_bit: usize = 1 << ((n_titles - 1) % 64);
-                    v[(n_titles - 1) / 64] = v[(n_titles - 1) / 64] | title_bit;
+                    let title_bit: usize = 1 << ((n_titles - 1) % arch_bits);
+                    v[(n_titles - 1) / arch_bits] = v[(n_titles - 1) / arch_bits] | title_bit;
                 }
             }
         }
