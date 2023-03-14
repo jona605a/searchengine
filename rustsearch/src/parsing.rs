@@ -58,7 +58,7 @@ fn lex(s: &str) -> Result<Vec<Token>, &'static str> {
     let mut state = ParseState::AnyExpected;
     let mut tokens = Vec::new();
     let mut cur_name = String::new();
-    
+
     for c in s.chars() {
         if let ParseState::InSymbolBinOp(op) = state {
             state = ParseState::AnyExpected;
@@ -119,10 +119,6 @@ fn lex(s: &str) -> Result<Vec<Token>, &'static str> {
     }
     Ok(tokens)
 }
-
-
-
-
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 
@@ -273,7 +269,7 @@ impl Expr {
 #[cfg(test)]
 mod test {
     use super::*;
-    
+
     #[test]
     fn mytest() {
         dbg!(Expr::from_string("(a & b) | (c & d)").unwrap());
