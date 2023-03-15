@@ -7,16 +7,7 @@ pub mod index8_3;
 
 pub mod boolean_tests;
 
-
-pub struct Index<T,G> {
+pub struct Index<T, G> {
     pub database: T,
     extra_variables: Option<G>,
 }
-
-
-
-
-
-
-
-
