@@ -2,6 +2,7 @@
 use criterion::{criterion_group, criterion_main, Criterion};
 use rand::SeedableRng;
 use rand::rngs::StdRng;
+use std::fs;
 
 use rustsearch::helpers::{Config, read_file_to_string};
 use rustsearch::index::boolean_tests::boolean_ast_gen;
@@ -68,81 +69,120 @@ fn gen_a_lot_of_runs(file_path: String, number : usize) -> Vec<Vec<Box<AstNode>>
 }
 
 
-pub fn searching_index_7_0_5MB(c: &mut Criterion) {
-    let file = "data/WestburyLab.wikicorp.201004_5MB.txt";
-    let ast_vec = gen_a_lot_of_runs(file.to_string(), 1000);
-    let index = index::Index::index7(&rustsearch::helpers::Config {file_path : file.to_string(), indexno : "7".to_string()}).unwrap();
-    let mut depth = 0;
-    for depth_vec in ast_vec {
-        depth += 1;
-        c.bench_function(&format!("searching index 7_0 in file 5 MB, depth {}", depth), |b| b.iter(|| {
+pub fn searching_index_7_0(c: &mut Criterion) {
+    let files = fs::read_dir("../../data.nosync/");
+
+    for dir in files.unwrap() {
+        let file = dir.unwrap().path().into_os_string().into_string().unwrap();
+        let filesize = &file[46..file.len()-4];
+
+        let ast_vec = gen_a_lot_of_runs(file.clone(), 1000);
+        let index = index::Index::index7(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "7".to_string()}).unwrap();
+        let mut depth = 0;
+
+        for depth_vec in ast_vec {
+            depth += 1;
+            c.bench_function(&format!("searching index 7_0 in file {}, depth {}", filesize, depth), |b| b.iter(|| {
             for ast in &depth_vec {
                 index.bitvec_to_articleset(index.evaluate_syntax_tree(*ast.clone()));
             }
         }));
     }
+    } 
 }
 
-pub fn searching_index_8_0_5MB(c: &mut Criterion) {
-    let file = "data/WestburyLab.wikicorp.201004_5MB.txt";
-    let ast_vec = gen_a_lot_of_runs(file.to_string(), 1000);
-    let index = index::Index::index8(&rustsearch::helpers::Config {file_path : file.to_string(), indexno : "8".to_string()}).unwrap();
-    let mut depth = 0;
-    for depth_vec in ast_vec {
-        depth += 1;
-        c.bench_function(&format!("searching index 8_0 in file 5 MB, depth {}", depth), |b| b.iter(|| {
+pub fn searching_index_8_0(c: &mut Criterion) {
+    let files = fs::read_dir("../../data.nosync/");
+
+    for dir in files.unwrap() {
+        let file = dir.unwrap().path().into_os_string().into_string().unwrap();
+        let filesize = &file[46..file.len()-4];
+
+        let ast_vec = gen_a_lot_of_runs(file.clone(), 1000);
+        let index = index::Index::index8(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "7".to_string()}).unwrap();
+        let mut depth = 0;
+
+        for depth_vec in ast_vec {
+            depth += 1;
+            c.bench_function(&format!("searching index 8_0 in file {}, depth {}", filesize, depth), |b| b.iter(|| {
             for ast in &depth_vec {
                 index.vec_to_articleset(index.evaluate_syntex_tree_naive(*ast.clone()));
             }
         }));
     }
+    } 
 }
 
-pub fn searching_index_8_1_5MB(c: &mut Criterion) {
-    let file = "data/WestburyLab.wikicorp.201004_5MB.txt";
-    let ast_vec = gen_a_lot_of_runs(file.to_string(), 1000);
-    let index = index::Index::index8(&rustsearch::helpers::Config {file_path : file.to_string(), indexno : "8".to_string()}).unwrap();
-    let mut depth = 0;
-    for depth_vec in ast_vec {
-        depth += 1;
-        c.bench_function(&format!("searching index 8_1 in file 5 MB, depth {}", depth), |b| b.iter(|| {
+pub fn searching_index_8_1(c: &mut Criterion) {
+    let files = fs::read_dir("../../data.nosync/");
+
+    for dir in files.unwrap() {
+        let file = dir.unwrap().path().into_os_string().into_string().unwrap();
+        let filesize = &file[46..file.len()-4];
+
+        let ast_vec = gen_a_lot_of_runs(file.clone(), 1000);
+        let index = index::Index::index8(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "7".to_string()}).unwrap();
+        let mut depth = 0;
+
+        for depth_vec in ast_vec {
+            depth += 1;
+            c.bench_function(&format!("searching index 8_1 in file {}, depth {}", filesize, depth), |b| b.iter(|| {
             for ast in &depth_vec {
                 index.vec_to_articleset(index.evaluate_syntex_tree_demorgan(*ast.clone()));
             }
         }));
     }
+    } 
 }
 
-pub fn searching_index_8_2_5MB(c: &mut Criterion) {
-    let file = "data/WestburyLab.wikicorp.201004_5MB.txt";
-    let ast_vec = gen_a_lot_of_runs(file.to_string(), 1000);
-    let index = index::Index::index8(&rustsearch::helpers::Config {file_path : file.to_string(), indexno : "8".to_string()}).unwrap();
-    let mut depth = 0;
-    for depth_vec in ast_vec {
-        depth += 1;
-        c.bench_function(&format!("searching index 8_2 in file 5 MB, depth {}", depth), |b| b.iter(|| {
+pub fn searching_index_8_2(c: &mut Criterion) {
+    let files = fs::read_dir("../../data.nosync/");
+
+    for dir in files.unwrap() {
+        let file = dir.unwrap().path().into_os_string().into_string().unwrap();
+        let filesize = &file[46..file.len()-4];
+
+        let ast_vec = gen_a_lot_of_runs(file.clone(), 1000);
+        let index = index::Index::index8(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "7".to_string()}).unwrap();
+        let mut depth = 0;
+
+        for depth_vec in ast_vec {
+            depth += 1;
+            c.bench_function(&format!("searching index 8_2 in file {}, depth {}", filesize, depth), |b| b.iter(|| {
             for ast in &depth_vec {
                 index.vec_to_articleset(index.evaluate_syntex_tree_binary_search(*ast.clone()));
             }
         }));
     }
+    } 
 }
 
-pub fn searching_index_8_3_5MB(c: &mut Criterion) {
-    let file = "data/WestburyLab.wikicorp.201004_5MB.txt";
-    let ast_vec = gen_a_lot_of_runs(file.to_string(), 1000);
-    let index = index::Index::index8(&rustsearch::helpers::Config {file_path : file.to_string(), indexno : "8".to_string()}).unwrap();
-    let mut depth = 0;
-    for depth_vec in ast_vec {
-        depth += 1;
-        c.bench_function(&format!("searching index 8_3 in file 5 MB, depth {}", depth), |b| b.iter(|| {
+pub fn searching_index_8_3(c: &mut Criterion) {
+    let files = fs::read_dir("../../data.nosync/");
+
+    for dir in files.unwrap() {
+        let file = dir.unwrap().path().into_os_string().into_string().unwrap();
+        let filesize = &file[46..file.len()-4];
+        print!("{}", filesize);
+
+
+        let ast_vec = gen_a_lot_of_runs(file.clone(), 1000);
+        let index = index::Index::index8(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "7".to_string()}).unwrap();
+        let mut depth = 0;
+
+        for depth_vec in ast_vec {
+            depth += 1;
+            c.bench_function(&format!("searching index 8_3 in file {}, depth {}", filesize, depth), |b| b.iter(|| {
             for ast in &depth_vec {
                 index.vec_to_articleset(index.evaluate_syntex_tree_hybrid(*ast.clone()));
             }
         }));
     }
+    } 
 }
 
-criterion_group!(benches,indexing_7_file_5_mb, indexing_8_file_5_mb);
+
+
+criterion_group!(benches,searching_index_8_0,searching_index_8_1,searching_index_8_2,searching_index_8_3);
 criterion_main!(benches);
 
