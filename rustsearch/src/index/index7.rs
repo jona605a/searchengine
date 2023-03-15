@@ -62,12 +62,12 @@ impl Index<HashMap<String, Vec<usize>>, Index7ExtraVariables> {
         })
     }
 
-    pub fn bitvec_to_articleset(&self, bitvecs: Vec<usize>) -> Option<Vec<String>> {
+    pub fn bitvec_to_articlelist(&self, bitvecs: Vec<usize>) -> Vec<String> {
         let mut output: Vec<String> = Vec::new();
         let titles = &self.extra_variables.as_ref().unwrap().article_titles;
         for i in 0..bitvecs.len() {
             for bit in 0..64 {
-                if (1 << (bit)) & bitvecs[i] > 0 {
+                if (1 << bit) & bitvecs[i] > 0 {
                     if titles.len() <= i * 64 + bit {
                         continue;
                     }
@@ -75,13 +75,13 @@ impl Index<HashMap<String, Vec<usize>>, Index7ExtraVariables> {
                 }
             }
         }
-        Some(output)
+        output
     }
 
     pub fn boolean_search(&self, exp: &String) -> Option<Vec<String>> {
         match Expr::from_string(&exp) {
             Ok(Expr(ExprData::HasNodes(node))) => {
-                self.bitvec_to_articleset(self.evaluate_syntax_tree(node))
+                Some(self.bitvec_to_articlelist(self.evaluate_syntax_tree(node)))
             }
             _ => None, // Either an error or the expression has no nodes
         }
@@ -116,6 +116,7 @@ impl Index<HashMap<String, Vec<usize>>, Index7ExtraVariables> {
                         .unwrap()
                         .article_titles
                         .len()
+                        / usize::BITS as usize
                 ])
                 .to_vec(),
         }
@@ -160,20 +161,19 @@ mod tests {
         let bitvec: Vec<usize> = vec![0b0000_0011];
 
         let hs = vec!["article 0".to_string(), "article 1".to_string()];
-        assert_eq!(test_index.bitvec_to_articleset(bitvec).unwrap(), hs)
+        assert_eq!(test_index.bitvec_to_articlelist(bitvec), hs)
     }
 
-    #[should_panic]
     #[test]
-    fn bitvec_to_articleset_panics_when_out_of_range() {
+    fn bitvec_to_articlelist_return_empty_list_when_out_of_range() {
         let test_index = setup_test();
 
         let bitvec: Vec<usize> = vec![
-            0,
+            0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000,
             0b11111111_00000000_00000000_00000000_00000000_00000000_00000000_00000000,
         ];
 
-        test_index.bitvec_to_articleset(bitvec).unwrap();
+        assert_eq!(0, test_index.bitvec_to_articlelist(bitvec).len())
     }
 
     fn search_match(

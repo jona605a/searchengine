@@ -9,7 +9,7 @@ impl Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
     pub fn boolean_search_demorgan(&self, exp: &String) -> Option<Vec<String>> {
         match Expr::from_string(&exp) {
             Ok(Expr(ExprData::HasNodes(node))) => {
-                self.vec_to_articleset(self.evaluate_syntex_tree_demorgan(node))
+                Some(self.vec_to_articlelist(self.evaluate_syntex_tree_demorgan(node)))
             }
             _ => None, // Either an error or the expression has no nodes
         }
@@ -83,23 +83,23 @@ mod tests {
     }
 
     #[test]
-    fn bitvec_to_articleset_works() {
+    fn vec_to_articlelist_works() {
         let test_index = setup_test();
 
-        let bitvec: Vec<usize> = vec![0, 1];
+        let vec: Vec<usize> = vec![0, 1];
 
         let hs = vec!["article 0".to_string(), "article 1".to_string()];
-        assert_eq!(test_index.vec_to_articleset(bitvec).unwrap(), hs)
+        assert_eq!(test_index.vec_to_articlelist(vec), hs)
     }
 
     #[should_panic]
     #[test]
-    fn bitvec_to_articleset_panics_when_out_of_range() {
+    fn vec_to_articlelist_panics_when_out_of_range() {
         let test_index = setup_test();
 
-        let bitvec: Vec<usize> = vec![100000000];
+        let vec: Vec<usize> = vec![100000000];
 
-        test_index.vec_to_articleset(bitvec).unwrap();
+        test_index.vec_to_articlelist(vec);
     }
 
     fn search_match(

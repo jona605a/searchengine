@@ -85,7 +85,7 @@ pub fn searching_index_7_0(c: &mut Criterion) {
             depth += 1;
             c.bench_function(&format!("searching index 7_0 in file {}, depth {}", filesize, depth), |b| b.iter(|| {
             for ast in &depth_vec {
-                index.bitvec_to_articleset(index.evaluate_syntax_tree(*ast.clone()));
+                index.bitvec_to_articlelist(index.evaluate_syntax_tree(*ast.clone()));
             }
         }));
     }
@@ -107,7 +107,7 @@ pub fn searching_index_8_0(c: &mut Criterion) {
             depth += 1;
             c.bench_function(&format!("searching index 8_0 in file {}, depth {}", filesize, depth), |b| b.iter(|| {
             for ast in &depth_vec {
-                index.vec_to_articleset(index.evaluate_syntex_tree_naive(*ast.clone()));
+                index.vec_to_articlelist(index.evaluate_syntex_tree_naive(*ast.clone()));
             }
         }));
     }
@@ -129,7 +129,7 @@ pub fn searching_index_8_1(c: &mut Criterion) {
             depth += 1;
             c.bench_function(&format!("searching index 8_1 in file {}, depth {}", filesize, depth), |b| b.iter(|| {
             for ast in &depth_vec {
-                index.vec_to_articleset(index.evaluate_syntex_tree_demorgan(*ast.clone()));
+                index.vec_to_articlelist(index.evaluate_syntex_tree_demorgan(*ast.clone()));
             }
         }));
     }
@@ -151,7 +151,7 @@ pub fn searching_index_8_2(c: &mut Criterion) {
             depth += 1;
             c.bench_function(&format!("searching index 8_2 in file {}, depth {}", filesize, depth), |b| b.iter(|| {
             for ast in &depth_vec {
-                index.vec_to_articleset(index.evaluate_syntex_tree_binary_search(*ast.clone()));
+                index.vec_to_articlelist(index.evaluate_syntex_tree_binary_search(*ast.clone()));
             }
         }));
     }
@@ -175,7 +175,7 @@ pub fn searching_index_8_3(c: &mut Criterion) {
             depth += 1;
             c.bench_function(&format!("searching index 8_3 in file {}, depth {}", filesize, depth), |b| b.iter(|| {
             for ast in &depth_vec {
-                index.vec_to_articleset(index.evaluate_syntex_tree_hybrid(*ast.clone()));
+                index.vec_to_articlelist(index.evaluate_syntex_tree_hybrid(*ast.clone()));
             }
         }));
     }
