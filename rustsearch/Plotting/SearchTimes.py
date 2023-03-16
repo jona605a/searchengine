@@ -32,11 +32,8 @@ for folderName in os.listdir("../target/criterion"):
         data[filesize][(index,version)]["upper_bound"][depth-1] = estimates["mean"]["confidence_interval"]["upper_bound"]
     
     if folderName.split()[0] == "indexing":
-        print(folderName)
         index = int(folderName.split()[2])
-        print(index)
         filesize = int(folderName.split()[3][:-2])
-        print(filesize)
         
         if filesize not in data: 
             data[filesize] = {}
@@ -46,7 +43,6 @@ for folderName in os.listdir("../target/criterion"):
         f = open(f"../target/criterion/{folderName}/new/estimates.json")
         estimates = json.load(f)
 
-        print(data[filesize][index]["mean"],estimates["mean"]["point_estimate"])
         data[filesize][index]["mean"] = estimates["mean"]["point_estimate"]
         data[filesize][index]["lower_bound"] = estimates["mean"]["confidence_interval"]["lower_bound"]
         data[filesize][index]["upper_bound"] = estimates["mean"]["confidence_interval"]["upper_bound"]
@@ -95,7 +91,7 @@ def plot_depth(data, indexes):
 
 
 
-#plot_depth(data,booleanIndexes)
+plot_depth(data,booleanIndexes)
 
 def plot_filesize(data, indexes):
 
@@ -121,7 +117,7 @@ def plot_filesize(data, indexes):
         plt.legend(loc='best')
         plt.show()
 
-#plot_filesize(data,booleanIndexes)
+plot_filesize(data,booleanIndexes)
 
 def plot_depth_filesize(data, indexes):
     
@@ -167,7 +163,7 @@ def plot_depth_filesize(data, indexes):
     plt.show()
     
 
-#plot_depth_filesize(data,booleanIndexes)
+plot_depth_filesize(data,booleanIndexes)
 
 
 
