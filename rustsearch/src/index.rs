@@ -4,6 +4,7 @@ pub mod index8_0;
 pub mod index8_1;
 pub mod index8_2;
 pub mod index8_3;
+pub mod index9;
 
 pub mod boolean_tests;
 

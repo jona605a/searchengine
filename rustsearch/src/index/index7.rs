@@ -33,9 +33,7 @@ impl Index<HashMap<String, Vec<usize>>, Index7ExtraVariables> {
         let arch_bits = usize::BITS as usize;
 
         for (title, contents) in articles_iter {
-            if title == "" {
-                ()
-            } else {
+            if title != "" {
                 article_titles.push(title.to_string());
                 n_titles += 1;
                 if n_titles > v_len * arch_bits {
@@ -111,12 +109,15 @@ impl Index<HashMap<String, Vec<usize>>, Index7ExtraVariables> {
                 .get(&word)
                 .unwrap_or(&vec![
                     0;
-                    self.extra_variables
+                    (self
+                        .extra_variables
                         .as_ref()
                         .unwrap()
                         .article_titles
                         .len()
+                        - 1)
                         / usize::BITS as usize
+                        + 1
                 ])
                 .to_vec(),
         }
