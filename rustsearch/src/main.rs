@@ -1,5 +1,5 @@
 use std::collections::{HashMap, HashSet};
-use std::{env, io, process};
+use std::io;
 
 use rustsearch::helpers::*;
 use rustsearch::index::Index;
