@@ -24,28 +24,30 @@ pub fn opening_and_reading_file(c: &mut Criterion) {
 }
 
 // Timing the indexing on different files
-pub fn indexing_7_file_100_kb(c: &mut Criterion) {
-    c.bench_function("index 8 indexing 100 KB", |b| b.iter(|| {
-        index::Index::index7(&rustsearch::helpers::Config {file_path : "data/WestburyLab.wikicorp.201004_100KB.txt".to_string(), indexno : "7_0".to_string()})
-    }));
+pub fn indexing_7(c: &mut Criterion) {
+    let files = fs::read_dir("../../data.nosync/");
+
+    for dir in files.unwrap() {
+        let file = dir.unwrap().path().into_os_string().into_string().unwrap();
+        let filesize = &file[46..file.len()-4];
+
+        c.bench_function(&format!("indexing index 7 {}",filesize),|b| b.iter(|| {
+            index::Index::index8(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "7_0".to_string()})
+        }) );
+}
 }
 
-pub fn indexing_7_file_5_mb(c: &mut Criterion) {
-    c.bench_function("index 8 indexing 5 MB", |b| b.iter(|| {
-        index::Index::index7(&rustsearch::helpers::Config {file_path : "data/WestburyLab.wikicorp.201004_5MB.txt".to_string(), indexno : "7_0".to_string()})
-    }));
-}
+pub fn indexing_8(c: &mut Criterion) {
+    let files = fs::read_dir("../../data.nosync/");
 
-pub fn indexing_8_file_100_kb(c: &mut Criterion) {
-    c.bench_function("index 8 indexing 100 KB", |b| b.iter(|| {
-        index::Index::index8(&rustsearch::helpers::Config {file_path : "data/WestburyLab.wikicorp.201004_100KB.txt".to_string(), indexno : "8_0".to_string()})
-    }));
-}
+    for dir in files.unwrap() {
+        let file = dir.unwrap().path().into_os_string().into_string().unwrap();
+        let filesize = &file[46..file.len()-4];
 
-pub fn indexing_8_file_5_mb(c: &mut Criterion) {
-    c.bench_function("index 8 indexing 5 MB", |b| b.iter(|| {
-        index::Index::index8(&rustsearch::helpers::Config {file_path : "data/WestburyLab.wikicorp.201004_5MB.txt".to_string(), indexno : "8_0".to_string()})
-    }));
+        c.bench_function(&format!("indexing index 8 {}",filesize),|b| b.iter(|| {
+            index::Index::index8(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "8_0".to_string()})
+        }) );
+}
 }
 
 
@@ -184,6 +186,6 @@ pub fn searching_index_8_3(c: &mut Criterion) {
 
 
 
-criterion_group!(benches,searching_index_8_0,searching_index_8_1,searching_index_8_2,searching_index_8_3);
+criterion_group!(benches,indexing_7,indexing_8);
 criterion_main!(benches);
 

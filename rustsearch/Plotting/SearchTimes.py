@@ -9,6 +9,8 @@ data = {}
 
 last_filesize = None
 
+
+
 #Load data from folder criterion
 for folderName in os.listdir("../target/criterion"):
     
@@ -28,9 +30,47 @@ for folderName in os.listdir("../target/criterion"):
         data[filesize][(index,version)]["mean"][depth-1] = estimates["mean"]["point_estimate"]
         data[filesize][(index,version)]["lower_bound"][depth-1] = estimates["mean"]["confidence_interval"]["lower_bound"]
         data[filesize][(index,version)]["upper_bound"][depth-1] = estimates["mean"]["confidence_interval"]["upper_bound"]
+    
+    if folderName.split()[0] == "indexing":
+        index = int(folderName.split()[2])
+        filesize = int(folderName.split()[3][:-2])
+        
+        if filesize not in data: 
+            data[filesize] = {}
+        if index not in data[filesize]:
+            data[filesize][index] = {"mean": None, "lower_bound": None,"upper_bound": None}
+        
+        f = open(f"../target/criterion/{folderName}/new/estimates.json")
+        estimates = json.load(f)
 
-
+        data[filesize][index]["mean"] = estimates["mean"]["point_estimate"]
+        data[filesize][index]["lower_bound"] = estimates["mean"]["confidence_interval"]["lower_bound"]
+        data[filesize][index]["upper_bound"] = estimates["mean"]["confidence_interval"]["upper_bound"]
+        
 booleanIndexes = [(7,0),(8,0),(8,1),(8,2),(8,3)]
+
+def plot_indexing(data,indexes):
+    for index in indexes:
+        mean = np.array([])
+        upper_bound = np.array([])
+        lower_bound = np.array([])
+        for filesize in sorted(data.keys()):
+            mean = np.append(mean,data[filesize][index]["mean"])
+            upper_bound = np.append(upper_bound,data[filesize][index]["upper_bound"])
+            lower_bound = np.append(lower_bound,data[filesize][index]["lower_bound"])
+        
+        x = [1, 2, 5, 10, 20, 50, 100, 200, 400]
+        plt.fill_between(x,lower_bound,upper_bound,label = f"index{index}")
+                    
+        plt.xticks([1, 2, 5, 10, 20, 50, 100, 200, 400],["1MB", "2MB", "5MB", "10MB", "20MB", "50MB", "100MB", "200MB","400MB"])
+        plt.title(f"Indexing Time over filesize.")
+        plt.xlabel("Filesize")
+        plt.ylabel("Searching Time")
+        plt.legend(loc='best')
+    plt.show()
+
+plot_indexing(data,[7,8])
+            
 
 def plot_depth(data, indexes):
     for filesize in sorted(data.keys()):
@@ -41,7 +81,6 @@ def plot_depth(data, indexes):
             y2 = data[filesize][index]["lower_bound"]
             plt.fill_between(x,y1,y2)
             
-            #plt.fill_between(data[filesize][index]["mean"],data[filesize][index]["lower_bound"],data[filesize][index]["upper_bound"])
         
         plt.xticks(range(0,7),labels=range(1,8))
         plt.title(f"Searching Time over depth of query filesize:{filesize} MB")
