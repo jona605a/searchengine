@@ -1,5 +1,5 @@
 use std::collections::{HashMap, HashSet};
-use std::io;
+use std::{env, io, process};
 
 use rustsearch::helpers::*;
 use rustsearch::index::Index;
@@ -7,25 +7,24 @@ use rustsearch::index::Index;
 #[allow(unused_variables)]
 
 fn main() {
-    word_freq()
+    // word_freq()
 
-    // let args: Vec<String> = env::args().collect();
+    let args: Vec<String> = env::args().collect();
 
-    // let config = Config::build(&args).unwrap_or_else(|err| {
-    //     eprintln!("Problem parsing arguments: {err}");
-    //     process::exit(1);
-    // });
+    let config = Config::build(&args).unwrap_or_else(|err| {
+        eprintln!("Problem parsing arguments: {err}");
+        process::exit(1);
+    });
 
-    // println!("In file {}", config.file_path);
+    
 
-    // let index = Index::index7(&config)
-    //     .expect("Config should have valid filename");
-    //user_dialog(&index);
-
-    // if let Err(e) = rustsearch::run(config) {
-    //     eprintln!("Application error: {e}");
-    //     process::exit(1);
-    // }
+    if config.indexno == "7" {
+        let index = Index::index7(&config).expect("Config should have valid filename");
+    } else if config.indexno == "8" {
+        let index = Index::index8(&config).expect("Config should have valid filename");
+    } else {
+        panic!("Invalid index number given. Accepts the following: 7, 8.");
+    }
 }
 
 #[allow(dead_code)]
