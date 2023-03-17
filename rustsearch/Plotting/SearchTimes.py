@@ -47,7 +47,9 @@ for folderName in os.listdir("../target/criterion"):
         data[filesize][index]["lower_bound"] = estimates["mean"]["confidence_interval"]["lower_bound"]
         data[filesize][index]["upper_bound"] = estimates["mean"]["confidence_interval"]["upper_bound"]
         
-booleanIndexes = [(7,0),(8,0),(8,1),(8,2),(8,3)]
+booleanIndexes = [(7,0),(8,0),(8,1),(8,2),(8,3),(8,4)]
+#booleanIndexes = [(8,0),(8,1),(8,2),(8,3)]
+
 
 def plot_indexing(data,indexes):
     for index in indexes:
