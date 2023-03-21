@@ -16,12 +16,25 @@ fn main() {
         process::exit(1);
     });
 
-    
+    println!(
+        "Opening and indexing file {} with index {}",
+        config.file_path, config.indexno
+    );
 
     if config.indexno == "7" {
+        
         let index = Index::index7(&config).expect("Config should have valid filename");
+        println!("#### Rust indexing done! ####");
+        index.boolean_search(&"(boot or shoe) and not sandal".to_string());
+        println!("#### Rust searching done! ####");
+
     } else if config.indexno == "8" {
+
         let index = Index::index8(&config).expect("Config should have valid filename");
+        println!("#### Rust indexing done! ####");
+        index.boolean_search_articles_to_bitvecs(&"(boot or shoe) and not sandal".to_string());
+        println!("#### Rust searching done! ####");
+        
     } else {
         panic!("Invalid index number given. Accepts the following: 7, 8.");
     }
