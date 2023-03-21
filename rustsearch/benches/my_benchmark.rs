@@ -184,8 +184,30 @@ pub fn searching_index_8_3(c: &mut Criterion) {
     } 
 }
 
+pub fn searching_index_8_4(c: &mut Criterion) {
+    let files = fs::read_dir("../../data.nosync/");
+
+    for dir in files.unwrap() {
+        let file = dir.unwrap().path().into_os_string().into_string().unwrap();
+        let filesize = &file[46..file.len()-4];
+
+        let ast_vec = gen_a_lot_of_runs(file.clone(), 1000);
+        let index = index::Index::index8(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "7".to_string()}).unwrap();
+        let mut depth = 0;
+
+        for depth_vec in ast_vec {
+            depth += 1;
+            c.bench_function(&format!("searching index 8_4 in file {}, depth {}", filesize, depth), |b| b.iter(|| {
+            for ast in &depth_vec {
+                index.bitvec_to_articlelist(index.evaluate_syntax_tree_convert_to_bitvecs(*ast.clone()));
+            }
+        }));
+    }
+    } 
+}
 
 
-criterion_group!(benches,indexing_7,indexing_8);
+
+criterion_group!(benches,searching_index_8_4);
 criterion_main!(benches);
 
