@@ -35,10 +35,14 @@ pub struct Trie {
 }
 
 impl Trie {
-    pub fn new()
+    pub fn new() -> Trie {
+        Trie {
+            root: TrieNode::new(),
+            n_titles: 0,
+        }
+    }
 
-
-    pub fn insert(&mut self, string_val: String, article_number: usize) {
+    pub fn insert(&mut self, string_val: &String, article_number: usize) {
         let mut current = &mut self.root;
         for c in string_val.chars() {
             if !current.children_map.contains_key(&c) {
@@ -50,22 +54,25 @@ impl Trie {
         if current.article_vec.is_none() {
             current.article_vec = Some(vec![]);
         }
-        current.article_vec.as_mut().unwrap().push(article_number);
+        let v = current.article_vec.as_mut().unwrap();
+        if v[v.len()-1] != article_number {
+            v.push(article_number)
+        }
     }
 
-    pub fn find(&self, string_val: String) -> &Option<Vec<usize>> {
+    pub fn find(&self, string_val: &String) -> Option<Vec<usize>> {
         let mut current = &self.root;
         for c in string_val.chars() {
             if !current.children_map.contains_key(&c) {
-                return &None;
+                return None;
             }
             current = current.children_map.get(&c).unwrap();
         }
         // At the end of the string, the last current node is final
-        &current.article_vec
+        Some(self.to_bitvec(&current.article_vec))
     }
 
-    pub fn find_prefix(&self, string_val: String) -> Option<Vec<usize>> {
+    pub fn find_prefix(&self, string_val: &String) -> Option<Vec<usize>> {
         let mut current = &self.root;
         for c in string_val.chars() {
             if !current.children_map.contains_key(&c) {
@@ -76,7 +83,7 @@ impl Trie {
         Some(self.get_subtree(current).to_vec())
     }
 
-    fn get_subtree<'a>(&'a self, node: &'a TrieNode) -> Vec<usize> {
+    fn get_subtree(&self, node: &TrieNode) -> Vec<usize> {
         node.children_map.values().fold(
             self.to_bitvec(&node.article_vec),
             |acc: Vec<usize>, child| {
@@ -105,10 +112,8 @@ impl Trie {
 }
 
 impl Index<Trie, Index9ExtraVariables> {
-    pub fn index9(
-        config: &Config,
-    ) -> Result<Index<Trie, Index9ExtraVariables>, Box<dyn Error>> {
-        let mut database = ;
+    pub fn index9(config: &Config) -> Result<Index<Trie, Index9ExtraVariables>, Box<dyn Error>> {
+        let mut database = Trie::new();
 
         let filecontents = read_file_to_string(&config.file_path)?;
         let re = Regex::new(r"\. |\.\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
@@ -126,10 +131,7 @@ impl Index<Trie, Index9ExtraVariables> {
             if title != "" {
                 article_titles.push(title.to_string());
                 for word in contents {
-                    let v = database.entry(word.to_string()).or_default();
-                    if (v.len() == 0) || (v[v.len() - 1] != article_titles.len() - 1) {
-                        v.push(article_titles.len() - 1)
-                    }
+                    database.insert(&word.to_string(), article_titles.len() - 1);
                 }
             }
         }
