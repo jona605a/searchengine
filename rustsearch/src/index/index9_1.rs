@@ -32,7 +32,7 @@ pub struct Trie {
 }
 
 impl Trie {
-    pub fn insert(&mut self, string_val: String, article_number: usize) {
+    pub fn insert(&mut self, string_val: &String, article_number: usize) {
         let mut current = &mut self.root;
         for c in string_val.chars() {
             if !current.children_map.contains_key(&c) {
@@ -44,7 +44,10 @@ impl Trie {
         if current.article_vec.is_none() {
             current.article_vec = Some(vec![]);
         }
-        current.article_vec.unwrap().push(article_number);
+        let v = current.article_vec.as_mut().unwrap();
+        if v[v.len()-1] != article_number {
+            v.push(article_number)
+        }
     }
     
     
@@ -106,8 +109,8 @@ impl Trie {
                 self.to_bitvec(articles),|acc:Vec<usize> ,child:&TrieNode| (self.or_bitvec(acc, self.get_subtree(child)))),
             None => {
                 let mut children = node.children_map.values();
-                let firstChild = children.next().unwrap();
-                children.fold(self.get_subtree(firstChild),|acc,child| self.or_bitvec(acc, self.get_subtree(child)))
+                let first_child = children.next().unwrap();
+                children.fold(self.get_subtree(first_child),|acc,child| self.or_bitvec(acc, self.get_subtree(child)))
             }
         }
     }
