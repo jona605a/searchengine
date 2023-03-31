@@ -52,7 +52,7 @@ impl Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
         let mut output: Vec<String> = Vec::new();
         let titles = &self.extra_variables.as_ref().unwrap().article_titles;
         for i in vec {
-            output.push(titles[i as usize].clone());
+            output.push(titles[i].clone());
         }
         output
     }

@@ -141,4 +141,23 @@ impl Index<Trie, Index9ExtraVariables> {
             extra_variables: Some(Index9ExtraVariables { article_titles }),
         })
     }
+
+    
+
+    // Copied from index7
+    pub fn bitvec_to_articlelist(&self, bitvecs: Vec<usize>) -> Vec<String> {
+        let mut output: Vec<String> = Vec::new();
+        let titles = &self.extra_variables.as_ref().unwrap().article_titles;
+        for i in 0..bitvecs.len() {
+            for bit in 0..64 {
+                if (1 << bit) & bitvecs[i] > 0 {
+                    if titles.len() <= i * 64 + bit {
+                        continue;
+                    }
+                    output.push(titles[i * 64 + bit].clone());
+                }
+            }
+        }
+        output
+    }
 }
