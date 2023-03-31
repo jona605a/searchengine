@@ -13,12 +13,15 @@ pub struct Index9ExtraVariables {
 
 pub struct TrieNode {
     pub children_map: HashMap<char, TrieNode>,
-    pub article_vec: Option<Vec<usize>>
+    pub article_vec: Option<Vec<usize>>,
 }
 
 impl TrieNode {
     pub fn new() -> TrieNode {
-        TrieNode { children_map: HashMap::new(), article_vec: None }
+        TrieNode {
+            children_map: HashMap::new(),
+            article_vec: None,
+        }
     }
 
     pub fn insert_child(&mut self, char: char) {
@@ -27,11 +30,14 @@ impl TrieNode {
 }
 
 pub struct Trie {
-    root: TrieNode, 
-    n_titles: usize
+    root: TrieNode,
+    n_titles: usize,
 }
 
 impl Trie {
+    pub fn new()
+
+
     pub fn insert(&mut self, string_val: String, article_number: usize) {
         let mut current = &mut self.root;
         for c in string_val.chars() {
@@ -44,10 +50,9 @@ impl Trie {
         if current.article_vec.is_none() {
             current.article_vec = Some(vec![]);
         }
-        current.article_vec.unwrap().push(article_number);
+        current.article_vec.as_mut().unwrap().push(article_number);
     }
-    
-    
+
     pub fn find(&self, string_val: String) -> &Option<Vec<usize>> {
         let mut current = &self.root;
         for c in string_val.chars() {
@@ -71,31 +76,26 @@ impl Trie {
         Some(self.get_subtree(current).to_vec())
     }
 
-    // fn get_subtree<'a>(&'a self, node: &'a TrieNode) -> &Vec<usize> {
-    //     node.children_map.values().fold(self.to_bitvec(&node.article_vec), 
-    //         |acc: &Option<Vec<usize>>, child| 
-    //             &Some(self.get_subtree(child).iter()
-    //             .zip(
-    //                 acc.expect("Vi tog fejl2").iter()
-    //             )
-    //             .map(|(l, r)| l | r)
-    //             .collect())
-    //         ).as_ref().unwrap()
-    // }
-
-    fn get_subtree(&self, node: &TrieNode) -> Vec<usize> {
-
-        for child in node.children_map.values() {
-            self.get_subtree(child);
-        }
-        vec![0]
+    fn get_subtree<'a>(&'a self, node: &'a TrieNode) -> Vec<usize> {
+        node.children_map.values().fold(
+            self.to_bitvec(&node.article_vec),
+            |acc: Vec<usize>, child| {
+                self.get_subtree(child)
+                    .iter()
+                    .zip(acc.iter())
+                    .map(|(l, r)| l | r)
+                    .collect()
+            },
+        )
     }
-    
-    fn to_bitvec(&self, articlevec: &Vec<usize>) -> Vec<usize> {
+
+    fn to_bitvec(&self, articlevec: &Option<Vec<usize>>) -> Vec<usize> {
         let arch_bits = usize::BITS as usize;
         let mut bitvec: Vec<usize> = vec![0; (self.n_titles - 1) / arch_bits + 1];
-
-        for n in articlevec {
+        if articlevec.is_none() {
+            return bitvec;
+        }
+        for n in articlevec.as_ref().unwrap() {
             let title_bit: usize = 1 << (n % arch_bits);
             bitvec[n / arch_bits] = bitvec[n / arch_bits] | title_bit;
         }
@@ -104,13 +104,11 @@ impl Trie {
     }
 }
 
-
-#[allow(dead_code)]
-impl Index<HashMap<String, Vec<usize>>, Index9ExtraVariables> {
+impl Index<Trie, Index9ExtraVariables> {
     pub fn index9(
         config: &Config,
-    ) -> Result<Index<HashMap<String, Vec<usize>>, Index9ExtraVariables>, Box<dyn Error>> {
-        let mut database: HashMap<String, Vec<usize>> = HashMap::new();
+    ) -> Result<Index<Trie, Index9ExtraVariables>, Box<dyn Error>> {
+        let mut database = ;
 
         let filecontents = read_file_to_string(&config.file_path)?;
         let re = Regex::new(r"\. |\.\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
