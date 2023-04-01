@@ -4,7 +4,6 @@ use std::error::Error;
 
 use crate::helpers::*;
 use crate::index::Index;
-// use crate::parsing::*;
 
 #[derive(Debug)]
 pub struct Index9ExtraVariables {
@@ -30,8 +29,8 @@ impl TrieNode {
 }
 
 pub struct Trie {
-    root: TrieNode,
-    n_titles: usize,
+    pub root: TrieNode,
+    pub n_titles: usize,
 }
 
 impl Trie {
@@ -55,7 +54,7 @@ impl Trie {
             current.article_vec = Some(vec![]);
         }
         let v = current.article_vec.as_mut().unwrap();
-        if v[v.len()-1] != article_number {
+        if v.len() == 0 || v[v.len() - 1] != article_number {
             v.push(article_number)
         }
     }
@@ -63,6 +62,10 @@ impl Trie {
     pub fn find(&self, string_val: &String) -> Option<Vec<usize>> {
         let mut current = &self.root;
         for c in string_val.chars() {
+            if c == '*' {
+                // When reading a *, return the subtree from this node
+                return Some(self.get_subtree(current).to_vec());
+            }
             if !current.children_map.contains_key(&c) {
                 return None;
             }
@@ -70,17 +73,6 @@ impl Trie {
         }
         // At the end of the string, the last current node is final
         Some(self.to_bitvec(&current.article_vec))
-    }
-
-    pub fn find_prefix(&self, string_val: &String) -> Option<Vec<usize>> {
-        let mut current = &self.root;
-        for c in string_val.chars() {
-            if !current.children_map.contains_key(&c) {
-                return None;
-            }
-            current = current.children_map.get(&c).unwrap();
-        }
-        Some(self.get_subtree(current).to_vec())
     }
 
     fn get_subtree(&self, node: &TrieNode) -> Vec<usize> {
@@ -131,10 +123,12 @@ impl Index<Trie, Index9ExtraVariables> {
             if title != "" {
                 article_titles.push(title.to_string());
                 for word in contents {
-                    database.insert(&word.to_string(), article_titles.len() - 1);
+                    database.insert(&word.to_string().to_lowercase(), article_titles.len() - 1);
                 }
             }
         }
+
+        database.n_titles = article_titles.len();
 
         Ok(Index {
             database,
@@ -142,7 +136,9 @@ impl Index<Trie, Index9ExtraVariables> {
         })
     }
 
-    
+    pub fn trie_search(&self, query: &String) -> Option<Vec<String>> {
+        Some(self.bitvec_to_articlelist(self.database.find(query)?))
+    }
 
     // Copied from index7
     pub fn bitvec_to_articlelist(&self, bitvecs: Vec<usize>) -> Vec<String> {
@@ -159,5 +155,104 @@ impl Index<Trie, Index9ExtraVariables> {
             }
         }
         output
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashSet;
+
+    use super::*;
+
+    fn setup_real() -> Index<Trie, Index9ExtraVariables> {
+        let config = Config::build(&[
+            "".to_string(),
+            "data/WestburyLab.wikicorp.201004_100KB.txt".to_string(),
+            "9_0".to_string(),
+        ])
+        .unwrap();
+        Index::index9(&config).unwrap()
+    }
+
+    fn insert_list_to_trie(trie: &mut Trie, word: &String, a_list: Vec<usize>) {
+        for a in a_list {
+            trie.insert(word, a)
+        }
+    }
+
+    fn setup_test() -> Index<Trie, Index9ExtraVariables> {
+        let mut database = Trie::new();
+        database.insert(&"word1".to_string(), 0);
+        insert_list_to_trie(&mut database, &"word1".to_string(), vec![0]);
+        insert_list_to_trie(&mut database, &"word2".to_string(), vec![0, 1, 2, 3]);
+        insert_list_to_trie(&mut database, &"world".to_string(), vec![0, 2, 4, 6, 7]);
+        insert_list_to_trie(&mut database, &"would".to_string(), vec![99, 5, 6, 7]);
+        insert_list_to_trie(&mut database, &"boob".to_string() , vec![0, 1, 2, 3, 4, 5, 6, 7]);
+        insert_list_to_trie(&mut database, &"booby".to_string(), vec![0, 5, 6, 7]);
+        insert_list_to_trie(&mut database, &"booty".to_string(), vec![1, 2, 3]);
+        let mut article_titles: Vec<String> = Vec::new();
+        for i in 0..100 {
+            article_titles.push(format!("article {}", i).to_string());
+        }
+        database.n_titles = 100;
+        Index {
+            database,
+            extra_variables: Some(Index9ExtraVariables { article_titles }),
+        }
+    }
+
+    fn search_match(index: &Index<Trie, Index9ExtraVariables>, query: &str, titles: Vec<&str>) {
+        dbg!(&query.to_string());
+        let index_result: HashSet<String> = HashSet::from_iter(
+            index
+                .trie_search(&query.to_string())
+                .unwrap_or(Vec::default()),
+        );
+        assert_eq!(
+            index_result,
+            HashSet::from_iter(titles.iter().map(|s| s.to_string()))
+        )
+    }
+
+    #[test]
+    fn find_a_word() {
+        let index = setup_test();
+        search_match(&index, "word1", vec!["article 0"]);
+    }
+
+    #[test]
+    fn find_a_prefix1() {
+        let index = setup_test();
+        search_match(&index, "word*", vec!["article 0", "article 1", "article 2", "article 3"]);
+    }
+
+    #[test]
+    fn find_a_prefix2() {
+        let index = setup_test();
+        search_match(&index, "wo*", vec!["article 0", "article 1", "article 2", "article 3", "article 4", "article 5", "article 6", "article 7", "article 99"]);
+    }
+
+    #[test]
+    fn find_a_prefix3() {
+        let index = setup_test();
+        search_match(&index, "boo*", vec!["article 0", "article 1", "article 2", "article 3", "article 4", "article 5", "article 6", "article 7"]);
+    }
+
+    #[test]
+    fn find_prefix_real1() {
+        let index = setup_real();
+        search_match(&index, "start*", vec!["Autism", "Anarchism"]);
+    }
+
+    #[test]
+    fn find_prefix_real2() {
+        let index = setup_real();
+        search_match(&index, "let*", vec!["A", "Anarchism"]);
+    }
+
+    #[test]
+    fn find_prefix_real3() {
+        let index = setup_real();
+        search_match(&index, "a*", vec!["A", "Anarchism", "Autism", "Albedo"]);
     }
 }
