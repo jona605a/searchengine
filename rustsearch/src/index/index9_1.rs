@@ -62,6 +62,7 @@ impl Trie {
     
     pub fn find(&self, string_val: &String) -> Option<Vec<usize>> {
         let mut current = &self.root;
+
         for c in string_val.chars() {
             if c == '*' {
                 // When reading a *, return the subtree from this node
@@ -136,7 +137,7 @@ impl Index<Trie, Index9ExtraVariables> {
             if title != "" {
                 article_titles.push(title.to_string());
                 for word in contents {
-                    database.insert(&word.to_string().to_lowercase(), article_titles.len() - 1);
+                    database.insert(&word.to_string(), article_titles.len() - 1);
                 }
             }
         }
@@ -172,8 +173,8 @@ impl Index<Trie, Index9ExtraVariables> {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
-    use crate::helpers::*;
+    use std::{collections::HashSet, fs, iter::zip};
+    use crate::{helpers::*, index::{gen_query::{gen_a_lot_of_runs_bool, gen_a_lot_of_runs_tries}, self}};
 
     use super::*;
 
@@ -308,5 +309,34 @@ mod tests {
     fn find_prefix_real4() {
         let index = setup_real();
         search_match(&index, ". *", vec![]);
+    }
+
+    #[test]
+    fn check_index9_and_index8_get_the_same_results() {
+        let files = fs::read_dir("../../data.nosync/");
+
+        for dir in files.unwrap() {
+            let file = dir.unwrap().path().into_os_string().into_string().unwrap();
+            let filesize = &file[46..file.len()-4];
+
+            if (filesize != "1MB") & (filesize != "2MB"){
+                continue;
+            }
+
+            let ast_vec = gen_a_lot_of_runs_bool(file.clone(), 10);
+            let word_vec = gen_a_lot_of_runs_tries(file.clone(), 10,false);
+
+            let index8 = index::Index::index8(&Config {file_path : file.clone(), indexno : "8".to_string()}).unwrap();
+            let index9 = index::Index::index9(&Config {file_path : file.clone(), indexno : "9".to_string()}).unwrap();
+
+            let depth_vec = &ast_vec[0];
+
+            for (ast,word) in zip(depth_vec,word_vec)  {
+                    let articleList8_0 = index8.vec_to_articlelist(index8.evaluate_syntex_tree_naive(*ast.clone()));
+                    let articleList9_1 = index9.trie_search_1(&word).unwrap_or([].to_vec());
+                    assert_eq!(articleList9_1,articleList8_0);
+                };
+
+        }
     }
 }

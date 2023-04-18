@@ -76,7 +76,7 @@ pub fn gen_a_lot_of_runs_bool(file_path: String, number : usize) -> Vec<Vec<Box<
     database_words.sort();
     
     
-    let boolean_queries = (1..=7).map(|depth| {
+    let boolean_queries = (0..=7).map(|depth| {
         (1..=number).map(|_| boolean_ast_gen(&database_words, depth, &mut rng)).collect::<Vec<Box<AstNode>>>()
     }).collect::<Vec<Vec<Box<AstNode>>>>();
     
@@ -105,6 +105,8 @@ mod bool_tests {
     use super::*;
     use rand::SeedableRng;
     use std::collections::HashMap;
+    use std::fs;
+    use std::iter::zip;
 
     use crate::index::index8_0::Index8ExtraVariables;
     use crate::index::Index;
@@ -183,5 +185,38 @@ mod bool_tests {
         assert_eq!(result2, "wor*");
         assert_eq!(result3, "wor*");
         assert_eq!(result4, "wor*");
+    }
+
+    fn astnode_to_string(ast:Box<AstNode>) -> String{
+        return match *ast{
+            AstNode::Name(s) => s,
+            AstNode => "AstNode does not have depth 0".to_string()
+        }
+    }
+
+    #[test]
+    fn gen_a_lot_of_runs_bool_and_gen_a_lot_of_runs_tries_gives_the_same_words(){
+        let files = fs::read_dir("../../data.nosync/");
+
+        for dir in files.unwrap() {
+            let file = dir.unwrap().path().into_os_string().into_string().unwrap();
+            let filesize = &file[46..file.len()-4];
+
+            if (filesize != "1MB") & (filesize != "2MB"){
+                continue;
+            }
+
+            let ast_vec = gen_a_lot_of_runs_bool(file.clone(), 10);
+            let word_vec = gen_a_lot_of_runs_tries(file.clone(), 10,false);
+
+            let depth_vec = &ast_vec[0];
+
+            for (ast,word) in zip(depth_vec,word_vec)  {
+                    print!("THE WORD THAT FAILED IS {}\n", &word);
+                    assert_eq!(astnode_to_string(ast.clone()),word);
+                };
+
+        }
+
     }
 }

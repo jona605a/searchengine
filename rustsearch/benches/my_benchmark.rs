@@ -233,4 +233,3 @@ pub fn prefix_search_index_9_1(c: &mut Criterion) {
 
 criterion_group!(benches,prefix_search_index_9_1);
 criterion_main!(benches);
-
