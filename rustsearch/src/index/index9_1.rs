@@ -65,6 +65,7 @@ impl Trie {
         for c in string_val.chars() {
             if c == '*' {
                 // When reading a *, return the subtree from this node
+                eprintln!("Start in word");
                 return Some(self.get_subtree_match(current).to_vec());
             }
             if !current.children_map.contains_key(&c) {
@@ -300,5 +301,11 @@ mod tests {
     fn find_prefix_real3() {
         let index = setup_real();
         search_match(&index, "a*", vec!["A", "Anarchism", "Autism", "Albedo"]);
+    }
+
+    #[test]
+    fn find_prefix_real4() {
+        let index = setup_real();
+        search_match(&index, ". *", vec![]);
     }
 }
