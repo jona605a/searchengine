@@ -44,14 +44,43 @@ for folderName in os.listdir("../target/criterion"):
         data[filesize][index]["mean"] = estimates["mean"]["point_estimate"]
         data[filesize][index]["lower_bound"] = estimates["mean"]["confidence_interval"]["lower_bound"]
         data[filesize][index]["upper_bound"] = estimates["mean"]["confidence_interval"]["upper_bound"]
+    
+    if folderName.split()[0] == "prefix":
+        index = folderName.split()[2]
+        filesize = int(folderName.split()[5][:-2])
+        
+        if filesize not in data: 
+            data[filesize] = {}
+        if index not in data[filesize]:
+            data[filesize][index] = {"mean": None, "lower_bound": None,"upper_bound": None}
+        
+        f = open(f"../target/criterion/{folderName}/new/estimates.json")
+        estimates = json.load(f)
+
+        data[filesize][index]["mean"] = estimates["mean"]["point_estimate"]
+        data[filesize][index]["lower_bound"] = estimates["mean"]["confidence_interval"]["lower_bound"]
+        data[filesize][index]["upper_bound"] = estimates["mean"]["confidence_interval"]["upper_bound"]
+
+    if folderName.split()[0] == "Find":
+        index = folderName.split()[2]
+        filesize = int(folderName.split()[3][:-2])
+        
+        if filesize not in data: 
+            data[filesize] = {}
+        if f"Find{index}" not in data[filesize]:
+            data[filesize][f"Find{index}"] = {"mean": None, "lower_bound": None,"upper_bound": None}
+        
+        f = open(f"../target/criterion/{folderName}/new/estimates.json")
+        estimates = json.load(f)
+
+        data[filesize][f"Find{index}"]["mean"] = estimates["mean"]["point_estimate"]
+        data[filesize][f"Find{index}"]["lower_bound"] = estimates["mean"]["confidence_interval"]["lower_bound"]
+        data[filesize][f"Find{index}"]["upper_bound"] = estimates["mean"]["confidence_interval"]["upper_bound"]
         
 booleanIndexes = [(7,0),(8,0),(8,1),(8,2),(8,3),(8,4)]
-#booleanIndexes = [(8,0),(8,1),(8,2),(8,3)]
-
 
 def plot_indexing(data,indexes):
     for index in indexes:
-        print(index)
         mean = np.array([])
         upper_bound = np.array([])
         lower_bound = np.array([])
@@ -76,10 +105,10 @@ def plot_indexing(data,indexes):
         plt.legend(loc='best')
     plt.show()
 
-plot_indexing(data,[7,8,9])
+#plot_indexing(data,[7,8,9])
             
-
 def plot_depth(data, indexes):
+    
     for filesize in sorted(data.keys()):
         for index in indexes:
             plt.plot(data[filesize][index]["mean"], label = f"index {index[0]}.{index[1]}")
@@ -96,9 +125,7 @@ def plot_depth(data, indexes):
         plt.legend(loc='best')
         plt.show()
 
-
-
-plot_depth(data,booleanIndexes)
+#plot_depth(data,booleanIndexes)
 
 def plot_filesize(data, indexes):
 
@@ -124,7 +151,32 @@ def plot_filesize(data, indexes):
         plt.legend(loc='best')
         plt.show()
 
-plot_filesize(data,booleanIndexes)
+
+#plot_filesize(data,booleanIndexes)
+
+def plot_find_word(data, indexes):
+    
+    for index in indexes:
+            mean = np.array([])
+            upper_bound = np.array([])
+            lower_bound = np.array([])
+            
+            for filesize in sorted(data.keys()):
+                mean = np.append(mean,data[filesize][f"Find{index}"]["mean"])
+                upper_bound = np.append(upper_bound,data[filesize][f"Find{index}"]["upper_bound"])
+                lower_bound = np.append(lower_bound,data[filesize][f"Find{index}"]["lower_bound"])
+
+            x = [1, 2, 5, 10, 20, 50, 100, 200, 400]
+            plt.fill_between(x,lower_bound,upper_bound,label = f"index {index}")
+                    
+    plt.xticks([1, 2, 5, 10, 20, 50, 100, 200, 400],["1MB", "2MB", "5MB", "10MB", "20MB", "50MB", "100MB", "200MB","400MB"])
+    plt.title(f"Searching Time for whole word over filesize")
+    plt.xlabel("Filesize")
+    plt.ylabel("Searching Time")
+    plt.legend(loc='best')
+    plt.show()
+
+plot_find_word(data,[8,9])
 
 def plot_depth_filesize(data, indexes):
     
@@ -170,7 +222,32 @@ def plot_depth_filesize(data, indexes):
     plt.show()
     
 
-plot_depth_filesize(data,booleanIndexes)
+#plot_depth_filesize(data,booleanIndexes)
+
+def plot_prefixsearch(data,indexes):
+    for index in indexes:
+        mean = np.array([])
+        upper_bound = np.array([])
+        lower_bound = np.array([])
+        
+        for filesize in sorted(data.keys()):
+            mean = np.append(mean,data[filesize][index]["mean"])
+            upper_bound = np.append(upper_bound,data[filesize][index]["upper_bound"])
+            lower_bound = np.append(lower_bound,data[filesize][index]["lower_bound"])
+        
+        x = [1, 2, 5, 10, 20, 50, 100, 200,400]
+        
+        plt.fill_between(x,lower_bound,upper_bound,label = f"index{index}")
+           
+        plt.xticks(x,["1MB", "2MB", "5MB", "10MB", "20MB", "50MB", "100MB", "200MB","400MB"])
+        plt.title("Prefix search time over filesize")
+        plt.xlabel("Filesize")
+        plt.ylabel("Searching Time")
+        plt.legend(loc='best')
+    plt.show()
+
+#plot_prefixsearch(data,["9_1"])
+            
 
 
 
