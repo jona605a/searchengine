@@ -1,9 +1,9 @@
 // https://bheisler.github.io/criterion.rs/book/getting_started.html
-#![allow(non_snake_case)]
+// #![allow(non_snake_case)]
 use criterion::{criterion_group, criterion_main, Criterion};
 use rand::{SeedableRng, Rng};
 use rand::rngs::StdRng;
-use std::{fs, string};
+use std::fs;
 
 use rustsearch::helpers::{Config, read_file_to_string};
 use rustsearch::index::boolean_tests::boolean_ast_gen;
