@@ -22,7 +22,7 @@ impl Index<HashMap<String, Vec<usize>>, Index7ExtraVariables> {
         let re = Regex::new(r"\. |\.\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
 
         let articles_iter = filecontents.split("---END.OF.DOCUMENT---").map(|a| {
-            let (title, contents) = a.trim().split_once(".\n").unwrap_or(("empty title", ""));
+            let (title, contents) = a.trim().split_once(".\n").unwrap_or(("", ""));
             // dbg!(title, contents);
             (title.to_string(), re.split(contents))
         });
