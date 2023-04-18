@@ -1,43 +1,38 @@
-//use super::index9_0::{Index9ExtraVariables, Trie, TrieNode};
+use super::index9_1::Index9ExtraVariables;
 use regex::Regex;
-use std::collections::HashMap;
 use std::error::Error;
 
 use crate::helpers::*;
 use crate::index::Index;
 
-#[derive(Debug)]
-pub struct Index9ExtraVariables {
-    pub article_titles: Vec<String>,
-}
-
-pub struct TrieNode {
-    pub children_map: HashMap<char, TrieNode>,
+pub struct TrieNodeLin {
+    pub children_vec: Vec<(char, TrieNodeLin)>,
     pub article_vec: Option<Vec<usize>>,
 }
 
-impl TrieNode {
-    pub fn new() -> TrieNode {
-        TrieNode {
-            children_map: HashMap::new(),
+impl TrieNodeLin {
+    pub fn new() -> TrieNodeLin {
+        TrieNodeLin {
+            children_vec: Vec::new(),
             article_vec: None,
         }
     }
 
     pub fn insert_child(&mut self, char: char) {
-        self.children_map.insert(char, TrieNode::new());
+        let child = TrieNodeLin::new();
+        self.children_vec.push((char, child))
     }
 }
 
-pub struct Trie {
-    pub root: TrieNode,
+pub struct TrieLin {
+    pub root: TrieNodeLin,
     pub n_titles: usize,
 }
 
-impl Trie {
-    pub fn new() -> Trie {
-        Trie {
-            root: TrieNode::new(),
+impl TrieLin {
+    pub fn new() -> TrieLin {
+        TrieLin {
+            root: TrieNodeLin::new(),
             n_titles: 0,
         }
     }
@@ -45,10 +40,20 @@ impl Trie {
     pub fn insert(&mut self, string_val: &String, article_number: usize) {
         let mut current = &mut self.root;
         for c in string_val.chars() {
-            if !current.children_map.contains_key(&c) {
-                current.insert_child(c);
+            let mut cld_idx = 0;
+            for (cld_char, _) in &current.children_vec {
+                if *cld_char == c {
+                    break;
+                }
+                cld_idx += 1;
             }
-            current = current.children_map.get_mut(&c).unwrap();
+
+            if cld_idx == current.children_vec.len() {
+                // The char was not in the children, so add it
+                current.insert_child(c)
+            }
+
+            current = &mut current.children_vec[cld_idx].1;
         }
         // At the end of the string, the last current node is final
         if current.article_vec.is_none() {
@@ -62,34 +67,37 @@ impl Trie {
 
     pub fn find(&self, string_val: &String) -> Option<Vec<usize>> {
         let mut current = &self.root;
-
         for c in string_val.chars() {
             if c == '*' {
                 // When reading a *, return the subtree from this node
-                eprintln!("Start in word");
                 return Some(self.get_subtree_match(current).to_vec());
             }
-            if !current.children_map.contains_key(&c) {
+            let mut cld_idx = 0;
+            for (cld_char, _) in &current.children_vec {
+                if *cld_char == c {
+                    break;
+                }
+                cld_idx += 1;
+            }
+            if cld_idx == current.children_vec.len() {
                 return None;
             }
-            current = current.children_map.get(&c).unwrap();
+            current = &current.children_vec[cld_idx].1;
         }
         // At the end of the string, the last current node is final
         Some(self.articlevec_to_bitvec(current.article_vec.as_ref().unwrap()))
     }
 
-    fn get_subtree_match(&self, node: &TrieNode) -> Vec<usize> {
+    fn get_subtree_match(&self, node: &TrieNodeLin) -> Vec<usize> {
         match &node.article_vec {
-            Some(articles) => node.children_map.values().fold(
+            Some(articles) => node.children_vec.iter().fold(
                 self.articlevec_to_bitvec(articles),
-                |acc: Vec<usize>, child: &TrieNode| {
-                    self.or_bitvec(acc, self.get_subtree_match(child))
-                },
+                |acc: Vec<usize>, (_, child)| self.or_bitvec(acc, self.get_subtree_match(child)),
             ),
             None => {
-                let mut children = node.children_map.values();
-                let first_child = children.next().unwrap();
-                children.fold(self.get_subtree_match(first_child), |acc, child| {
+                let mut children = node.children_vec.iter();
+                let first_child = &children.next().unwrap().1;
+                children.fold(self.get_subtree_match(first_child), |acc, (_, child)| {
                     self.or_bitvec(acc, self.get_subtree_match(child))
                 })
             }
@@ -116,9 +124,12 @@ impl Trie {
     }
 }
 
-impl Index<Trie, Index9ExtraVariables> {
-    pub fn index9(config: &Config) -> Result<Index<Trie, Index9ExtraVariables>, Box<dyn Error>> {
-        let mut database = Trie::new();
+
+
+
+impl Index<TrieLin, Index9ExtraVariables> {
+    pub fn index9_0(config: &Config) -> Result<Index<TrieLin, Index9ExtraVariables>, Box<dyn Error>> {
+        let mut database = TrieLin::new();
 
         let filecontents = read_file_to_string(&config.file_path)?;
         let re = Regex::new(r"\. |\.\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
@@ -136,7 +147,7 @@ impl Index<Trie, Index9ExtraVariables> {
             if title != "" {
                 article_titles.push(title.to_string());
                 for word in contents {
-                    database.insert(&word.to_string(), article_titles.len() - 1);
+                    database.insert(&word.to_string().to_lowercase(), article_titles.len() - 1);
                 }
             }
         }
@@ -149,7 +160,7 @@ impl Index<Trie, Index9ExtraVariables> {
         })
     }
 
-    pub fn trie_search_1(&self, query: &String) -> Option<Vec<String>> {
+    pub fn trie_search(&self, query: &String) -> Option<Vec<String>> {
         Some(self.bitvec_to_articlelist(self.database.find(query)?))
     }
 
@@ -170,31 +181,32 @@ impl Index<Trie, Index9ExtraVariables> {
     }
 }
 
+
 #[cfg(test)]
 mod tests {
-    use std::{collections::HashSet, fs, iter::zip};
-    use crate::{helpers::*, index::{gen_query::{gen_a_lot_of_runs_bool, gen_a_lot_of_runs_tries}, self}};
+    use crate::helpers::*;
+    use std::collections::HashSet;
 
     use super::*;
 
-    fn setup_real() -> Index<Trie, Index9ExtraVariables> {
+    fn setup_real() -> Index<TrieLin, Index9ExtraVariables> {
         let config = Config::build(&[
             "".to_string(),
             "data/WestburyLab.wikicorp.201004_100KB.txt".to_string(),
-            "9_1".to_string(),
+            "9_0".to_string(),
         ])
         .unwrap();
-        Index::index9(&config).unwrap()
+        Index::index9_0(&config).unwrap()
     }
 
-    fn insert_list_to_trie(trie: &mut Trie, word: &String, a_list: Vec<usize>) {
+    fn insert_list_to_trie(trie: &mut TrieLin, word: &String, a_list: Vec<usize>) {
         for a in a_list {
             trie.insert(word, a)
         }
     }
 
-    fn setup_test() -> Index<Trie, Index9ExtraVariables> {
-        let mut database = Trie::new();
+    fn setup_test() -> Index<TrieLin, Index9ExtraVariables> {
+        let mut database = TrieLin::new();
         database.insert(&"word1".to_string(), 0);
         insert_list_to_trie(&mut database, &"word1".to_string(), vec![0]);
         insert_list_to_trie(&mut database, &"word2".to_string(), vec![0, 1, 2, 3]);
@@ -218,11 +230,11 @@ mod tests {
         }
     }
 
-    fn search_match(index: &Index<Trie, Index9ExtraVariables>, query: &str, titles: Vec<&str>) {
+    fn search_match(index: &Index<TrieLin, Index9ExtraVariables>, query: &str, titles: Vec<&str>) {
         dbg!(&query.to_string());
         let index_result: HashSet<String> = HashSet::from_iter(
             index
-                .trie_search_1(&query.to_string())
+                .trie_search(&query.to_string())
                 .unwrap_or(Vec::default()),
         );
         assert_eq!(
@@ -302,40 +314,5 @@ mod tests {
     fn find_prefix_real3() {
         let index = setup_real();
         search_match(&index, "a*", vec!["A", "Anarchism", "Autism", "Albedo"]);
-    }
-
-    #[test]
-    fn find_prefix_real4() {
-        let index = setup_real();
-        search_match(&index, ". *", vec![]);
-    }
-
-    #[test]
-    fn check_index9_and_index8_get_the_same_results() {
-        let files = fs::read_dir("../../data.nosync/");
-
-        for dir in files.unwrap() {
-            let file = dir.unwrap().path().into_os_string().into_string().unwrap();
-            let filesize = &file[46..file.len()-4];
-
-            if (filesize != "1MB") & (filesize != "2MB"){
-                continue;
-            }
-
-            let ast_vec = gen_a_lot_of_runs_bool(file.clone(), 10);
-            let word_vec = gen_a_lot_of_runs_tries(file.clone(), 10,false);
-
-            let index8 = index::Index::index8(&Config {file_path : file.clone(), indexno : "8".to_string()}).unwrap();
-            let index9 = index::Index::index9(&Config {file_path : file.clone(), indexno : "9".to_string()}).unwrap();
-
-            let depth_vec = &ast_vec[0];
-
-            for (ast,word) in zip(depth_vec,word_vec)  {
-                    let articleList8_0 = index8.vec_to_articlelist(index8.evaluate_syntex_tree_naive(*ast.clone()));
-                    let articleList9_1 = index9.trie_search_1(&word).unwrap_or([].to_vec());
-                    assert_eq!(articleList9_1,articleList8_0);
-                };
-
-        }
     }
 }

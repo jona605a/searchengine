@@ -1,11 +1,10 @@
 // https://bheisler.github.io/criterion.rs/book/getting_started.html
-#![allow(non_snake_case)]
+// #![allow(non_snake_case)]
 use criterion::{criterion_group, criterion_main, Criterion};
-use std::{fs};
+use std::fs;
 
 use rustsearch::helpers::{read_file_to_string};
-use rustsearch::index::gen_query::{gen_a_lot_of_runs_bool,gen_a_lot_of_runs_tries};
-use rustsearch::index::{self, Index};
+use rustsearch::index::{self, gen_query::{gen_a_lot_of_runs_bool,gen_a_lot_of_runs_tries}};
 
 
 // Timing reading files
