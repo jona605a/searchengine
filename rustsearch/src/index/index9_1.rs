@@ -69,10 +69,11 @@ impl Trie {
                 eprintln!("Start in word");
                 return Some(self.get_subtree_match(current).to_vec());
             }
-            if !current.children_map.contains_key(&c) {
-                return None;
-            }
-            current = current.children_map.get(&c).unwrap();
+        
+            current = match current.children_map.get(&c){
+                Some(child) => child,
+                None => return None
+            };
         }
         // At the end of the string, the last current node is final
         Some(self.articlevec_to_bitvec(current.article_vec.as_ref().unwrap()))
@@ -326,14 +327,19 @@ mod tests {
             let word_vec = gen_a_lot_of_runs_tries(file.clone(), 10,false);
 
             let index8 = index::Index::index8(&Config {file_path : file.clone(), indexno : "8".to_string()}).unwrap();
-            let index9 = index::Index::index9(&Config {file_path : file.clone(), indexno : "9".to_string()}).unwrap();
+            let index9_0 = index::Index::index9_0(&Config {file_path : file.clone(), indexno : "9".to_string()}).unwrap();
+            let index9_1 = index::Index::index9(&Config {file_path : file.clone(), indexno : "9".to_string()}).unwrap();
 
             let depth_vec = &ast_vec[0];
 
             for (ast,word) in zip(depth_vec,word_vec)  {
                     let articleList8_0 = index8.vec_to_articlelist(index8.evaluate_syntex_tree_naive(*ast.clone()));
-                    let articleList9_1 = index9.trie_search_1(&word).unwrap_or([].to_vec());
+                    let articleList9_0 = index9_0.trie_search(&word).unwrap_or([].to_vec());
+                    let articleList9_1 = index9_1.trie_search_1(&word).unwrap_or([].to_vec());
+
+                    assert_eq!(articleList9_0,articleList8_0);
                     assert_eq!(articleList9_1,articleList8_0);
+
                 };
 
         }
