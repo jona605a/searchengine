@@ -190,7 +190,7 @@ mod bool_tests {
     fn astnode_to_string(ast:Box<AstNode>) -> String{
         return match *ast{
             AstNode::Name(s) => s,
-            AstNode => "AstNode does not have depth 0".to_string()
+            _ => "AstNode does not have depth 0".to_string()
         }
     }
 

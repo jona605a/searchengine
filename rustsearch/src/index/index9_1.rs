@@ -1,3 +1,4 @@
+#![allow(non_snake_case)]
 //use super::index9_0::{Index9ExtraVariables, Trie, TrieNode};
 use regex::Regex;
 use std::collections::HashMap;

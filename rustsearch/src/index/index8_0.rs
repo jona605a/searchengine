@@ -1,3 +1,4 @@
+#![allow(non_snake_case)]
 use regex::Regex;
 use std::collections::HashMap;
 use std::error::Error;
@@ -145,7 +146,7 @@ impl Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
 
 #[cfg(test)]
 mod tests {
-    use crate::index::{gen_query::{gen_a_lot_of_runs_bool, gen_a_lot_of_runs_tries}, self};
+    use crate::index::{gen_query::gen_a_lot_of_runs_bool, self};
 
     use super::*;
     use std::{collections::HashSet, fs};

@@ -1,8 +1,6 @@
 use regex::Regex;
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
-use std::fs;
-use std::ops::Deref;
 
 use crate::helpers::*;
 use crate::index::Index;
@@ -64,7 +62,7 @@ impl Index<HashMap<String, HashMap<usize, usize>>, Index10ExtraVariables> {
         // For each article in the intersection, identify the least frequent word and read through the article (linearly) to find all sentence matches
         let query_words: Vec<&str> = query.split(' ').collect();
         for art_no in art_intersect.iter().map(|i| *i) {
-            let least_frequent_word = *query_words
+            let _least_frequent_word = *query_words
                 .iter()
                 .map(|w| (w, self.database.get(&w.to_string()).unwrap()))
                 .min_by(|x, y| x.1.get(art_no).unwrap().cmp(y.1.get(art_no).unwrap()))
