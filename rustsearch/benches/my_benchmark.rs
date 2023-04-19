@@ -89,9 +89,13 @@ pub fn searching_index_8_0(c: &mut Criterion) {
         let file = dir.unwrap().path().into_os_string().into_string().unwrap();
         let filesize = &file[46..file.len()-4];
 
+        if filesize != "100MB"{
+            continue;
+        }
+
         let ast_vec = gen_a_lot_of_runs_bool(file.clone(), 1000);
         let index = index::Index::index8(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "8".to_string()}).unwrap();
-        let mut depth = 0;
+        let mut depth = -1;
 
         for depth_vec in ast_vec {
             depth += 1;
@@ -230,6 +234,5 @@ pub fn prefix_search_index_9_1(c: &mut Criterion) {
     } 
 }
 
-criterion_group!(benches,prefix_search_index_9_1);
+criterion_group!(benches,searching_index_8_0);
 criterion_main!(benches);
-

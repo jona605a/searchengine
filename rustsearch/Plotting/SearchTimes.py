@@ -104,8 +104,6 @@ def plot_indexing(data,indexes):
         plt.ylabel("Searching Time")
         plt.legend(loc='best')
     plt.show()
-
-#plot_indexing(data,[7,8,9])
             
 def plot_depth(data, indexes):
     
@@ -125,7 +123,6 @@ def plot_depth(data, indexes):
         plt.legend(loc='best')
         plt.show()
 
-#plot_depth(data,booleanIndexes)
 
 def plot_filesize(data, indexes):
 
@@ -152,7 +149,6 @@ def plot_filesize(data, indexes):
         plt.show()
 
 
-#plot_filesize(data,booleanIndexes)
 
 def plot_find_word(data, indexes):
     
@@ -176,7 +172,6 @@ def plot_find_word(data, indexes):
     plt.legend(loc='best')
     plt.show()
 
-plot_find_word(data,[8,9])
 
 def plot_depth_filesize(data, indexes):
     
@@ -220,9 +215,6 @@ def plot_depth_filesize(data, indexes):
     ax.set_yticklabels(["1MB", "2MB", "5MB", "10MB", "20MB", "50MB", "100MB", "200MB","400MB"])
 
     plt.show()
-    
-
-#plot_depth_filesize(data,booleanIndexes)
 
 def plot_prefixsearch(data,indexes):
     for index in indexes:
@@ -246,6 +238,11 @@ def plot_prefixsearch(data,indexes):
         plt.legend(loc='best')
     plt.show()
 
+#plot_indexing(data,[7,8,9])
+#plot_depth(data,booleanIndexes)
+#plot_filesize(data,booleanIndexes)
+plot_find_word(data,[8,9])
+#plot_depth_filesize(data,booleanIndexes)
 #plot_prefixsearch(data,["9_1"])
             
 

@@ -147,7 +147,7 @@ impl Index<TrieLin, Index9ExtraVariables> {
             if title != "" {
                 article_titles.push(title.to_string());
                 for word in contents {
-                    database.insert(&word.to_string().to_lowercase(), article_titles.len() - 1);
+                    database.insert(&word.to_string(), article_titles.len() - 1);
                 }
             }
         }
