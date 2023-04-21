@@ -33,12 +33,12 @@ impl Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
 
                         if left_articlelist.len() > 0
                             && left_articlelist.len() + right_articlelist.len()
-                                > left_articlelist.len().ilog2() as usize * right_articlelist.len()
+                                > (left_articlelist.len() as f32).log2().ceil() as usize * right_articlelist.len()
                         {
                             self.and_binary_search(right_articlelist, left_articlelist)
                         } else if right_articlelist.len() > 0
                             && left_articlelist.len() + right_articlelist.len()
-                                > right_articlelist.len().ilog2() as usize * left_articlelist.len()
+                                > (right_articlelist.len() as f32).log2().ceil() as usize * left_articlelist.len()
                         {
                             self.and_binary_search(left_articlelist, right_articlelist)
                         } else {
@@ -58,12 +58,12 @@ impl Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
 
                         if left_articlelist.len() > 0
                             && left_articlelist.len() + right_articlelist.len()
-                                > left_articlelist.len().ilog2() as usize * right_articlelist.len()
+                                > (left_articlelist.len() as f32).log2().ceil() as usize * right_articlelist.len()
                         {
                             self.invert(self.and_binary_search(right_articlelist, left_articlelist))
                         } else if right_articlelist.len() > 0
                             && left_articlelist.len() + right_articlelist.len()
-                                > right_articlelist.len().ilog2() as usize * left_articlelist.len()
+                                > (right_articlelist.len() as f32).log2().ceil() as usize * left_articlelist.len()
                         {
                             self.invert(self.and_binary_search(left_articlelist, right_articlelist))
                         } else {
