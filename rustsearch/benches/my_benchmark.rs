@@ -27,34 +27,47 @@ pub fn indexing_7(c: &mut Criterion) {
         let file = dir.unwrap().path().into_os_string().into_string().unwrap();
         let filesize = &file[46..file.len()-4];
 
-        c.bench_function(&format!("indexing index 7 {}",filesize),|b| b.iter(|| {
+        c.bench_function(&format!("indexing index 7_0 {}",filesize),|b| b.iter(|| {
             index::Index::index7(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "7_0".to_string()})
         }) );
 }
 }
 
-pub fn indexing_8(c: &mut Criterion) {
+pub fn indexing_8_0(c: &mut Criterion) {
     let files = fs::read_dir("../../data.nosync/");
 
     for dir in files.unwrap() {
         let file = dir.unwrap().path().into_os_string().into_string().unwrap();
         let filesize = &file[46..file.len()-4];
 
-        c.bench_function(&format!("indexing index 8 {}",filesize),|b| b.iter(|| {
+        c.bench_function(&format!("indexing index 8_0 {}",filesize),|b| b.iter(|| {
             index::Index::index8(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "8_0".to_string()})
         }) );
 }
 }
 
-pub fn indexing_9(c: &mut Criterion) {
+pub fn indexing_9_1(c: &mut Criterion) {
     let files = fs::read_dir("../../data.nosync/");
 
     for dir in files.unwrap() {
         let file = dir.unwrap().path().into_os_string().into_string().unwrap();
         let filesize = &file[46..file.len()-4];
 
-        c.bench_function(&format!("indexing index 9 {}",filesize),|b| b.iter(|| {
+        c.bench_function(&format!("indexing index 9_1 {}",filesize),|b| b.iter(|| {
             index::Index::index9(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "9_0".to_string()})
+        }) );
+}
+}
+
+pub fn indexing_9_0(c: &mut Criterion) {
+    let files = fs::read_dir("../../data.nosync/");
+
+    for dir in files.unwrap() {
+        let file = dir.unwrap().path().into_os_string().into_string().unwrap();
+        let filesize = &file[46..file.len()-4];
+
+        c.bench_function(&format!("indexing index 9_0 {}",filesize),|b| b.iter(|| {
+            index::Index::index9_0(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "9_0".to_string()})
         }) );
 }
 }
@@ -198,7 +211,25 @@ pub fn searching_index_8_4(c: &mut Criterion) {
     } 
 }
 
-pub fn searching_index_9_1(c: &mut Criterion) {
+pub fn find_word_9_0(c: &mut Criterion) {
+    let files = fs::read_dir("../../data.nosync/");
+
+    for dir in files.unwrap() {
+        let file = dir.unwrap().path().into_os_string().into_string().unwrap();
+        let filesize = &file[46..file.len()-4];
+
+        let word_vec = gen_a_lot_of_runs_tries(file.clone(), 1000,false);
+        let index = index::Index::index9_0(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "9".to_string()}).unwrap();
+
+        c.bench_function(&format!("Find word 9_0 {}", filesize), |b| b.iter(|| {
+            for word in &word_vec {
+                index.trie_search(word);
+            }
+        }));
+    } 
+}
+
+pub fn find_word_9_1(c: &mut Criterion) {
     let files = fs::read_dir("../../data.nosync/");
 
     for dir in files.unwrap() {
@@ -208,9 +239,27 @@ pub fn searching_index_9_1(c: &mut Criterion) {
         let word_vec = gen_a_lot_of_runs_tries(file.clone(), 1000,false);
         let index = index::Index::index9(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "9".to_string()}).unwrap();
 
-        c.bench_function(&format!("Find word 9 {}", filesize), |b| b.iter(|| {
+        c.bench_function(&format!("Find word 9_1 {}", filesize), |b| b.iter(|| {
             for word in &word_vec {
                 index.trie_search_1(word);
+            }
+        }));
+    } 
+}
+
+pub fn prefix_search_index_9_0(c: &mut Criterion) {
+    let files = fs::read_dir("../../data.nosync/");
+
+    for dir in files.unwrap() {
+        let file = dir.unwrap().path().into_os_string().into_string().unwrap();
+        let filesize = &file[46..file.len()-4];
+
+        let word_vec:Vec<String> = gen_a_lot_of_runs_tries(file.clone(), 1000,true);
+        let index = index::Index::index9_0(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "9".to_string()}).unwrap();
+        
+        c.bench_function(&format!("prefix search 9_0 in file {}", filesize), |b| b.iter(|| {
+            for word in &word_vec {
+                index.trie_search(word);
             }
         }));
     } 
@@ -234,5 +283,7 @@ pub fn prefix_search_index_9_1(c: &mut Criterion) {
     } 
 }
 
-criterion_group!(benches,searching_index_8_0);
+//criterion_group!(benches,indexing_7,indexing_8_0,indexing_9_1,indexing_9_0,searching_index_7_0,searching_index_8_0,searching_index_8_1,searching_index_8_2,searching_index_8_3,searching_index_8_4,find_word_9_0,find_word_9_1,prefix_search_index_9_0,prefix_search_index_9_1);
+criterion_group!(benches,find_word_9_0,prefix_search_index_9_0);
+
 criterion_main!(benches);
