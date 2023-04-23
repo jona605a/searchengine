@@ -119,7 +119,7 @@ impl Trie {
 }
 
 impl Index<Trie, Index9ExtraVariables> {
-    pub fn index9(config: &Config) -> Result<Index<Trie, Index9ExtraVariables>, Box<dyn Error>> {
+    pub fn index9(config: &Config) -> Result<Self, Box<dyn Error>> {
         let mut database = Trie::new();
 
         let filecontents = read_file_to_string(&config.file_path)?;
