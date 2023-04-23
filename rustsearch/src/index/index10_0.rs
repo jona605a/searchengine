@@ -48,7 +48,7 @@ impl Index<HashMap<String, HashMap<usize, usize>>, Index10ExtraVariables> {
         })
     }
 
-    pub fn exact_search(&self, query: &String) -> HashMap<usize,Vec<usize>> {
+    pub fn exact_search(&self, query: &String) -> HashMap<usize, Vec<usize>> {
         // Split sentence into words
         // Get article set for each word, and find intersection
         let art_intersect = query
@@ -63,7 +63,7 @@ impl Index<HashMap<String, HashMap<usize, usize>>, Index10ExtraVariables> {
 
         // For each article in the intersection, identify the least frequent word and read through the article (linearly) to find all sentence matches
         let query_words: Vec<&str> = query.split(' ').collect();
-        let mut result: HashMap<usize,Vec<usize>> = HashMap::new();
+        let mut result: HashMap<usize, Vec<usize>> = HashMap::new();
         let T = Index::kmp_table(&query_words);
 
         for art_no in art_intersect.iter().map(|i| *i) {
@@ -138,10 +138,8 @@ impl Index<HashMap<String, HashMap<usize, usize>>, Index10ExtraVariables> {
     }
 }
 
-#[allow(non_snake_case)]
 #[cfg(test)]
 mod tests {
-
     use super::*;
 
     #[test]
@@ -215,6 +213,13 @@ mod tests {
         let query_words: Vec<&str> = vec!["let", "it", "be"];
         let T: Vec<i32> = Index::kmp_table(&query_words);
 
-        assert_eq!(Index::kmp(file_contents, &query_words, &T), vec![17, 38, 41, 44, 47, 50, 57, 76, 99, 102, 105, 108, 111, 119, 122, 125, 128, 131, 138, 141, 144, 147, 150, 157, 179, 199, 203, 206, 209, 212, 219, 223, 226, 229, 232, 239]);
+        assert_eq!(
+            Index::kmp(file_contents, &query_words, &T),
+            vec![
+                17, 38, 41, 44, 47, 50, 57, 76, 99, 102, 105, 108, 111, 119, 122, 125, 128, 131,
+                138, 141, 144, 147, 150, 157, 179, 199, 203, 206, 209, 212, 219, 223, 226, 229,
+                232, 239
+            ]
+        );
     }
 }
