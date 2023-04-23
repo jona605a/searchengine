@@ -48,7 +48,7 @@ impl Index<HashMap<String, HashMap<usize, usize>>, Index10ExtraVariables> {
         })
     }
 
-    pub fn exact_search(&self, query: &String) -> Option<Vec<String>> {
+    pub fn exact_search(&self, query: &String) -> HashMap<usize,Vec<usize>> {
         // Split sentence into words
         // Get article set for each word, and find intersection
         let art_intersect = query
@@ -63,8 +63,8 @@ impl Index<HashMap<String, HashMap<usize, usize>>, Index10ExtraVariables> {
 
         // For each article in the intersection, identify the least frequent word and read through the article (linearly) to find all sentence matches
         let query_words: Vec<&str> = query.split(' ').collect();
-        let mut result: Vec<(usize, Vec<usize>)> = vec![];
-        let T = self.kmp_table(&query_words);
+        let mut result: HashMap<usize,Vec<usize>> = HashMap::new();
+        let T = Index::kmp_table(&query_words);
 
         for art_no in art_intersect.iter().map(|i| *i) {
             // Read the file
@@ -76,18 +76,15 @@ impl Index<HashMap<String, HashMap<usize, usize>>, Index10ExtraVariables> {
                     )
                     .as_str(),
                 );
-            result.push((
-                *art_no, 
-                self.kmp(file_contents, &query_words, &T)
-            ));
+            let match_pos = Index::kmp(file_contents, &query_words, &T);
+            result.insert(*art_no, match_pos);
         }
         // Result to article names
-        // Some(vec!["boobies".to_string()]);
-        todo!()
+        result
     }
 
-    pub fn kmp_table(&self, query_words: &Vec<&str>) -> Vec<i32> {
-        let mut T: Vec<i32> = vec![0; query_words.len()];
+    pub fn kmp_table(query_words: &Vec<&str>) -> Vec<i32> {
+        let mut T: Vec<i32> = vec![0; query_words.len() + 1];
         let mut pos: usize = 1;
         let mut cnd: i32 = 0;
         T[0] = -1;
@@ -108,7 +105,7 @@ impl Index<HashMap<String, HashMap<usize, usize>>, Index10ExtraVariables> {
         T
     }
 
-    pub fn kmp(&self, file_contents: String, query_words: &Vec<&str>, T: &Vec<i32>) -> Vec<usize> {
+    pub fn kmp(file_contents: String, query_words: &Vec<&str>, T: &Vec<i32>) -> Vec<usize> {
         // Output
         let mut P: Vec<usize> = vec![];
 
@@ -116,7 +113,8 @@ impl Index<HashMap<String, HashMap<usize, usize>>, Index10ExtraVariables> {
         let mut j = 0;
         let mut k = 0;
 
-        let file_vec: Vec<&str> = file_contents.split(' ').collect();
+        let file_vec: Vec<&str> = file_contents.split_ascii_whitespace().collect();
+
         while j < file_vec.len() {
             if query_words[k] == file_vec[j] {
                 j += 1;
@@ -137,5 +135,86 @@ impl Index<HashMap<String, HashMap<usize, usize>>, Index10ExtraVariables> {
             }
         }
         P
+    }
+}
+
+#[allow(non_snake_case)]
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn kmp_table_1() {
+        let w: Vec<&str> = vec!["A", "B", "C", "D", "A", "B", "D"];
+        let kmp_table = Index::kmp_table(&w);
+        assert_eq!(kmp_table, vec![-1, 0, 0, 0, -1, 0, 2, 0]);
+    }
+
+    #[test]
+    fn kmp_table_2() {
+        let w: Vec<&str> = vec!["A", "B", "A", "C", "A", "B", "A", "B", "C"];
+        let kmp_table = Index::kmp_table(&w);
+        assert_eq!(kmp_table, vec![-1, 0, -1, 1, -1, 0, -1, 3, 2, 0]);
+    }
+
+    #[test]
+    fn kmp_table_3() {
+        let w: Vec<&str> = vec!["A", "B", "A", "C", "A", "B", "A", "B", "A"];
+        let kmp_table = Index::kmp_table(&w);
+        assert_eq!(kmp_table, vec![-1, 0, -1, 1, -1, 0, -1, 3, -1, 3]);
+    }
+
+    #[test]
+    fn kmp_table_4() {
+        let w: Vec<&str> = vec![
+            "P", "A", "R", "T", "I", "C", "I", "P", "A", "T", "E", " ", "I", "N", " ", "P", "A",
+            "R", "A", "C", "H", "U", "T", "E",
+        ];
+        let kmp_table = Index::kmp_table(&w);
+        assert_eq!(
+            kmp_table,
+            vec![-1, 0, 0, 0, 0, 0, 0, -1, 0, 2, 0, 0, 0, 0, 0, -1, 0, 0, 3, 0, 0, 0, 0, 0, 0]
+        );
+    }
+
+    #[test]
+    fn kmp_table_5() {
+        let w: Vec<&str> = vec![
+            "WORDA", "WORDB", "WORDC", "WORDD", "WORDA", "WORDB", "WORDD",
+        ];
+        let kmp_table = Index::kmp_table(&w);
+        assert_eq!(kmp_table, vec![-1, 0, 0, 0, -1, 0, 2, 0]);
+    }
+
+    #[test]
+    fn kmp_1() {
+        let file_contents: String = "A".to_string();
+        let query_words: Vec<&str> = vec!["A"];
+        let T: Vec<i32> = Index::kmp_table(&query_words);
+
+        assert_eq!(Index::kmp(file_contents, &query_words, &T), vec![0]);
+    }
+
+    #[test]
+    fn kmp_2() {
+        let file_contents: String = "A B AB A B C A B".to_string();
+        let query_words: Vec<&str> = vec!["A", "B"];
+        let T: Vec<i32> = Index::kmp_table(&query_words);
+
+        assert_eq!(Index::kmp(file_contents, &query_words, &T), vec![0, 3, 6]);
+    }
+
+    #[test]
+    fn kmp_3() {
+        let file_contents: String =
+            "When I find myself in times of trouble, Mother Mary comes to me Speaking words of wisdom, 
+            let it be And in my hour of darkness she is standing right in front of me Speaking words of wisdom, let it be Let it be  let it be let it be let it be Whisper words of wisdom, let it be And when the broken hearted people living in the world agree There will be an answer, let it be For though they may be parted, there is still a chance that they will see There will be an answer, let it be Let it be let it be let it be let it be There will be an answer, let it be Let it be let it be let it be let it be Whisper words of wisdom, let it be Let it be let it be let it be let it be Whisper words of wisdom, let it be be And when the night is cloudy there is still a light that shines on me Shinin' until tomorrow, let it be I wake up to the sound of music, Mother Mary comes to me Speaking words of wisdom, let it be And let it be let it be let it be let it be Whisper words of wisdom, let it be And let it be let it be let it be let it be Whisper words of wisdom, let it be"
+                .to_string()
+                .to_ascii_lowercase();
+        let query_words: Vec<&str> = vec!["let", "it", "be"];
+        let T: Vec<i32> = Index::kmp_table(&query_words);
+
+        assert_eq!(Index::kmp(file_contents, &query_words, &T), vec![17, 38, 41, 44, 47, 50, 57, 76, 99, 102, 105, 108, 111, 119, 122, 125, 128, 131, 138, 141, 144, 147, 150, 157, 179, 199, 203, 206, 209, 212, 219, 223, 226, 229, 232, 239]);
     }
 }
