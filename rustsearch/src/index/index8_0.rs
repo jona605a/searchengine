@@ -1,4 +1,3 @@
-#![allow(non_snake_case)]
 use regex::Regex;
 use std::collections::HashMap;
 use std::error::Error;
@@ -7,12 +6,10 @@ use crate::helpers::*;
 use crate::index::Index;
 use crate::parsing::*;
 
-#[derive(Debug)]
 pub struct Index8ExtraVariables {
     pub article_titles: Vec<String>,
 }
 
-#[allow(dead_code)]
 impl Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
     pub fn index8(
         config: &Config,
@@ -146,7 +143,7 @@ impl Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
 
 #[cfg(test)]
 mod tests {
-    use crate::index::{gen_query::gen_a_lot_of_runs_bool, self};
+    use crate::index::{self, gen_query::gen_a_lot_of_runs_bool};
 
     use super::*;
     use std::{collections::HashSet, fs};
@@ -342,34 +339,49 @@ mod tests {
 
         for dir in files.unwrap() {
             let file = dir.unwrap().path().into_os_string().into_string().unwrap();
-            let filesize = &file[46..file.len()-4];
+            let filesize = &file[46..file.len() - 4];
 
-            if (filesize != "1MB") & (filesize != "2MB"){
+            if (filesize != "1MB") & (filesize != "2MB") {
                 continue;
             }
 
             let ast_vec = gen_a_lot_of_runs_bool(file.clone(), 10);
 
-            let index7 = index::Index::index7(&Config {file_path : file.clone(), indexno : "7".to_string()}).unwrap();
-            let index8 = index::Index::index8(&Config {file_path : file.clone(), indexno : "8".to_string()}).unwrap();
+            let index7 = index::Index::index7(&Config {
+                file_path: file.clone(),
+                indexno: "7".to_string(),
+            })
+            .unwrap();
+            let index8 = index::Index::index8(&Config {
+                file_path: file.clone(),
+                indexno: "8".to_string(),
+            })
+            .unwrap();
 
             for depth_vec in ast_vec {
                 for ast in &depth_vec {
-                    let articleList7_0 = index7.bitvec_to_articlelist(index7.evaluate_syntax_tree(*ast.clone()));
-                    let articleList8_0 = index8.vec_to_articlelist(index8.evaluate_syntex_tree_naive(*ast.clone()));
-                    let articleList8_1: Vec<String> = index8.vec_to_articlelist(index8.evaluate_syntex_tree_demorgan(*ast.clone()));
-                    let articleList8_2 = index8.vec_to_articlelist(index8.evaluate_syntex_tree_binary_search(*ast.clone()));
-                    let articleList8_3 = index8.vec_to_articlelist(index8.evaluate_syntex_tree_hybrid(*ast.clone()));
-                    let articleList8_4 = index8.bitvec_to_articlelist(index8.evaluate_syntax_tree_convert_to_bitvecs(*ast.clone()));
+                    let article_list7_0 =
+                        index7.bitvec_to_articlelist(index7.evaluate_syntax_tree(*ast.clone()));
+                    let article_list8_0 =
+                        index8.vec_to_articlelist(index8.evaluate_syntex_tree_naive(*ast.clone()));
+                    let article_list8_1: Vec<String> = index8
+                        .vec_to_articlelist(index8.evaluate_syntex_tree_demorgan(*ast.clone()));
+                    let article_list8_2 = index8.vec_to_articlelist(
+                        index8.evaluate_syntex_tree_binary_search(*ast.clone()),
+                    );
+                    let article_list8_3 =
+                        index8.vec_to_articlelist(index8.evaluate_syntex_tree_hybrid(*ast.clone()));
+                    let article_list8_4 = index8.bitvec_to_articlelist(
+                        index8.evaluate_syntax_tree_convert_to_bitvecs(*ast.clone()),
+                    );
 
-                    assert_eq!(articleList7_0,articleList8_0);
-                    assert_eq!(articleList8_1,articleList8_2);
-                    assert_eq!(articleList8_3,articleList8_4);
-                    assert_eq!(articleList7_0,articleList8_1);
-                    assert_eq!(articleList7_0,articleList8_3);
-                };
-             }
-
+                    assert_eq!(article_list7_0, article_list8_0);
+                    assert_eq!(article_list8_1, article_list8_2);
+                    assert_eq!(article_list8_3, article_list8_4);
+                    assert_eq!(article_list7_0, article_list8_1);
+                    assert_eq!(article_list7_0, article_list8_3);
+                }
+            }
         }
     }
 }

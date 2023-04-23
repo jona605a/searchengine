@@ -7,12 +7,10 @@ use std::fs;
 use crate::helpers::*;
 use crate::index::Index;
 
-#[derive(Debug)]
 pub struct Index10ExtraVariables {
     pub article_titles: Vec<String>,
 }
 
-#[allow(dead_code)]
 impl Index<HashMap<String, HashMap<usize, usize>>, Index10ExtraVariables> {
     pub fn index10(
         config: &Config,

@@ -4,7 +4,6 @@ use crate::index::index8_0::Index8ExtraVariables;
 use crate::index::Index;
 use crate::parsing::*;
 
-#[allow(dead_code)]
 impl Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
     pub fn boolean_search_demorgan(&self, exp: &String) -> Option<Vec<String>> {
         match Expr::from_string(&exp) {

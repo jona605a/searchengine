@@ -5,12 +5,10 @@ use std::error::Error;
 use crate::helpers::*;
 use crate::index::Index;
 
-#[derive(Debug)]
 pub struct Index11ExtraVariables {
     pub article_titles: Vec<String>,
 }
 
-#[allow(dead_code)]
 impl Index<HashMap<(String, String, String), Vec<usize>>, Index11ExtraVariables> {
     pub fn index11(
         config: &Config,

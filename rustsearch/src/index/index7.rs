@@ -6,12 +6,10 @@ use crate::helpers::*;
 use crate::index::Index;
 use crate::parsing::*;
 
-#[derive(Debug)]
 pub struct Index7ExtraVariables {
     article_titles: Vec<String>,
 }
 
-#[allow(dead_code)]
 impl Index<HashMap<String, Vec<usize>>, Index7ExtraVariables> {
     pub fn index7(
         config: &Config,

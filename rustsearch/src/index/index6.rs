@@ -5,8 +5,6 @@ use std::error::Error;
 use crate::helpers::*;
 use crate::index::Index;
 
-#[allow(dead_code)]
-
 impl Index<HashMap<String, HashSet<String>>, Option<u128>> {
     pub fn index6(
         config: &Config,

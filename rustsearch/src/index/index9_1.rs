@@ -1,16 +1,9 @@
-#![allow(non_snake_case)]
-//use super::index9_0::{Index9ExtraVariables, Trie, TrieNode};
 use regex::Regex;
 use std::collections::HashMap;
 use std::error::Error;
 
 use crate::helpers::*;
 use crate::index::Index;
-
-#[derive(Debug)]
-pub struct Index9ExtraVariables {
-    pub article_titles: Vec<String>,
-}
 
 pub struct TrieNode {
     pub children_map: HashMap<char, TrieNode>,
@@ -116,6 +109,10 @@ impl Trie {
             .map(|(l, r)| l | r)
             .collect()
     }
+}
+
+pub struct Index9ExtraVariables {
+    pub article_titles: Vec<String>,
 }
 
 impl Index<Trie, Index9ExtraVariables> {
@@ -334,12 +331,12 @@ mod tests {
             let depth_vec = &ast_vec[0];
 
             for (ast,word) in zip(depth_vec,word_vec)  {
-                    let articleList8_0 = index8.vec_to_articlelist(index8.evaluate_syntex_tree_naive(*ast.clone()));
-                    let articleList9_0 = index9_0.trie_search(&word).unwrap_or([].to_vec());
-                    let articleList9_1 = index9_1.trie_search_1(&word).unwrap_or([].to_vec());
+                    let article_list8_0 = index8.vec_to_articlelist(index8.evaluate_syntex_tree_naive(*ast.clone()));
+                    let article_list9_0 = index9_0.trie_search(&word).unwrap_or([].to_vec());
+                    let article_list9_1 = index9_1.trie_search_1(&word).unwrap_or([].to_vec());
 
-                    assert_eq!(articleList9_0,articleList8_0);
-                    assert_eq!(articleList9_1,articleList8_0);
+                    assert_eq!(article_list9_0,article_list8_0);
+                    assert_eq!(article_list9_1,article_list8_0);
 
                 };
 

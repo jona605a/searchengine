@@ -4,7 +4,6 @@ use crate::index::index8_0::Index8ExtraVariables;
 use crate::index::Index;
 use crate::parsing::*;
 
-#[allow(dead_code)]
 impl Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
     pub fn boolean_search_hybrid(&self, exp: &String) -> Option<Vec<String>> {
         match Expr::from_string(&exp) {
@@ -33,12 +32,14 @@ impl Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
 
                         if left_articlelist.len() > 0
                             && left_articlelist.len() + right_articlelist.len()
-                                > (left_articlelist.len() as f32).log2().ceil() as usize * right_articlelist.len()
+                                > (left_articlelist.len() as f32).log2().ceil() as usize
+                                    * right_articlelist.len()
                         {
                             self.and_binary_search(right_articlelist, left_articlelist)
                         } else if right_articlelist.len() > 0
                             && left_articlelist.len() + right_articlelist.len()
-                                > (right_articlelist.len() as f32).log2().ceil() as usize * left_articlelist.len()
+                                > (right_articlelist.len() as f32).log2().ceil() as usize
+                                    * left_articlelist.len()
                         {
                             self.and_binary_search(left_articlelist, right_articlelist)
                         } else {
@@ -58,12 +59,14 @@ impl Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
 
                         if left_articlelist.len() > 0
                             && left_articlelist.len() + right_articlelist.len()
-                                > (left_articlelist.len() as f32).log2().ceil() as usize * right_articlelist.len()
+                                > (left_articlelist.len() as f32).log2().ceil() as usize
+                                    * right_articlelist.len()
                         {
                             self.invert(self.and_binary_search(right_articlelist, left_articlelist))
                         } else if right_articlelist.len() > 0
                             && left_articlelist.len() + right_articlelist.len()
-                                > (right_articlelist.len() as f32).log2().ceil() as usize * left_articlelist.len()
+                                > (right_articlelist.len() as f32).log2().ceil() as usize
+                                    * left_articlelist.len()
                         {
                             self.invert(self.and_binary_search(left_articlelist, right_articlelist))
                         } else {

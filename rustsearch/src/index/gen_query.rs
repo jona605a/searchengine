@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use crate::helpers::Config;
 use crate::parsing::{AstNode, BinaryOp};
 use rand::rngs::StdRng;

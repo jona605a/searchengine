@@ -124,11 +124,10 @@ impl TrieLin {
     }
 }
 
-
-
-
 impl Index<TrieLin, Index9ExtraVariables> {
-    pub fn index9_0(config: &Config) -> Result<Index<TrieLin, Index9ExtraVariables>, Box<dyn Error>> {
+    pub fn index9_0(
+        config: &Config,
+    ) -> Result<Index<TrieLin, Index9ExtraVariables>, Box<dyn Error>> {
         let mut database = TrieLin::new();
 
         let filecontents = read_file_to_string(&config.file_path)?;
@@ -180,7 +179,6 @@ impl Index<TrieLin, Index9ExtraVariables> {
         output
     }
 }
-
 
 #[cfg(test)]
 mod tests {
