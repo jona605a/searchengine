@@ -44,7 +44,7 @@ fn user_dialog(index: & impl Search) {
         };
         println!(
             "Found in articles: {:?}\n",
-            index.search(query)
+            index.search(&query)
         );
     }
 }

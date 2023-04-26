@@ -49,7 +49,7 @@ impl std::fmt::Display for SearchType {
 }
 
 pub trait Search {
-    fn search(&self, query: Query) -> ArticleTitles;
+    fn search(&self, query: &Query) -> ArticleTitles;
 }
 
 

@@ -5,7 +5,7 @@ use std::error::Error;
 use crate::helpers::*;
 use crate::index::Index;
 
-use super::{ArticleTitles, Search};
+use super::*;
 
 pub struct TrieNode {
     pub children_map: HashMap<char, TrieNode>,
@@ -168,7 +168,7 @@ impl Index<Trie> {
 }
 
 impl Search for Index<Trie> {
-    fn search(&self, query: super::Query) -> ArticleTitles {
+    fn search(&self, query: &Query) -> ArticleTitles {
         todo!()
     }
 }

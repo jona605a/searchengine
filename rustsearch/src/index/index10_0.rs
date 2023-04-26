@@ -132,7 +132,7 @@ impl Index<HashMap<String, HashMap<usize, usize>>> {
 }
 
 impl Search for Index<HashMap<String, HashMap<usize, usize>>> {
-    fn search(&self, query: Query) -> ArticleTitles {
+    fn search(&self, query: &Query) -> ArticleTitles {
         todo!()
     }
 }

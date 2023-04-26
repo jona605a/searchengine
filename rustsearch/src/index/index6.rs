@@ -47,7 +47,7 @@ impl Index<HashMap<String, HashSet<String>>> {
 }
 
 impl Search for Index<HashMap<String, HashSet<String>>> {
-    fn search(&self, query: super::Query) -> ArticleTitles {
+    fn search(&self, query: &Query) -> ArticleTitles {
         let articleset = match query.search_type {
             crate::index::SearchType::SingleWordSearch => self.single_search(&query.search_string),
             _ => panic!(

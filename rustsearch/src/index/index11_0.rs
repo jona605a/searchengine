@@ -5,7 +5,7 @@ use std::error::Error;
 use crate::helpers::*;
 use crate::index::Index;
 
-use super::{ArticleTitles, Search};
+use super::*;
 
 impl Index<HashMap<(String, String, String), Vec<usize>>> {
     pub fn index11(config: &Config) -> Result<Self, Box<dyn Error>> {
@@ -61,7 +61,7 @@ impl Index<HashMap<(String, String, String), Vec<usize>>> {
 }
 
 impl Search for Index<HashMap<(String, String, String), Vec<usize>>> {
-    fn search(&self, query: super::Query) -> ArticleTitles {
+    fn search(&self, query: &Query) -> ArticleTitles {
         todo!()
     }
 }

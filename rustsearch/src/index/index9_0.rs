@@ -4,7 +4,7 @@ use std::error::Error;
 use crate::helpers::*;
 use crate::index::Index;
 
-use super::{ArticleTitles, Search};
+use super::*;
 
 pub struct TrieNodeLin {
     pub children_vec: Vec<(char, TrieNodeLin)>,
@@ -182,7 +182,7 @@ impl Index<TrieLin> {
 }
 
 impl Search for Index<TrieLin> {
-    fn search(&self, query: super::Query) -> ArticleTitles {
+    fn search(&self, query: &Query) -> ArticleTitles {
         todo!()
     }
 }

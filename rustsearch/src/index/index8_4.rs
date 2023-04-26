@@ -78,8 +78,8 @@ impl Index<HashMap<String, Vec<usize>>> {
 }
 
 impl Search for Index<HashMap<String, Vec<usize>>> {
-    fn search(&self, query: Query) -> ArticleTitles {
-        match query.search_type {
+    fn search(&self, query: &Query) -> ArticleTitles {
+        match &query.search_type {
             SearchType::SingleWordSearch => todo!(),
             SearchType::BooleanSearch(x) if x == "Naive"        => todo!(),
             SearchType::BooleanSearch(x) if x == "DeMorgan"     => todo!(),
