@@ -1,4 +1,3 @@
-use std::path::Prefix;
 use std::{env, fs, io, process};
 
 use regex::Regex;
@@ -53,15 +52,15 @@ fn user_dialog(index: Box<dyn Search>) {
         io::stdin()
             .read_line(&mut query_type)
             .expect("Failed to read line");
-        
-        let search_type = (&search_types[query_type.trim().parse::<usize>().unwrap()]).clone();
+
+        let search_type = search_types[query_type.trim().parse::<usize>().unwrap()].clone();
 
         println!("Searching for {query_string}, using {search_type}");
-        // let query = Query {
-        //     search_string: query_string.trim().to_string(),
-        //     search_type: search_type
-        // };
-        // println!("Found in articles: {:?}\n", index.search(&query));
+        let query = Query {
+            search_string: query_string.trim().to_string(),
+            search_type,
+        };
+        println!("Found in articles: {:?}\n", index.search(&query));
     }
 }
 
