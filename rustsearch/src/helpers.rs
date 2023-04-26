@@ -1,9 +1,10 @@
 use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
-use std::iter::Map;
 
-use regex::{Regex, Split};
+use regex::Regex;
+
+use crate::index::{Index, Search};
 
 pub struct Config {
     pub file_path: String,
@@ -21,6 +22,18 @@ impl Config {
 
         Ok(Config { file_path, indexno })
     }
+
+    pub fn to_index(&self) -> Result<Box<dyn Search>, Box<dyn Error>> {
+        match self.indexno.as_str() {
+            "6" => Ok(Box::new(Index::index6(&self)?)),
+            "7" => Ok(Box::new(Index::index7(&self)?)),
+            "8" => Ok(Box::new(Index::index8(&self)?)),
+            "9_0" => Ok(Box::new(Index::index9_0(&self)?)),
+            "9_1" => Ok(Box::new(Index::index9_1(&self)?)),
+            "10" => Ok(Box::new(Index::index10(&self)?)),
+            _ => todo!(),
+        }
+    }
 }
 
 pub fn read_file_to_string(file_path: &String) -> Result<String, Box<dyn Error>> {
@@ -28,21 +41,20 @@ pub fn read_file_to_string(file_path: &String) -> Result<String, Box<dyn Error>>
     Ok(contents)
 }
 
-pub fn read_and_clean_file_to_iter(config: &Config) -> Result<() , Box<dyn Error>> {
+pub fn read_and_clean_file_to_iter(config: &Config) -> Result<Vec<(String,Vec<String>)>, Box<dyn Error>> {
     let filecontents = read_file_to_string(&config.file_path)?;
     let re = Regex::new(r"\. |\.\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
 
     // Articles are seperated by the delimiter "---END.OF.DOCUMENT---"
     // In each article, it is assumed that the first line is the title, ending in a '.'
     // The contents of each article is split according to the regular expression.
-    
-    // let articles_iter: Vec<String,Vec<&str>> = filecontents.split("---END.OF.DOCUMENT---").map(|a| {
-    //     let (title, contents) = a.trim().split_once(".\n").unwrap_or(("", ""));
-    //     let x: Vec<&str> = re.split(contents).collect();
-    //     (title.to_string(), x)
-    // }).collect();
-    // Ok(articles_iter)
-    todo!()
+
+    let articles_iter: Vec<(String, Vec<String>)> = filecontents.split("---END.OF.DOCUMENT---").map(|a| {
+        let (title, contents) = a.trim().split_once(".\n").unwrap_or(("", ""));
+        let x: Vec<String> = re.split(contents).map(|s| s.to_string()).collect();
+        (title.to_string(), x)
+    }).collect();
+    Ok(articles_iter)
 }
 
 pub fn word_freq() {
@@ -67,15 +79,3 @@ pub fn word_freq() {
     }
     println!("{:#?}", word_freq)
 }
-
-// pub fn read_file_filtered(file_path: &String) -> Vec<&str> {
-//     // let whitelist: Vec<&str> = vec!["A.B.","abbr.","Acad.","A.D.","alt.","A.M.","Assn.","Aug.","Ave.","b.","B.A.","B.C.","b.p.","B.S","c.","Capt.","cent.","co.","Col.","Comdr.","Corp.","Cpl.","d.","D.C.","Dec.","dept.","dist.","div.","Dr.","ed.","est.","al.","Feb.","fl.","gal.","Gen.","Gov.","grad.","Hon.","i.e.","in.","inc.","inc.","Inst.","Jan.","Jr.","lat.","Lib.","long.","Lt.","Ltd.","M.D.","Mr.","Mrs.","mt.","mts.","Mus.","no.","Nov.","Oct.","ph.d.","pl.","pop.","pseud.","pt.","pub.","Rev.","rev.","R.N.","Sept.","Ser.","Sgt.","Sr.","St.","uninc.","Univ.","U.S.","vol.","vs.","wt."];
-//     // let blacklist: Vec<_> = vec!['(',')','[',']','{','}',',',';',':','-','/','=','?','!','*','&',' ',];
-
-//     let re = Regex::new(r"\. |\.\n|[\[\]\{\}\\\n\-() ,;:/=?!*&]").unwrap();
-
-//     let filecontents = read_file_to_string(file_path).expect("Should read file");
-
-//     let x: Vec<&str> = re.split(&filecontents).collect();
-//     x
-// }

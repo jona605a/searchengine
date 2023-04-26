@@ -41,21 +41,25 @@ impl Index<HashMap<String, HashSet<String>>> {
         })
     }
 
-    pub fn single_search(&self, word: &String) -> Option<&HashSet<String>> {
-        self.database.get(word)
+    pub fn single_search(&self, word: &String) -> ArticleTitles {
+        Vec::from_iter(
+            self.database
+                .get(word)
+                .unwrap_or(&HashSet::new())
+                .to_owned(),
+        )
     }
 }
 
 impl Search for Index<HashMap<String, HashSet<String>>> {
     fn search(&self, query: &Query) -> ArticleTitles {
-        let articleset = match query.search_type {
-            crate::index::SearchType::SingleWordSearch => self.single_search(&query.search_string),
+        match query.search_type {
+            SearchType::SingleWordSearch => self.single_search(&query.search_string),
             _ => panic!(
                 "Searchtype {0} not implemented for index6. ",
                 query.search_type
             ),
-        };
-        Vec::from_iter(articleset.unwrap_or(&HashSet::new()).to_owned())
+        }
     }
 }
 

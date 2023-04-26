@@ -1,4 +1,3 @@
-use regex::Regex;
 use std::collections::HashMap;
 use std::error::Error;
 
@@ -56,23 +55,36 @@ impl Trie {
         }
     }
 
-    pub fn find(&self, string_val: &String) -> Option<Vec<usize>> {
+    pub fn find_prefix(&self, string_val: &String) -> Vec<usize> {
         let mut current = &self.root;
 
         for c in string_val.chars() {
             if c == '*' {
                 // When reading a *, return the subtree from this node
                 eprintln!("Start in word");
-                return Some(self.get_subtree_match(current).to_vec());
+                return self.get_subtree_match(current).to_vec();
             }
-        
-            current = match current.children_map.get(&c){
+
+            current = match current.children_map.get(&c) {
                 Some(child) => child,
-                None => return None
+                None => return vec![],
             };
         }
         // At the end of the string, the last current node is final
-        Some(self.articlevec_to_bitvec(current.article_vec.as_ref().unwrap()))
+        self.articlevec_to_bitvec(current.article_vec.as_ref().unwrap())
+    }
+    
+    pub fn find_single(&self, string_val: &String) -> Vec<usize> {
+        let mut current = &self.root;
+
+        for c in string_val.chars() {
+            current = match current.children_map.get(&c) {
+                Some(child) => child,
+                None => return vec![],
+            };
+        }
+        // At the end of the string, the last current node is final
+        self.articlevec_to_bitvec(current.article_vec.as_ref().unwrap())
     }
 
     fn get_subtree_match(&self, node: &TrieNode) -> Vec<usize> {
@@ -114,19 +126,10 @@ impl Trie {
 }
 
 impl Index<Trie> {
-    pub fn index9(config: &Config) -> Result<Self, Box<dyn Error>> {
+    pub fn index9_1(config: &Config) -> Result<Self, Box<dyn Error>> {
         let mut database = Trie::new();
 
-        let filecontents = read_file_to_string(&config.file_path)?;
-        let re = Regex::new(r"\. |\.\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
-
-        // Articles are seperated by the delimiter "---END.OF.DOCUMENT---"
-        // In each article, it is assumed that the first line is the title, ending in a '.'
-        // The contents of each article is split according to the regular expression.
-        let articles_iter = filecontents.split("---END.OF.DOCUMENT---").map(|a| {
-            let (title, contents) = a.trim().split_once(".\n").unwrap_or(("", ""));
-            (title.to_string(), re.split(contents))
-        });
+        let articles_iter = read_and_clean_file_to_iter(config)?;
         let mut article_titles: Vec<String> = Vec::new();
 
         for (title, contents) in articles_iter {
@@ -142,12 +145,16 @@ impl Index<Trie> {
 
         Ok(Index {
             database,
-            article_titles
+            article_titles,
         })
     }
 
-    pub fn trie_search_1(&self, query: &String) -> Option<Vec<String>> {
-        Some(self.bitvec_to_articlelist(self.database.find(query)?))
+    pub fn prefix_search(&self, query: &String) -> ArticleTitles {
+        self.bitvec_to_articlelist(self.database.find_prefix(query))
+    }
+
+    pub fn single_search(&self, query: &String) -> ArticleTitles {
+        self.bitvec_to_articlelist(self.database.find_single(query))
     }
 
     pub fn bitvec_to_articlelist(&self, bitvecs: Vec<usize>) -> Vec<String> {
@@ -169,14 +176,24 @@ impl Index<Trie> {
 
 impl Search for Index<Trie> {
     fn search(&self, query: &Query) -> ArticleTitles {
-        todo!()
+        match query.search_type {
+            SearchType::SingleWordSearch => self.single_search(&query.search_string),
+            SearchType::PrefixSearch => self.prefix_search(&query.search_string),
+            _ => unimplemented!(),
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::{
+        helpers::*,
+        index::{
+            self,
+            gen_query::{gen_a_lot_of_runs_bool, gen_a_lot_of_runs_tries},
+        },
+    };
     use std::{collections::HashSet, fs, iter::zip};
-    use crate::{helpers::*, index::{gen_query::{gen_a_lot_of_runs_bool, gen_a_lot_of_runs_tries}, self}};
 
     use super::*;
 
@@ -187,7 +204,7 @@ mod tests {
             "9_1".to_string(),
         ])
         .unwrap();
-        Index::index9(&config).unwrap()
+        Index::index9_1(&config).unwrap()
     }
 
     fn insert_list_to_trie(trie: &mut Trie, word: &String, a_list: Vec<usize>) {
@@ -217,7 +234,7 @@ mod tests {
         database.n_titles = 100;
         Index {
             database,
-            article_titles
+            article_titles,
         }
     }
 
@@ -225,8 +242,7 @@ mod tests {
         dbg!(&query.to_string());
         let index_result: HashSet<String> = HashSet::from_iter(
             index
-                .trie_search_1(&query.to_string())
-                .unwrap_or(Vec::default()),
+                .prefix_search(&query.to_string())
         );
         assert_eq!(
             index_result,
@@ -319,31 +335,46 @@ mod tests {
 
         for dir in files.unwrap() {
             let file = dir.unwrap().path().into_os_string().into_string().unwrap();
-            let filesize = &file[46..file.len()-4];
+            let filesize = &file[46..file.len() - 4];
 
-            if (filesize != "1MB") & (filesize != "2MB"){
+            if (filesize != "1MB") & (filesize != "2MB") {
                 continue;
             }
 
             let ast_vec = gen_a_lot_of_runs_bool(file.clone(), 10);
-            let word_vec = gen_a_lot_of_runs_tries(file.clone(), 10,false);
+            let word_vec = gen_a_lot_of_runs_tries(file.clone(), 10, false);
 
-            let index8 = index::Index::index8(&Config {file_path : file.clone(), indexno : "8".to_string()}).unwrap();
-            let index9_0 = index::Index::index9_0(&Config {file_path : file.clone(), indexno : "9".to_string()}).unwrap();
-            let index9_1 = index::Index::index9(&Config {file_path : file.clone(), indexno : "9".to_string()}).unwrap();
+            let index8 = index::Index::index8(&Config {
+                file_path: file.clone(),
+                indexno: "8".to_string(),
+            })
+            .unwrap();
+            let index9_0 = index::Index::index9_0(&Config {
+                file_path: file.clone(),
+                indexno: "9".to_string(),
+            })
+            .unwrap();
+            let index9_1 = index::Index::index9_1(&Config {
+                file_path: file.clone(),
+                indexno: "9".to_string(),
+            })
+            .unwrap();
 
             let depth_vec = &ast_vec[0];
 
-            for (ast,word) in zip(depth_vec,word_vec)  {
-                    let article_list8_0 = index8.vec_to_articlelist(index8.evaluate_syntax_tree_naive(*ast.clone()));
-                    let article_list9_0 = index9_0.trie_search(&word).unwrap_or([].to_vec());
-                    let article_list9_1 = index9_1.trie_search_1(&word).unwrap_or([].to_vec());
-
-                    assert_eq!(article_list9_0,article_list8_0);
-                    assert_eq!(article_list9_1,article_list8_0);
-
+            for (ast, word) in zip(depth_vec, word_vec) {
+                let query = Query {
+                    search_string: word,
+                    search_type: SearchType::PrefixSearch
                 };
+                let article_list8_0 =
+                    index8.vec_to_articlelist(index8.evaluate_syntax_tree_naive(*ast.clone()));
+                let article_list9_0 = index9_0.search(&query);
+                let article_list9_1 = index9_1.search(&query);
 
+                assert_eq!(article_list9_0, article_list8_0);
+                assert_eq!(article_list9_1, article_list8_0);
+            }
         }
     }
 }

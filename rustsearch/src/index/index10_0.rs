@@ -9,10 +9,10 @@ use crate::index::Index;
 
 use super::*;
 
-impl Index<HashMap<String, HashMap<usize, usize>>> {
+impl Index<HashMap<String, HashSet<usize>>> {
     pub fn index10(config: &Config) -> Result<Self, Box<dyn Error>> {
         // Setup
-        let mut database: HashMap<String, HashMap<usize, usize>> = HashMap::new();
+        let mut database: HashMap<String, HashSet<usize>> = HashMap::new();
 
         let filecontents = read_file_to_string(&config.file_path)?;
         let re = Regex::new(r"\. |\.\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
@@ -28,8 +28,8 @@ impl Index<HashMap<String, HashMap<usize, usize>>> {
             if title != "" {
                 article_titles.push(title.to_string());
                 for word in contents {
-                    let article_freq = database.entry(word.to_string()).or_default();
-                    *article_freq.entry(article_no).or_default() += 1;
+                    let articles = database.entry(word.to_string()).or_default();
+                    articles.insert(article_no);
                 }
             }
             article_no += 1;
@@ -41,25 +41,69 @@ impl Index<HashMap<String, HashMap<usize, usize>>> {
         })
     }
 
-    pub fn exact_search(&self, query: &String) -> HashMap<usize, Vec<usize>> {
+    pub fn single_search(&self, query: &String) -> ArticleTitles {
+        let article_set = self
+            .database
+            .get(query)
+            .unwrap_or(&HashSet::new())
+            .to_owned();
+        article_set
+            .iter()
+            .map(|a_no| self.article_titles[*a_no].to_owned())
+            .collect()
+    }
+
+    pub fn exact_search(&self, query: &String) -> ArticleTitles {
         // Split sentence into words
         // Get article set for each word, and find intersection
         let art_intersect = query
             .split(' ')
-            .map(|w| match self.database.get(w) {
-                Some(art_map) => HashSet::from_iter(art_map.keys()),
-                None => HashSet::new(),
-            })
+            .map(|w| self.database.get(w).unwrap_or(&HashSet::new()).to_owned())
             .fold(HashSet::new(), |acc, art_set| {
                 art_set.intersection(&acc).map(|i| *i).collect()
             });
 
-        // For each article in the intersection, identify the least frequent word and read through the article (linearly) to find all sentence matches
+        let query_words: Vec<&str> = query.split(' ').collect();
+        let mut result: Vec<usize> = Vec::new();
+        let T = Index::kmp_table(&query_words);
+
+        for art_no in art_intersect {
+            // Read the file
+            let file_contents =
+                fs::read_to_string(format!("data/individual_articles/{:05}.txt", art_no)).expect(
+                    format!(
+                        "Article number {} not found in data/individual_articles/",
+                        art_no
+                    )
+                    .as_str(),
+                );
+            match Index::kmp(file_contents, &query_words, &T) {
+                x if x == vec![] => (),   // Empty vector
+                _ => result.push(art_no), // There was at least one occurence
+            }
+        }
+        // Result to article names
+        result
+            .iter()
+            .map(|a_no| self.article_titles[*a_no].to_owned())
+            .collect()
+    }
+
+    pub fn exact_search_locations(&self, query: &String) -> HashMap<usize, Vec<usize>> {
+        // Split sentence into words
+        // Get article set for each word, and find intersection
+        let art_intersect = query
+            .split(' ')
+            .map(|w| self.database.get(w).unwrap_or(&HashSet::new()).to_owned())
+            .fold(HashSet::new(), |acc, art_set| {
+                art_set.intersection(&acc).map(|i| *i).collect()
+            });
+
         let query_words: Vec<&str> = query.split(' ').collect();
         let mut result: HashMap<usize, Vec<usize>> = HashMap::new();
         let T = Index::kmp_table(&query_words);
 
-        for art_no in art_intersect.iter().map(|i| *i) {
+        for art_no in art_intersect {
             // Read the file
             let file_contents =
                 fs::read_to_string(format!("data/individual_articles/{:05}.txt", art_no)).expect(
@@ -70,7 +114,7 @@ impl Index<HashMap<String, HashMap<usize, usize>>> {
                     .as_str(),
                 );
             let match_pos = Index::kmp(file_contents, &query_words, &T);
-            result.insert(*art_no, match_pos);
+            result.insert(art_no, match_pos);
         }
         // Result to article names
         result
@@ -99,10 +143,7 @@ impl Index<HashMap<String, HashMap<usize, usize>>> {
     }
 
     pub fn kmp(file_contents: String, query_words: &Vec<&str>, T: &Vec<i32>) -> Vec<usize> {
-        // Output
-        let mut P: Vec<usize> = vec![];
-
-        // Local variables
+        let mut P: Vec<usize> = Vec::new();
         let mut j = 0;
         let mut k = 0;
 
@@ -131,9 +172,13 @@ impl Index<HashMap<String, HashMap<usize, usize>>> {
     }
 }
 
-impl Search for Index<HashMap<String, HashMap<usize, usize>>> {
+impl Search for Index<HashMap<String, HashSet<usize>>> {
     fn search(&self, query: &Query) -> ArticleTitles {
-        todo!()
+        match query.search_type {
+            SearchType::SingleWordSearch => self.single_search(&query.search_string),
+            SearchType::ExactSearch => self.exact_search(&query.search_string),
+            _ => unimplemented!(),
+        }
     }
 }
 

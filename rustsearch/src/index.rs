@@ -1,3 +1,7 @@
+use std::error::Error;
+
+use crate::helpers::Config;
+
 pub mod index6;
 pub mod index7;
 pub mod index8_0;
@@ -15,6 +19,20 @@ pub mod gen_query;
 pub struct Index<T> {
     database: T,
     article_titles: ArticleTitles,
+}
+
+impl<T> Index<T> {
+    pub fn from_config(config: &Config) -> Result<Box<dyn Search>, Box<dyn Error>> {
+        match config.indexno.as_str() {
+            "6" => Ok(Box::new(Index::index6(config)?)),
+            "7" => Ok(Box::new(Index::index7(config)?)),
+            "8" => Ok(Box::new(Index::index8(config)?)),
+            "9_0" => Ok(Box::new(Index::index9_0(config)?)),
+            "9_1" => Ok(Box::new(Index::index9_1(config)?)),
+            "10" => Ok(Box::new(Index::index10(config)?)),
+            _ => todo!(),
+        }
+    }
 }
 
 // #[derive(Debug)]

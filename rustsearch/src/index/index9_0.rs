@@ -66,12 +66,12 @@ impl TrieLin {
         }
     }
 
-    pub fn find(&self, string_val: &String) -> Option<Vec<usize>> {
+    pub fn find_prefix(&self, string_val: &String) -> Vec<usize> {
         let mut current = &self.root;
         for c in string_val.chars() {
             if c == '*' {
                 // When reading a *, return the subtree from this node
-                return Some(self.get_subtree_match(current).to_vec());
+                return self.get_subtree_match(current).to_vec();
             }
             let mut cld_idx = 0;
             for (cld_char, _) in &current.children_vec {
@@ -81,12 +81,31 @@ impl TrieLin {
                 cld_idx += 1;
             }
             if cld_idx == current.children_vec.len() {
-                return None;
+                return vec![];
             }
             current = &current.children_vec[cld_idx].1;
         }
         // At the end of the string, the last current node is final
-        Some(self.articlevec_to_bitvec(current.article_vec.as_ref().unwrap()))
+        self.articlevec_to_bitvec(current.article_vec.as_ref().unwrap())
+    }
+
+    pub fn find_single(&self, string_val: &String) -> Vec<usize> {
+        let mut current = &self.root;
+        for c in string_val.chars() {
+            let mut cld_idx = 0;
+            for (cld_char, _) in &current.children_vec {
+                if *cld_char == c {
+                    break;
+                }
+                cld_idx += 1;
+            }
+            if cld_idx == current.children_vec.len() {
+                return vec![];
+            }
+            current = &current.children_vec[cld_idx].1;
+        }
+        // At the end of the string, the last current node is final
+        self.articlevec_to_bitvec(current.article_vec.as_ref().unwrap())
     }
 
     fn get_subtree_match(&self, node: &TrieNodeLin) -> Vec<usize> {
@@ -160,8 +179,12 @@ impl Index<TrieLin> {
         })
     }
 
-    pub fn trie_search(&self, query: &String) -> Option<Vec<String>> {
-        Some(self.bitvec_to_articlelist(self.database.find(query)?))
+    pub fn prefix_search(&self, query: &String) -> ArticleTitles {
+        self.bitvec_to_articlelist(self.database.find_prefix(query))
+    }
+
+    pub fn single_search(&self, query: &String) -> ArticleTitles {
+        self.bitvec_to_articlelist(self.database.find_single(query))
     }
 
     pub fn bitvec_to_articlelist(&self, bitvecs: Vec<usize>) -> Vec<String> {
@@ -183,7 +206,11 @@ impl Index<TrieLin> {
 
 impl Search for Index<TrieLin> {
     fn search(&self, query: &Query) -> ArticleTitles {
-        todo!()
+        match query.search_type {
+            SearchType::SingleWordSearch => self.single_search(&query.search_string),
+            SearchType::PrefixSearch => self.prefix_search(&query.search_string),
+            _ => unimplemented!(),
+        }
     }
 }
 
@@ -239,8 +266,7 @@ mod tests {
         dbg!(&query.to_string());
         let index_result: HashSet<String> = HashSet::from_iter(
             index
-                .trie_search(&query.to_string())
-                .unwrap_or(Vec::default()),
+                .prefix_search(&query.to_string())
         );
         assert_eq!(
             index_result,

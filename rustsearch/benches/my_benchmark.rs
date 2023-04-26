@@ -1,6 +1,7 @@
 // https://bheisler.github.io/criterion.rs/book/getting_started.html
 // #![allow(non_snake_case)]
 use criterion::{criterion_group, criterion_main, Criterion};
+use rustsearch::index::{Query, Search};
 use std::fs;
 
 use rustsearch::helpers::{read_file_to_string};
@@ -54,7 +55,7 @@ pub fn indexing_9_1(c: &mut Criterion) {
         let filesize = &file[46..file.len()-4];
 
         c.bench_function(&format!("indexing index 9_1 {}",filesize),|b| b.iter(|| {
-            index::Index::index9(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "9_0".to_string()})
+            index::Index::index9_1(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "9_0".to_string()})
         }) );
 }
 }
@@ -223,7 +224,11 @@ pub fn find_word_9_0(c: &mut Criterion) {
 
         c.bench_function(&format!("Find word 9_0 {}", filesize), |b| b.iter(|| {
             for word in &word_vec {
-                index.trie_search(word);
+                let query = Query {
+                    search_string: word.to_owned(),
+                    search_type: index::SearchType::PrefixSearch
+                };
+                index.search(&query);
             }
         }));
     } 
@@ -237,11 +242,15 @@ pub fn find_word_9_1(c: &mut Criterion) {
         let filesize = &file[46..file.len()-4];
 
         let word_vec = gen_a_lot_of_runs_tries(file.clone(), 1000,false);
-        let index = index::Index::index9(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "9".to_string()}).unwrap();
+        let index = index::Index::index9_1(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "9".to_string()}).unwrap();
 
         c.bench_function(&format!("Find word 9_1 {}", filesize), |b| b.iter(|| {
             for word in &word_vec {
-                index.trie_search_1(word);
+                let query = Query {
+                    search_string: word.to_owned(),
+                    search_type: index::SearchType::PrefixSearch
+                };
+                index.search(&query);
             }
         }));
     } 
@@ -259,7 +268,11 @@ pub fn prefix_search_index_9_0(c: &mut Criterion) {
         
         c.bench_function(&format!("prefix search 9_0 in file {}", filesize), |b| b.iter(|| {
             for word in &word_vec {
-                index.trie_search(word);
+                let query = Query {
+                    search_string: word.to_owned(),
+                    search_type: index::SearchType::PrefixSearch
+                };
+                index.search(&query);
             }
         }));
     } 
@@ -273,11 +286,15 @@ pub fn prefix_search_index_9_1(c: &mut Criterion) {
         let filesize = &file[46..file.len()-4];
 
         let word_vec:Vec<String> = gen_a_lot_of_runs_tries(file.clone(), 1000,true);
-        let index = index::Index::index9(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "9".to_string()}).unwrap();
+        let index = index::Index::index9_1(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "9".to_string()}).unwrap();
         
         c.bench_function(&format!("prefix search 9_1 in file {}", filesize), |b| b.iter(|| {
             for word in &word_vec {
-                index.trie_search_1(word);
+                let query = Query {
+                    search_string: word.to_owned(),
+                    search_type: index::SearchType::PrefixSearch
+                };
+                index.search(&query);
             }
         }));
     } 
