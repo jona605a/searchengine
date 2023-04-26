@@ -22,6 +22,15 @@ fn get_search_prefix(database_words: &Vec<&String>, rng: &mut StdRng) -> String 
     };
 }
 
+pub fn ast_to_string(node: AstNode) -> String{
+    match node{
+        AstNode::Invert(child) => {let mut x = "! ".to_string();x.push_str(&ast_to_string(*child)); x},
+        AstNode::Binary(BinaryOp::And,left_child, right_child) => {let mut x = ast_to_string(*left_child);let y = ast_to_string(*right_child);x.push_str(" and ");x.push_str(&y); x},
+        AstNode::Binary(BinaryOp::Or, left_child, right_child) => {let mut x = ast_to_string(*left_child);let y = ast_to_string(*right_child);x.push_str(" or ");x.push_str(&y); x},
+        AstNode::Name(word) =>  word,
+    }
+}
+
 fn boolean_ast_gen(database_words: &Vec<&String>, depth: usize, rng: &mut StdRng) -> Box<AstNode> {
     if depth == 0 {
         // return Name randomly from database
@@ -52,7 +61,7 @@ fn boolean_ast_gen(database_words: &Vec<&String>, depth: usize, rng: &mut StdRng
     }
 }
 
-pub fn gen_a_lot_of_runs_bool(file_path: String, number: usize) -> Vec<Vec<Box<AstNode>>> {
+pub fn gen_a_lot_of_runs_bool(file_path: String, number: usize) -> Vec<Vec<String>> {
     let mut rng = StdRng::seed_from_u64(8008135);
 
     let config: Config =
@@ -66,12 +75,13 @@ pub fn gen_a_lot_of_runs_bool(file_path: String, number: usize) -> Vec<Vec<Box<A
     let boolean_queries = (0..=7)
         .map(|depth| {
             (1..=number)
-                .map(|_| boolean_ast_gen(&database_words, depth, &mut rng))
-                .collect::<Vec<Box<AstNode>>>()
+                .map(|_| ast_to_string(*boolean_ast_gen(&database_words, depth, &mut rng)))
+                .collect::<Vec<String>>()
         })
-        .collect::<Vec<Vec<Box<AstNode>>>>();
+        .collect::<Vec<Vec<String>>>();
 
     boolean_queries
+    
 }
 
 pub fn gen_a_lot_of_runs_tries(file_path: String, number: usize, prefix: bool) -> Vec<String> {
@@ -183,13 +193,6 @@ mod bool_tests {
         assert_eq!(result4, "wor*");
     }
 
-    fn astnode_to_string(ast: Box<AstNode>) -> String {
-        return match *ast {
-            AstNode::Name(s) => s,
-            _ => "AstNode does not have depth 0".to_string(),
-        };
-    }
-
     #[test]
     fn gen_a_lot_of_runs_bool_and_gen_a_lot_of_runs_tries_gives_the_same_words() {
         let files = fs::read_dir("../../data.nosync/");
@@ -209,7 +212,7 @@ mod bool_tests {
 
             for (ast, word) in zip(depth_vec, word_vec) {
                 print!("THE WORD THAT FAILED IS {}\n", &word);
-                assert_eq!(astnode_to_string(ast.clone()), word);
+                assert_eq!(ast.clone(), word);
             }
         }
     }

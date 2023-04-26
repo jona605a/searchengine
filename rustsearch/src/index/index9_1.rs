@@ -337,7 +337,6 @@ mod tests {
                 continue;
             }
 
-            let ast_vec = gen_a_lot_of_runs_bool(file.clone(), 10);
             let word_vec = gen_a_lot_of_runs_tries(file.clone(), 10, false);
 
             let index8 = index::Index::index8(&Config {
@@ -356,17 +355,20 @@ mod tests {
             })
             .unwrap();
 
-            let depth_vec = &ast_vec[0];
-
-            for (ast, word) in zip(depth_vec, word_vec) {
-                let query = Query {
-                    search_string: word,
+            for word in word_vec {
+                let query1 = Query {
+                    search_string: word.clone(),
                     search_type: SearchType::PrefixSearch,
                 };
-                let article_list8_0 =
-                    index8.vec_to_articlelist(index8.evaluate_syntax_tree_naive(*ast.clone()));
-                let article_list9_0 = index9_0.search(&query);
-                let article_list9_1 = index9_1.search(&query);
+
+                let query2 = Query {
+                    search_string: word.clone(),
+                    search_type: SearchType::BooleanSearch("Naive".to_string())
+                };
+
+                let article_list8_0 = index8.search(&query2);
+                let article_list9_0 = index9_0.search(&query1);
+                let article_list9_1 = index9_1.search(&query1);
 
                 assert_eq!(article_list9_0, article_list8_0);
                 assert_eq!(article_list9_1, article_list8_0);

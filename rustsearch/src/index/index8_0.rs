@@ -139,7 +139,7 @@ impl Index<HashMap<String, Vec<usize>>> {
 
 #[cfg(test)]
 mod tests {
-    use crate::index::{self, gen_query::gen_a_lot_of_runs_bool};
+    use crate::index::{self, gen_query::gen_a_lot_of_runs_bool, Search, Query, SearchType};
 
     use super::*;
     use std::{collections::HashSet, fs};
@@ -347,22 +347,46 @@ mod tests {
             })
             .unwrap();
 
+
             for depth_vec in ast_vec {
-                for ast in &depth_vec {
-                    let article_list7_0 =
-                        index7.bitvec_to_articlelist(index7.evaluate_syntax_tree(*ast.clone()));
-                    let article_list8_0 =
-                        index8.vec_to_articlelist(index8.evaluate_syntax_tree_naive(*ast.clone()));
-                    let article_list8_1: Vec<String> = index8
-                        .vec_to_articlelist(index8.evaluate_syntax_tree_demorgan(*ast.clone()));
-                    let article_list8_2 = index8.vec_to_articlelist(
-                        index8.evaluate_syntax_tree_binary_search(*ast.clone()),
-                    );
-                    let article_list8_3 =
-                        index8.vec_to_articlelist(index8.evaluate_syntax_tree_hybrid(*ast.clone()));
-                    let article_list8_4 = index8.bitvec_to_articlelist(
-                        index8.evaluate_syntax_tree_convert_to_bitvecs(*ast.clone()),
-                    );
+                for word in &depth_vec {
+                    
+                    let query1 = Query {
+                        search_string: word.clone(),
+                        search_type: SearchType::BooleanSearch(" ".to_string())
+                    };
+
+                    let query2 = Query {
+                        search_string: word.clone(),
+                        search_type: SearchType::BooleanSearch("Naive".to_string())
+                    };
+
+                    let query3 = Query {
+                        search_string: word.clone(),
+                        search_type: SearchType::BooleanSearch("DeMorgan".to_string())
+                    };
+
+                    let query4 = Query {
+                        search_string: word.clone(),
+                        search_type: SearchType::BooleanSearch("BinarySearch".to_string())
+                    };
+
+                    let query5 = Query {
+                        search_string: word.clone(),
+                        search_type: SearchType::BooleanSearch("Hybrid".to_string())
+                    };
+
+                    let query6 = Query {
+                        search_string: word.clone(),
+                        search_type: SearchType::BooleanSearch("Bitvecs".to_string())
+                    };
+
+                    let article_list7_0 = index7.search(&query1);
+                    let article_list8_0 = index8.search(&query2);
+                    let article_list8_1: Vec<String> = index8.search(&query3);
+                    let article_list8_2 = index8.search(&query4);
+                    let article_list8_3 = index8.search(&query5);
+                    let article_list8_4 = index8.search(&query6);
 
                     assert_eq!(article_list7_0, article_list8_0);
                     assert_eq!(article_list7_0, article_list8_1);

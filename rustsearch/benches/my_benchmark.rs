@@ -1,7 +1,8 @@
 // https://bheisler.github.io/criterion.rs/book/getting_started.html
 // #![allow(non_snake_case)]
 use criterion::{criterion_group, criterion_main, Criterion};
-use rustsearch::index::{Query, Search};
+use rustsearch::index::{Query, Search, SearchType};
+use rustsearch::parsing::AstNode;
 use std::fs;
 
 use rustsearch::helpers::{read_file_to_string, Config};
@@ -40,188 +41,92 @@ pub fn index_template(c: &mut Criterion, i_string: &str) {
     }
 }
 
-pub fn indexing_7(c: &mut Criterion) {
+pub fn indexing_7_0(c: &mut Criterion) {
     index_template(c, "7_0");
 }
 
 
-
 pub fn indexing_8_0(c: &mut Criterion) {
-    let files = fs::read_dir("../../data.nosync/");
-
-    for dir in files.unwrap() {
-        let file = dir.unwrap().path().into_os_string().into_string().unwrap();
-        let filesize = &file[46..file.len()-4];
-
-        c.bench_function(&format!("indexing index 8_0 {}",filesize),|b| b.iter(|| {
-            index::Index::index8(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "8_0".to_string()})
-        }) );
-}
+    index_template(c, "8_0");
 }
 
 pub fn indexing_9_1(c: &mut Criterion) {
-    let files = fs::read_dir("../../data.nosync/");
-
-    for dir in files.unwrap() {
-        let file = dir.unwrap().path().into_os_string().into_string().unwrap();
-        let filesize = &file[46..file.len()-4];
-
-        c.bench_function(&format!("indexing index 9_1 {}",filesize),|b| b.iter(|| {
-            index::Index::index9_1(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "9_0".to_string()})
-        }) );
-}
+    index_template(c, "9_0");
 }
 
 pub fn indexing_9_0(c: &mut Criterion) {
-    let files = fs::read_dir("../../data.nosync/");
-
-    for dir in files.unwrap() {
-        let file = dir.unwrap().path().into_os_string().into_string().unwrap();
-        let filesize = &file[46..file.len()-4];
-
-        c.bench_function(&format!("indexing index 9_0 {}",filesize),|b| b.iter(|| {
-            index::Index::index9_0(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "9_0".to_string()})
-        }) );
+    index_template(c, "9_0");
 }
-}
+
 // Timing search times
 
-pub fn searching_index_7_0(c: &mut Criterion) {
+pub fn searching_template(c: &mut Criterion, i_string: &str,) {
     let files = fs::read_dir("../../data.nosync/");
 
-    for dir in files.unwrap() {
-        let file = dir.unwrap().path().into_os_string().into_string().unwrap();
-        let filesize = &file[46..file.len()-4];
+    let booleanSearchtype = match i_string {
+        "7_0" => " ",
+        "8_0" => "Naive",
+        "8_1" => "DeMorgan",
+        "8_2" => "BinarySearch",
+        "8_3" => "Hybrid",
+        "8_4" => "Bitvecs",
+        _ => panic!()
+    };
 
-        let ast_vec = gen_a_lot_of_runs_bool(file.clone(), 1000);
-        let index = index::Index::index7(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "7".to_string()}).unwrap();
+    for dir in files.unwrap() {
+        let file_path = dir.unwrap().path().into_os_string().into_string().unwrap();
+        let filesize = &file_path[46..file_path.len()-4];
+
+        let ast_vec: Vec<Vec<String>> = gen_a_lot_of_runs_bool(file_path.clone(), 1000);
+
+        let config = Config {
+            file_path: file_path.to_owned(),
+            indexno: i_string.to_string(),
+        };
+        let index = config.to_index().unwrap();
+        
         let mut depth = 0;
 
         for depth_vec in ast_vec {
             depth += 1;
-            c.bench_function(&format!("searching index 7_0 in file {}, depth {}", filesize, depth), |b| b.iter(|| {
-            for ast in &depth_vec {
-                index.bitvec_to_articlelist(index.evaluate_syntax_tree(*ast.clone()));
+
+            c.bench_function(&format!("searching index {} in file {}, depth {}",i_string, filesize, depth), |b| b.iter(|| {
+            for word in &depth_vec {
+                
+                let query = Query {
+                    search_string: word.clone(),
+                    search_type: SearchType::BooleanSearch(booleanSearchtype.to_string())
+                };
+                
+                index.search(&query);
             }
         }));
     }
     } 
+} 
+
+pub fn searching_index_7_0(c: &mut Criterion) {
+    searching_template(c, "7_0");
 }
 
 pub fn searching_index_8_0(c: &mut Criterion) {
-    let files = fs::read_dir("../../data.nosync/");
-
-    for dir in files.unwrap() {
-        let file = dir.unwrap().path().into_os_string().into_string().unwrap();
-        let filesize = &file[46..file.len()-4];
-
-        if filesize != "100MB"{
-            continue;
-        }
-
-        let ast_vec = gen_a_lot_of_runs_bool(file.clone(), 1000);
-        let index = index::Index::index8(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "8".to_string()}).unwrap();
-        let mut depth = -1;
-
-        for depth_vec in ast_vec {
-            depth += 1;
-            c.bench_function(&format!("searching index 8_0 in file {}, depth {}", filesize, depth), |b| b.iter(|| {
-            for ast in &depth_vec {
-                index.vec_to_articlelist(index.evaluate_syntax_tree_naive(*ast.clone()));
-            }
-        }));
-    }
-    } 
+    searching_template(c, "8_0");
 }
 
 pub fn searching_index_8_1(c: &mut Criterion) {
-    let files = fs::read_dir("../../data.nosync/");
-
-    for dir in files.unwrap() {
-        let file = dir.unwrap().path().into_os_string().into_string().unwrap();
-        let filesize = &file[46..file.len()-4];
-
-        let ast_vec = gen_a_lot_of_runs_bool(file.clone(), 1000);
-        let index = index::Index::index8(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "8".to_string()}).unwrap();
-        let mut depth = 0;
-
-        for depth_vec in ast_vec {
-            depth += 1;
-            c.bench_function(&format!("searching index 8_1 in file {}, depth {}", filesize, depth), |b| b.iter(|| {
-            for ast in &depth_vec {
-                index.vec_to_articlelist(index.evaluate_syntax_tree_demorgan(*ast.clone()));
-            }
-        }));
-    }
-    } 
+    searching_template(c, "8_1");
 }
 
 pub fn searching_index_8_2(c: &mut Criterion) {
-    let files = fs::read_dir("../../data.nosync/");
-
-    for dir in files.unwrap() {
-        let file = dir.unwrap().path().into_os_string().into_string().unwrap();
-        let filesize = &file[46..file.len()-4];
-
-        let ast_vec = gen_a_lot_of_runs_bool(file.clone(), 1000);
-        let index = index::Index::index8(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "8".to_string()}).unwrap();
-        let mut depth = 0;
-
-        for depth_vec in ast_vec {
-            depth += 1;
-            c.bench_function(&format!("searching index 8_2 in file {}, depth {}", filesize, depth), |b| b.iter(|| {
-            for ast in &depth_vec {
-                index.vec_to_articlelist(index.evaluate_syntax_tree_binary_search(*ast.clone()));
-            }
-        }));
-    }
-    } 
+    searching_template(c, "8_2");
 }
 
 pub fn searching_index_8_3(c: &mut Criterion) {
-    let files = fs::read_dir("../../data.nosync/");
-
-    for dir in files.unwrap() {
-        let file = dir.unwrap().path().into_os_string().into_string().unwrap();
-        let filesize = &file[46..file.len()-4];
-        print!("{}", filesize);
-
-
-        let ast_vec = gen_a_lot_of_runs_bool(file.clone(), 1000);
-        let index = index::Index::index8(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "8".to_string()}).unwrap();
-        let mut depth = 0;
-
-        for depth_vec in ast_vec {
-            depth += 1;
-            c.bench_function(&format!("searching index 8_3 in file {}, depth {}", filesize, depth), |b| b.iter(|| {
-            for ast in &depth_vec {
-                index.vec_to_articlelist(index.evaluate_syntax_tree_hybrid(*ast.clone()));
-            }
-        }));
-    }
-    } 
+    searching_template(c, "8_3");
 }
 
 pub fn searching_index_8_4(c: &mut Criterion) {
-    let files = fs::read_dir("../../data.nosync/");
-
-    for dir in files.unwrap() {
-        let file = dir.unwrap().path().into_os_string().into_string().unwrap();
-        let filesize = &file[46..file.len()-4];
-
-        let ast_vec = gen_a_lot_of_runs_bool(file.clone(), 1000);
-        let index = index::Index::index8(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "8".to_string()}).unwrap();
-        let mut depth = 0;
-
-        for depth_vec in ast_vec {
-            depth += 1;
-            c.bench_function(&format!("searching index 8_4 in file {}, depth {}", filesize, depth), |b| b.iter(|| {
-            for ast in &depth_vec {
-                index.bitvec_to_articlelist(index.evaluate_syntax_tree_convert_to_bitvecs(*ast.clone()));
-            }
-        }));
-    }
-    } 
+    searching_template(c, "8_4");
 }
 
 pub fn find_word_9_0(c: &mut Criterion) {
