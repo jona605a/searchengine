@@ -86,7 +86,7 @@ impl TrieLin {
             current = &current.children_vec[cld_idx].1;
         }
         // At the end of the string, the last current node is final
-        self.articlevec_to_bitvec(current.article_vec.as_ref().unwrap())
+        self.articlevec_to_bitvec(current.article_vec.as_ref().unwrap_or(&Vec::new()))
     }
 
     pub fn find_single(&self, string_val: &String) -> Vec<usize> {
@@ -105,7 +105,7 @@ impl TrieLin {
             current = &current.children_vec[cld_idx].1;
         }
         // At the end of the string, the last current node is final
-        self.articlevec_to_bitvec(current.article_vec.as_ref().unwrap())
+        self.articlevec_to_bitvec(current.article_vec.as_ref().unwrap_or(&Vec::new()))
     }
 
     fn get_subtree_match(&self, node: &TrieNodeLin) -> Vec<usize> {
