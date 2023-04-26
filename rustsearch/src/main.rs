@@ -1,8 +1,9 @@
-use std::{env, io, process, fs};
+use std::path::Prefix;
+use std::{env, fs, io, process};
 
 use regex::Regex;
 use rustsearch::helpers::*;
-use rustsearch::index::{Index, Search, Query};
+use rustsearch::index::{Index, Query, Search, SearchType::*};
 
 #[allow(unused_variables)]
 
@@ -14,38 +15,53 @@ fn main() {
         process::exit(1);
     });
 
-    println!(
-        "Opening and indexing file {} with index {}",
-        config.file_path, config.indexno
-    );
+    user_dialog(config.to_index().unwrap())
 
-    separate_file_to_seperate_articles(&config);
+    // separate_file_to_seperate_articles(&config);
 
     // profile_memory_old(&config);
 }
 
 #[allow(dead_code)]
-fn user_dialog(index: & impl Search) {
+fn user_dialog(index: Box<dyn Search>) {
+    let search_types = [
+        SingleWordSearch,
+        BooleanSearch(String::new()),
+        PrefixSearch,
+        ExactSearch,
+        FuzzySearch,
+    ];
     loop {
         println!("Please input your query. (exit to stop)");
 
-        let mut query = String::new();
+        let mut query_string = String::new();
+        let mut query_type = String::new();
 
         io::stdin()
-            .read_line(&mut query)
+            .read_line(&mut query_string)
             .expect("Failed to read line");
-        if query.trim() == "exit" {
+        if query_string.trim() == "exit" {
             break;
         }
-        println!("Searching for {query}");
-        let query = Query {
-            search_string: query.trim().to_string(),
-            search_type: rustsearch::index::SearchType::SingleWordSearch
-        };
-        println!(
-            "Found in articles: {:?}\n",
-            index.search(&query)
-        );
+
+        println!("Select the search type for your index");
+
+        for (i, st) in search_types.iter().enumerate() {
+            println!("{}) {}", i, st)
+        }
+
+        io::stdin()
+            .read_line(&mut query_type)
+            .expect("Failed to read line");
+        
+        let search_type = (&search_types[query_type.trim().parse::<usize>().unwrap()]).clone();
+
+        println!("Searching for {query_string}, using {search_type}");
+        // let query = Query {
+        //     search_string: query_string.trim().to_string(),
+        //     search_type: search_type
+        // };
+        // println!("Found in articles: {:?}\n", index.search(&query));
     }
 }
 
@@ -68,7 +84,6 @@ fn profile_memory_old(config: &Config) {
 
 #[allow(dead_code)]
 fn separate_file_to_seperate_articles(config: &Config) {
-
     let filecontents = read_file_to_string(&config.file_path).unwrap();
     let re = Regex::new(r"\. |\.\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
 
@@ -81,7 +96,7 @@ fn separate_file_to_seperate_articles(config: &Config) {
     });
 
     let mut count = 0;
-    
+
     for (title, contents) in articles_iter {
         if title != "" {
             let x = contents.collect::<Vec<&str>>().join(" ");
@@ -89,5 +104,4 @@ fn separate_file_to_seperate_articles(config: &Config) {
             count += 1;
         }
     }
-
 }

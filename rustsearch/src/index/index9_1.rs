@@ -57,11 +57,9 @@ impl Trie {
 
     pub fn find_prefix(&self, string_val: &String) -> Vec<usize> {
         let mut current = &self.root;
-
         for c in string_val.chars() {
             if c == '*' {
                 // When reading a *, return the subtree from this node
-                eprintln!("Start in word");
                 return self.get_subtree_match(current).to_vec();
             }
 
@@ -73,7 +71,7 @@ impl Trie {
         // At the end of the string, the last current node is final
         self.articlevec_to_bitvec(current.article_vec.as_ref().unwrap())
     }
-    
+
     pub fn find_single(&self, string_val: &String) -> Vec<usize> {
         let mut current = &self.root;
 
@@ -240,10 +238,8 @@ mod tests {
 
     fn search_match(index: &Index<Trie>, query: &str, titles: Vec<&str>) {
         dbg!(&query.to_string());
-        let index_result: HashSet<String> = HashSet::from_iter(
-            index
-                .prefix_search(&query.to_string())
-        );
+        let index_result: HashSet<String> =
+            HashSet::from_iter(index.prefix_search(&query.to_string()));
         assert_eq!(
             index_result,
             HashSet::from_iter(titles.iter().map(|s| s.to_string()))
@@ -365,7 +361,7 @@ mod tests {
             for (ast, word) in zip(depth_vec, word_vec) {
                 let query = Query {
                     search_string: word,
-                    search_type: SearchType::PrefixSearch
+                    search_type: SearchType::PrefixSearch,
                 };
                 let article_list8_0 =
                     index8.vec_to_articlelist(index8.evaluate_syntax_tree_naive(*ast.clone()));

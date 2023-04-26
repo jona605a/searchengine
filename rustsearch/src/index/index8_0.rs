@@ -6,6 +6,8 @@ use crate::helpers::*;
 use crate::index::Index;
 use crate::parsing::*;
 
+use super::ArticleTitles;
+
 impl Index<HashMap<String, Vec<usize>>> {
     pub fn index8(config: &Config) -> Result<Self, Box<dyn Error>> {
         let mut database: HashMap<String, Vec<usize>> = HashMap::new();
@@ -49,12 +51,12 @@ impl Index<HashMap<String, Vec<usize>>> {
         output
     }
 
-    pub fn boolean_search_naive(&self, exp: &String) -> Option<Vec<String>> {
+    pub fn boolean_search_naive(&self, exp: &String) -> ArticleTitles {
         match Expr::from_string(&exp) {
             Ok(Expr(ExprData::HasNodes(node))) => {
-                Some(self.vec_to_articlelist(self.evaluate_syntax_tree_naive(node)))
+                self.vec_to_articlelist(self.evaluate_syntax_tree_naive(node))
             }
-            _ => None, // Either an error or the expression has no nodes
+            _ => Vec::new(), // Either an error or the expression has no nodes
         }
     }
 
@@ -190,11 +192,8 @@ mod tests {
 
     fn search_match(index: &Index<HashMap<String, Vec<usize>>>, query: &str, titles: Vec<&str>) {
         dbg!(&query.to_string());
-        let index_result: HashSet<String> = HashSet::from_iter(
-            index
-                .boolean_search_naive(&query.to_string())
-                .unwrap_or(Vec::default()),
-        );
+        let index_result: HashSet<String> =
+            HashSet::from_iter(index.boolean_search_naive(&query.to_string()));
         assert_eq!(
             index_result,
             HashSet::from_iter(titles.iter().map(|s| s.to_string()))

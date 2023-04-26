@@ -6,12 +6,12 @@ use crate::parsing::*;
 use super::*;
 
 impl Index<HashMap<String, Vec<usize>>> {
-    pub fn boolean_search_articles_to_bitvecs(&self, exp: &String) -> Option<Vec<String>> {
+    pub fn boolean_search_articles_to_bitvecs(&self, exp: &String) -> Vec<String> {
         match Expr::from_string(&exp) {
             Ok(Expr(ExprData::HasNodes(node))) => {
-                Some(self.bitvec_to_articlelist(self.evaluate_syntax_tree_convert_to_bitvecs(node)))
+                self.bitvec_to_articlelist(self.evaluate_syntax_tree_convert_to_bitvecs(node))
             }
-            _ => None, // Either an error or the expression has no nodes
+            _ => Vec::new(), // Either an error or the expression has no nodes
         }
     }
 
@@ -75,17 +75,33 @@ impl Index<HashMap<String, Vec<usize>>> {
         }
         output
     }
+
+    pub fn single_search(&self, query: &String) -> ArticleTitles {
+        self.bitvec_to_articlelist(
+            self.to_bitvec(self.database.get(query).unwrap_or(&vec![]).to_vec()),
+        )
+    }
 }
 
 impl Search for Index<HashMap<String, Vec<usize>>> {
     fn search(&self, query: &Query) -> ArticleTitles {
         match &query.search_type {
-            SearchType::SingleWordSearch => todo!(),
-            SearchType::BooleanSearch(x) if x == "Naive"        => todo!(),
-            SearchType::BooleanSearch(x) if x == "DeMorgan"     => todo!(),
-            SearchType::BooleanSearch(x) if x == "BinarySearch" => todo!(),
-            SearchType::BooleanSearch(x) if x == "Hybrid"       => todo!(),
-            SearchType::BooleanSearch(x) if x == "Bitvecs"      => todo!(),
+            SearchType::SingleWordSearch => self.single_search(&query.search_string),
+            SearchType::BooleanSearch(x) if x == "Naive" => {
+                self.boolean_search_naive(&query.search_string)
+            }
+            SearchType::BooleanSearch(x) if x == "DeMorgan" => {
+                self.boolean_search_demorgan(&query.search_string)
+            }
+            SearchType::BooleanSearch(x) if x == "BinarySearch" => {
+                self.boolean_search_binary_search(&query.search_string)
+            }
+            SearchType::BooleanSearch(x) if x == "Hybrid" => {
+                self.boolean_search_hybrid(&query.search_string)
+            }
+            SearchType::BooleanSearch(x) if x == "Bitvecs" => {
+                self.boolean_search_articles_to_bitvecs(&query.search_string)
+            }
             _ => unimplemented!(),
         }
     }
@@ -125,11 +141,8 @@ mod tests {
 
     fn search_match(index: &Index<HashMap<String, Vec<usize>>>, query: &str, titles: Vec<&str>) {
         dbg!(&query.to_string());
-        let index_result: HashSet<String> = HashSet::from_iter(
-            index
-                .boolean_search_articles_to_bitvecs(&query.to_string())
-                .unwrap_or(Vec::default()),
-        );
+        let index_result: HashSet<String> =
+            HashSet::from_iter(index.boolean_search_articles_to_bitvecs(&query.to_string()));
         assert_eq!(
             index_result,
             HashSet::from_iter(titles.iter().map(|s| s.to_string()))

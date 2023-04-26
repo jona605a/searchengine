@@ -3,13 +3,15 @@ use std::collections::HashMap;
 use crate::index::Index;
 use crate::parsing::*;
 
+use super::ArticleTitles;
+
 impl Index<HashMap<String, Vec<usize>>> {
-    pub fn boolean_search_hybrid(&self, exp: &String) -> Option<Vec<String>> {
+    pub fn boolean_search_hybrid(&self, exp: &String) -> ArticleTitles {
         match Expr::from_string(&exp) {
             Ok(Expr(ExprData::HasNodes(node))) => {
-                Some(self.vec_to_articlelist(self.evaluate_syntax_tree_hybrid(node)))
+                self.vec_to_articlelist(self.evaluate_syntax_tree_hybrid(node))
             }
-            _ => None, // Either an error or the expression has no nodes
+            _ => Vec::new(), // Either an error or the expression has no nodes
         }
     }
 
@@ -144,7 +146,6 @@ mod tests {
         let index_result: HashSet<String> = HashSet::from_iter(
             index
                 .boolean_search_hybrid(&query.to_string())
-                .unwrap_or(Vec::default()),
         );
         assert_eq!(
             index_result,

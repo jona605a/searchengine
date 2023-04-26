@@ -145,9 +145,7 @@ impl TrieLin {
 }
 
 impl Index<TrieLin> {
-    pub fn index9_0(
-        config: &Config,
-    ) -> Result<Self, Box<dyn Error>> {
+    pub fn index9_0(config: &Config) -> Result<Self, Box<dyn Error>> {
         let mut database = TrieLin::new();
 
         let filecontents = read_file_to_string(&config.file_path)?;
@@ -175,7 +173,7 @@ impl Index<TrieLin> {
 
         Ok(Index {
             database,
-            article_titles
+            article_titles,
         })
     }
 
@@ -258,16 +256,14 @@ mod tests {
         database.n_titles = 100;
         Index {
             database,
-            article_titles
+            article_titles,
         }
     }
 
     fn search_match(index: &Index<TrieLin>, query: &str, titles: Vec<&str>) {
         dbg!(&query.to_string());
-        let index_result: HashSet<String> = HashSet::from_iter(
-            index
-                .prefix_search(&query.to_string())
-        );
+        let index_result: HashSet<String> =
+            HashSet::from_iter(index.prefix_search(&query.to_string()));
         assert_eq!(
             index_result,
             HashSet::from_iter(titles.iter().map(|s| s.to_string()))
