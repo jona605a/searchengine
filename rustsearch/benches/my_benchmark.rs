@@ -4,7 +4,7 @@ use criterion::{criterion_group, criterion_main, Criterion};
 use rustsearch::index::{Query, Search};
 use std::fs;
 
-use rustsearch::helpers::{read_file_to_string};
+use rustsearch::helpers::{read_file_to_string, Config};
 use rustsearch::index::{self, gen_query::{gen_a_lot_of_runs_bool,gen_a_lot_of_runs_tries}};
 
 
@@ -21,18 +21,30 @@ pub fn opening_and_reading_file(c: &mut Criterion) {
 }
 
 // Timing the indexing on different files
-pub fn indexing_7(c: &mut Criterion) {
+pub fn index_template(c: &mut Criterion, i_string: &str) {
     let files = fs::read_dir("../../data.nosync/");
+    
 
     for dir in files.unwrap() {
-        let file = dir.unwrap().path().into_os_string().into_string().unwrap();
-        let filesize = &file[46..file.len()-4];
+        let file_path = dir.unwrap().path().into_os_string().into_string().unwrap();
+        let filesize = &file_path[46..file_path.len()-4];
 
-        c.bench_function(&format!("indexing index 7_0 {}",filesize),|b| b.iter(|| {
-            index::Index::index7(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "7_0".to_string()})
+        let config = Config {
+            file_path: file_path.to_owned(),
+            indexno: i_string.to_string(),
+        };
+
+        c.bench_function(&format!("indexing index {} {}",i_string,filesize),|b| b.iter(|| {
+            config.to_index()
         }) );
+    }
 }
+
+pub fn indexing_7(c: &mut Criterion) {
+    index_template(c, "7_0");
 }
+
+
 
 pub fn indexing_8_0(c: &mut Criterion) {
     let files = fs::read_dir("../../data.nosync/");
@@ -220,6 +232,7 @@ pub fn find_word_9_0(c: &mut Criterion) {
         let filesize = &file[46..file.len()-4];
 
         let word_vec = gen_a_lot_of_runs_tries(file.clone(), 1000,false);
+
         let index = index::Index::index9_0(&rustsearch::helpers::Config {file_path : file.clone(), indexno : "9".to_string()}).unwrap();
 
         c.bench_function(&format!("Find word 9_0 {}", filesize), |b| b.iter(|| {
