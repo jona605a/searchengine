@@ -1,9 +1,8 @@
-use std::collections::{HashMap, HashSet};
 use std::{env, io, process, fs};
 
 use regex::Regex;
 use rustsearch::helpers::*;
-use rustsearch::index::Index;
+use rustsearch::index::{Index, Search, Query};
 
 #[allow(unused_variables)]
 
@@ -26,7 +25,7 @@ fn main() {
 }
 
 #[allow(dead_code)]
-fn user_dialog(index: &Index<HashMap<String, HashSet<String>>, Option<u128>>) {
+fn user_dialog(index: & impl Search) {
     loop {
         println!("Please input your query. (exit to stop)");
 
@@ -35,13 +34,17 @@ fn user_dialog(index: &Index<HashMap<String, HashSet<String>>, Option<u128>>) {
         io::stdin()
             .read_line(&mut query)
             .expect("Failed to read line");
-        if query == "exit\n" {
+        if query.trim() == "exit" {
             break;
         }
-        print!("Searching for {query}");
+        println!("Searching for {query}");
+        let query = Query {
+            search_string: query.trim().to_string(),
+            search_type: rustsearch::index::SearchType::SingleWordSearch
+        };
         println!(
             "Found in articles: {:?}\n",
-            index.search(&query.strip_suffix('\n').unwrap().to_string())
+            index.search(query)
         );
     }
 }

@@ -6,14 +6,8 @@ use crate::helpers::*;
 use crate::index::Index;
 use crate::parsing::*;
 
-pub struct Index8ExtraVariables {
-    pub article_titles: Vec<String>,
-}
-
-impl Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
-    pub fn index8(
-        config: &Config,
-    ) -> Result<Index<HashMap<String, Vec<usize>>, Index8ExtraVariables>, Box<dyn Error>> {
+impl Index<HashMap<String, Vec<usize>>> {
+    pub fn index8(config: &Config) -> Result<Self, Box<dyn Error>> {
         let mut database: HashMap<String, Vec<usize>> = HashMap::new();
 
         let filecontents = read_file_to_string(&config.file_path)?;
@@ -42,13 +36,13 @@ impl Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
 
         Ok(Index {
             database,
-            extra_variables: Some(Index8ExtraVariables { article_titles }),
+            article_titles,
         })
     }
 
     pub fn vec_to_articlelist(&self, vec: Vec<usize>) -> Vec<String> {
         let mut output: Vec<String> = Vec::new();
-        let titles = &self.extra_variables.as_ref().unwrap().article_titles;
+        let titles = &self.article_titles;
         for i in vec {
             output.push(titles[i].clone());
         }
@@ -58,22 +52,22 @@ impl Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
     pub fn boolean_search_naive(&self, exp: &String) -> Option<Vec<String>> {
         match Expr::from_string(&exp) {
             Ok(Expr(ExprData::HasNodes(node))) => {
-                Some(self.vec_to_articlelist(self.evaluate_syntex_tree_naive(node)))
+                Some(self.vec_to_articlelist(self.evaluate_syntax_tree_naive(node)))
             }
             _ => None, // Either an error or the expression has no nodes
         }
     }
 
-    pub fn evaluate_syntex_tree_naive(&self, node: AstNode) -> Vec<usize> {
+    pub fn evaluate_syntax_tree_naive(&self, node: AstNode) -> Vec<usize> {
         match node {
-            AstNode::Invert(child) => self.invert(self.evaluate_syntex_tree_naive(*child)),
+            AstNode::Invert(child) => self.invert(self.evaluate_syntax_tree_naive(*child)),
             AstNode::Binary(BinaryOp::And, left_child, right_child) => self.and(
-                self.evaluate_syntex_tree_naive(*left_child),
-                self.evaluate_syntex_tree_naive(*right_child),
+                self.evaluate_syntax_tree_naive(*left_child),
+                self.evaluate_syntax_tree_naive(*right_child),
             ),
             AstNode::Binary(BinaryOp::Or, left_child, right_child) => self.or(
-                self.evaluate_syntex_tree_naive(*left_child),
-                self.evaluate_syntex_tree_naive(*right_child),
+                self.evaluate_syntax_tree_naive(*left_child),
+                self.evaluate_syntax_tree_naive(*right_child),
             ),
             AstNode::Name(word) => self.database.get(&word).unwrap_or(&vec![]).to_vec(),
         }
@@ -130,7 +124,7 @@ impl Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
         let mut result: Vec<usize> = Vec::new();
         let mut p: usize = 0;
 
-        for i in 0..self.extra_variables.as_ref().unwrap().article_titles.len() {
+        for i in 0..self.article_titles.len() {
             if (p >= child.len()) || (i < child[p]) {
                 result.push(i)
             } else {
@@ -148,7 +142,7 @@ mod tests {
     use super::*;
     use std::{collections::HashSet, fs};
 
-    fn setup_real() -> Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
+    fn setup_real() -> Index<HashMap<String, Vec<usize>>> {
         let config = Config::build(&[
             "".to_string(),
             "data/WestburyLab.wikicorp.201004_100KB.txt".to_string(),
@@ -158,7 +152,7 @@ mod tests {
         Index::index8(&config).unwrap()
     }
 
-    fn setup_test() -> Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
+    fn setup_test() -> Index<HashMap<String, Vec<usize>>> {
         let mut database: HashMap<String, Vec<usize>> = HashMap::new();
         database.insert("word1".to_string(), vec![0]);
         database.insert("word2".to_string(), vec![0, 1, 2, 3, 4, 5, 6, 7]);
@@ -170,7 +164,7 @@ mod tests {
         }
         Index {
             database,
-            extra_variables: Some(Index8ExtraVariables { article_titles }),
+            article_titles,
         }
     }
 
@@ -194,11 +188,7 @@ mod tests {
         test_index.vec_to_articlelist(vec);
     }
 
-    fn search_match(
-        index: &Index<HashMap<String, Vec<usize>>, Index8ExtraVariables>,
-        query: &str,
-        titles: Vec<&str>,
-    ) {
+    fn search_match(index: &Index<HashMap<String, Vec<usize>>>, query: &str, titles: Vec<&str>) {
         dbg!(&query.to_string());
         let index_result: HashSet<String> = HashSet::from_iter(
             index
@@ -347,12 +337,12 @@ mod tests {
 
             let ast_vec = gen_a_lot_of_runs_bool(file.clone(), 10);
 
-            let index7 = index::Index::index7(&Config {
+            let index7: Index<HashMap<String, Vec<u64>>> = index::Index::index7(&Config {
                 file_path: file.clone(),
                 indexno: "7".to_string(),
             })
             .unwrap();
-            let index8 = index::Index::index8(&Config {
+            let index8: Index<HashMap<String, Vec<usize>>> = index::Index::index8(&Config {
                 file_path: file.clone(),
                 indexno: "8".to_string(),
             })
@@ -363,23 +353,23 @@ mod tests {
                     let article_list7_0 =
                         index7.bitvec_to_articlelist(index7.evaluate_syntax_tree(*ast.clone()));
                     let article_list8_0 =
-                        index8.vec_to_articlelist(index8.evaluate_syntex_tree_naive(*ast.clone()));
+                        index8.vec_to_articlelist(index8.evaluate_syntax_tree_naive(*ast.clone()));
                     let article_list8_1: Vec<String> = index8
-                        .vec_to_articlelist(index8.evaluate_syntex_tree_demorgan(*ast.clone()));
+                        .vec_to_articlelist(index8.evaluate_syntax_tree_demorgan(*ast.clone()));
                     let article_list8_2 = index8.vec_to_articlelist(
-                        index8.evaluate_syntex_tree_binary_search(*ast.clone()),
+                        index8.evaluate_syntax_tree_binary_search(*ast.clone()),
                     );
                     let article_list8_3 =
-                        index8.vec_to_articlelist(index8.evaluate_syntex_tree_hybrid(*ast.clone()));
+                        index8.vec_to_articlelist(index8.evaluate_syntax_tree_hybrid(*ast.clone()));
                     let article_list8_4 = index8.bitvec_to_articlelist(
                         index8.evaluate_syntax_tree_convert_to_bitvecs(*ast.clone()),
                     );
 
                     assert_eq!(article_list7_0, article_list8_0);
-                    assert_eq!(article_list8_1, article_list8_2);
-                    assert_eq!(article_list8_3, article_list8_4);
                     assert_eq!(article_list7_0, article_list8_1);
+                    assert_eq!(article_list7_0, article_list8_2);
                     assert_eq!(article_list7_0, article_list8_3);
+                    assert_eq!(article_list7_0, article_list8_4);
                 }
             }
         }

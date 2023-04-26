@@ -5,47 +5,57 @@ use std::error::Error;
 use crate::helpers::*;
 use crate::index::Index;
 
-impl Index<HashMap<String, HashSet<String>>, Option<u128>> {
-    pub fn index6(
-        config: &Config,
-    ) -> Result<Index<HashMap<String, HashSet<String>>, Option<u128>>, Box<dyn Error>> {
+use super::*;
+
+impl Index<HashMap<String, HashSet<String>>> {
+    pub fn index6(config: &Config) -> Result<Self, Box<dyn Error>> {
         let mut database: HashMap<String, HashSet<String>> = HashMap::new();
 
         let filecontents = read_file_to_string(&config.file_path)?;
-        let re = Regex::new(r"\. |\.\n|\n\n|[\[\]\{\}\\\n\() ,;:/=?!*&]").unwrap();
+        let re = Regex::new(r"\. |\.\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
 
-        let mut prev_word = String::from("---END.OF.DOCUMENT---");
-        let mut cur_title = String::new();
+        // Articles are seperated by the delimiter "---END.OF.DOCUMENT---"
+        // In each article, it is assumed that the first line is the title, ending in a '.'
+        // The contents of each article is split according to the regular expression.
+        let articles_iter = filecontents.split("---END.OF.DOCUMENT---").map(|a| {
+            let (title, contents) = a.trim().split_once(".\n").unwrap_or(("", ""));
+            (title.to_string(), re.split(contents))
+        });
+        let mut article_titles: Vec<String> = Vec::new();
 
-        let mut x = re.split(&filecontents);
-        x.next();
-
-        for word in x {
-            if word == "---END.OF.DOCUMENT---" {
-                prev_word = word.to_string();
-                continue;
+        for (title, contents) in articles_iter {
+            if title != "" {
+                article_titles.push(title.to_string());
+                for word in contents {
+                    database
+                        .entry(word.to_string())
+                        .or_default()
+                        .insert(title.clone());
+                }
             }
-            // Update title
-            if prev_word == "---END.OF.DOCUMENT---" {
-                cur_title = word.to_string();
-                prev_word = String::new();
-            }
-
-            database
-                .entry(word.to_string())
-                .or_default()
-                .insert(cur_title.clone());
         }
 
-        let index: Index<HashMap<String, HashSet<String>>, Option<u128>> = Index {
+        Ok(Index {
             database,
-            extra_variables: None,
-        };
-        Ok(index)
+            article_titles,
+        })
     }
 
-    pub fn search(&self, word: &String) -> Option<&HashSet<String>> {
+    pub fn single_search(&self, word: &String) -> Option<&HashSet<String>> {
         self.database.get(word)
+    }
+}
+
+impl Search for Index<HashMap<String, HashSet<String>>> {
+    fn search(&self, query: super::Query) -> ArticleTitles {
+        let articleset = match query.search_type {
+            crate::index::SearchType::SingleWordSearch => self.single_search(&query.search_string),
+            _ => panic!(
+                "Searchtype {0} not implemented for index6. ",
+                query.search_type
+            ),
+        };
+        Vec::from_iter(articleset.unwrap_or(&HashSet::new()).to_owned())
     }
 }
 

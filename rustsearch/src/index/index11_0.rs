@@ -5,17 +5,10 @@ use std::error::Error;
 use crate::helpers::*;
 use crate::index::Index;
 
-pub struct Index11ExtraVariables {
-    pub article_titles: Vec<String>,
-}
+use super::{ArticleTitles, Search};
 
-impl Index<HashMap<(String, String, String), Vec<usize>>, Index11ExtraVariables> {
-    pub fn index11(
-        config: &Config,
-    ) -> Result<
-        Index<HashMap<(String, String, String), Vec<usize>>, Index11ExtraVariables>,
-        Box<dyn Error>,
-    > {
+impl Index<HashMap<(String, String, String), Vec<usize>>> {
+    pub fn index11(config: &Config) -> Result<Self, Box<dyn Error>> {
         let mut database: HashMap<(String, String, String), Vec<usize>> = HashMap::new();
 
         let filecontents = read_file_to_string(&config.file_path)?;
@@ -53,13 +46,13 @@ impl Index<HashMap<(String, String, String), Vec<usize>>, Index11ExtraVariables>
 
         Ok(Index {
             database,
-            extra_variables: Some(Index11ExtraVariables { article_titles }),
+            article_titles,
         })
     }
 
     pub fn vec_to_articlelist(&self, vec: Vec<usize>) -> Vec<String> {
         let mut output: Vec<String> = Vec::new();
-        let titles = &self.extra_variables.as_ref().unwrap().article_titles;
+        let titles = &self.article_titles;
         for i in vec {
             output.push(titles[i].clone());
         }
@@ -67,11 +60,17 @@ impl Index<HashMap<(String, String, String), Vec<usize>>, Index11ExtraVariables>
     }
 }
 
+impl Search for Index<HashMap<(String, String, String), Vec<usize>>> {
+    fn search(&self, query: super::Query) -> ArticleTitles {
+        todo!()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    fn setup_real() -> Index<HashMap<(String, String, String), Vec<usize>>, Index11ExtraVariables> {
+    fn setup_real() -> Index<HashMap<(String, String, String), Vec<usize>>> {
         let config = Config::build(&[
             "".to_string(),
             "data/WestburyLab.wikicorp.201004_100KB.txt".to_string(),
@@ -81,7 +80,7 @@ mod tests {
         Index::index11(&config).unwrap()
     }
 
-    fn setup_test() -> Index<HashMap<(String, String, String), Vec<usize>>, Index11ExtraVariables> {
+    fn setup_test() -> Index<HashMap<(String, String, String), Vec<usize>>> {
         let mut database: HashMap<(String, String, String), Vec<usize>> = HashMap::new();
         database.insert(
             (
@@ -121,7 +120,7 @@ mod tests {
         }
         Index {
             database,
-            extra_variables: Some(Index11ExtraVariables { article_titles }),
+            article_titles,
         }
     }
 

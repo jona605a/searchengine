@@ -7,15 +7,10 @@ use std::fs;
 use crate::helpers::*;
 use crate::index::Index;
 
-pub struct Index10ExtraVariables {
-    pub article_titles: Vec<String>,
-}
+use super::*;
 
-impl Index<HashMap<String, HashMap<usize, usize>>, Index10ExtraVariables> {
-    pub fn index10(
-        config: &Config,
-    ) -> Result<Index<HashMap<String, HashMap<usize, usize>>, Index10ExtraVariables>, Box<dyn Error>>
-    {
+impl Index<HashMap<String, HashMap<usize, usize>>> {
+    pub fn index10(config: &Config) -> Result<Self, Box<dyn Error>> {
         // Setup
         let mut database: HashMap<String, HashMap<usize, usize>> = HashMap::new();
 
@@ -42,7 +37,7 @@ impl Index<HashMap<String, HashMap<usize, usize>>, Index10ExtraVariables> {
 
         Ok(Index {
             database,
-            extra_variables: Some(Index10ExtraVariables { article_titles }),
+            article_titles,
         })
     }
 
@@ -133,6 +128,12 @@ impl Index<HashMap<String, HashMap<usize, usize>>, Index10ExtraVariables> {
             }
         }
         P
+    }
+}
+
+impl Search for Index<HashMap<String, HashMap<usize, usize>>> {
+    fn search(&self, query: Query) -> ArticleTitles {
+        todo!()
     }
 }
 

@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
+use std::iter::Map;
 
-use regex::Regex;
+use regex::{Regex, Split};
 
 pub struct Config {
     pub file_path: String,
@@ -25,6 +26,23 @@ impl Config {
 pub fn read_file_to_string(file_path: &String) -> Result<String, Box<dyn Error>> {
     let contents = fs::read_to_string(file_path)?;
     Ok(contents)
+}
+
+pub fn read_and_clean_file_to_iter(config: &Config) -> Result<() , Box<dyn Error>> {
+    let filecontents = read_file_to_string(&config.file_path)?;
+    let re = Regex::new(r"\. |\.\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
+
+    // Articles are seperated by the delimiter "---END.OF.DOCUMENT---"
+    // In each article, it is assumed that the first line is the title, ending in a '.'
+    // The contents of each article is split according to the regular expression.
+    
+    // let articles_iter: Vec<String,Vec<&str>> = filecontents.split("---END.OF.DOCUMENT---").map(|a| {
+    //     let (title, contents) = a.trim().split_once(".\n").unwrap_or(("", ""));
+    //     let x: Vec<&str> = re.split(contents).collect();
+    //     (title.to_string(), x)
+    // }).collect();
+    // Ok(articles_iter)
+    todo!()
 }
 
 pub fn word_freq() {

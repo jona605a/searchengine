@@ -1,25 +1,24 @@
 use std::collections::HashMap;
 
-use crate::index::index8_0::Index8ExtraVariables;
 use crate::index::Index;
 use crate::parsing::*;
 
-impl Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
+impl Index<HashMap<String, Vec<usize>>> {
     pub fn boolean_search_binary_search(&self, exp: &String) -> Option<Vec<String>> {
         match Expr::from_string(&exp) {
             Ok(Expr(ExprData::HasNodes(node))) => {
-                Some(self.vec_to_articlelist(self.evaluate_syntex_tree_binary_search(node)))
+                Some(self.vec_to_articlelist(self.evaluate_syntax_tree_binary_search(node)))
             }
             _ => None, // Either an error or the expression has no nodes
         }
     }
 
-    pub fn evaluate_syntex_tree_binary_search(&self, node: AstNode) -> Vec<usize> {
+    pub fn evaluate_syntax_tree_binary_search(&self, node: AstNode) -> Vec<usize> {
         match node {
-            AstNode::Invert(child) => self.invert(self.evaluate_syntex_tree_binary_search(*child)),
+            AstNode::Invert(child) => self.invert(self.evaluate_syntax_tree_binary_search(*child)),
             AstNode::Binary(BinaryOp::And, left_child, right_child) => {
-                let left_articlelist = self.evaluate_syntex_tree_binary_search(*left_child);
-                let right_articlelist = self.evaluate_syntex_tree_binary_search(*right_child);
+                let left_articlelist = self.evaluate_syntax_tree_binary_search(*left_child);
+                let right_articlelist = self.evaluate_syntax_tree_binary_search(*right_child);
 
                 if left_articlelist.len() > 0
                     && left_articlelist.len() + right_articlelist.len()
@@ -38,8 +37,8 @@ impl Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
                 }
             }
             AstNode::Binary(BinaryOp::Or, left_child, right_child) => self.or(
-                self.evaluate_syntex_tree_binary_search(*left_child),
-                self.evaluate_syntex_tree_binary_search(*right_child),
+                self.evaluate_syntax_tree_binary_search(*left_child),
+                self.evaluate_syntax_tree_binary_search(*right_child),
             ),
             AstNode::Name(word) => self.database.get(&word).unwrap_or(&vec![]).to_vec(),
         }
@@ -68,7 +67,7 @@ mod tests {
     use super::*;
     use std::collections::HashSet;
 
-    fn setup_real() -> Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
+    fn setup_real() -> Index<HashMap<String, Vec<usize>>> {
         let config = crate::helpers::Config::build(&[
             "".to_string(),
             "data/WestburyLab.wikicorp.201004_100KB.txt".to_string(),
@@ -78,7 +77,7 @@ mod tests {
         Index::index8(&config).unwrap()
     }
 
-    fn setup_test() -> Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
+    fn setup_test() -> Index<HashMap<String, Vec<usize>>> {
         let mut database: HashMap<String, Vec<usize>> = HashMap::new();
         database.insert("word1".to_string(), vec![0]);
         database.insert("word2".to_string(), vec![0, 1, 2, 3, 4, 5, 6, 7]);
@@ -90,7 +89,7 @@ mod tests {
         }
         Index {
             database,
-            extra_variables: Some(Index8ExtraVariables { article_titles }),
+            article_titles,
         }
     }
 
@@ -114,11 +113,7 @@ mod tests {
         test_index.vec_to_articlelist(vec);
     }
 
-    fn search_match(
-        index: &Index<HashMap<String, Vec<usize>>, Index8ExtraVariables>,
-        query: &str,
-        titles: Vec<&str>,
-    ) {
+    fn search_match(index: &Index<HashMap<String, Vec<usize>>>, query: &str, titles: Vec<&str>) {
         dbg!(&query.to_string());
         let index_result: HashSet<String> = HashSet::from_iter(
             index

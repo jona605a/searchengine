@@ -1,10 +1,11 @@
 use std::collections::HashMap;
 
-use crate::index::index8_0::Index8ExtraVariables;
 use crate::index::Index;
 use crate::parsing::*;
 
-impl Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
+use super::*;
+
+impl Index<HashMap<String, Vec<usize>>> {
     pub fn boolean_search_articles_to_bitvecs(&self, exp: &String) -> Option<Vec<String>> {
         match Expr::from_string(&exp) {
             Ok(Expr(ExprData::HasNodes(node))) => {
@@ -46,7 +47,7 @@ impl Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
     }
 
     fn to_bitvec(&self, articlevec: Vec<usize>) -> Vec<usize> {
-        let n_titles = self.extra_variables.as_ref().unwrap().article_titles.len();
+        let n_titles = self.article_titles.len();
         let arch_bits = usize::BITS as usize;
         let mut bitvec: Vec<usize> = vec![0; (n_titles - 1) / arch_bits + 1];
 
@@ -59,9 +60,9 @@ impl Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
     }
 
     // Copied from index7
-    pub fn bitvec_to_articlelist(&self, bitvecs: Vec<usize>) -> Vec<String> {
+    pub fn bitvec_to_articlelist(&self, bitvecs: Vec<usize>) -> ArticleTitles {
         let mut output: Vec<String> = Vec::new();
-        let titles = &self.extra_variables.as_ref().unwrap().article_titles;
+        let titles = &self.article_titles;
         for i in 0..bitvecs.len() {
             for bit in 0..64 {
                 if (1 << bit) & bitvecs[i] > 0 {
@@ -76,13 +77,27 @@ impl Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
     }
 }
 
+impl Search for Index<HashMap<String, Vec<usize>>> {
+    fn search(&self, query: Query) -> ArticleTitles {
+        match query.search_type {
+            SearchType::SingleWordSearch => todo!(),
+            SearchType::BooleanSearch(x) if x == "Naive"        => todo!(),
+            SearchType::BooleanSearch(x) if x == "DeMorgan"     => todo!(),
+            SearchType::BooleanSearch(x) if x == "BinarySearch" => todo!(),
+            SearchType::BooleanSearch(x) if x == "Hybrid"       => todo!(),
+            SearchType::BooleanSearch(x) if x == "Bitvecs"      => todo!(),
+            _ => unimplemented!(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::helpers::Config;
     use std::collections::HashSet;
 
-    fn setup_real() -> Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
+    fn setup_real() -> Index<HashMap<String, Vec<usize>>> {
         let config = Config::build(&[
             "".to_string(),
             "data/WestburyLab.wikicorp.201004_100KB.txt".to_string(),
@@ -92,7 +107,7 @@ mod tests {
         Index::index8(&config).unwrap()
     }
 
-    fn setup_test() -> Index<HashMap<String, Vec<usize>>, Index8ExtraVariables> {
+    fn setup_test() -> Index<HashMap<String, Vec<usize>>> {
         let mut database: HashMap<String, Vec<usize>> = HashMap::new();
         database.insert("word1".to_string(), vec![0]);
         database.insert("word2".to_string(), vec![0, 1, 2, 3, 4, 5, 6, 7]);
@@ -104,15 +119,11 @@ mod tests {
         }
         Index {
             database,
-            extra_variables: Some(Index8ExtraVariables { article_titles }),
+            article_titles,
         }
     }
 
-    fn search_match(
-        index: &Index<HashMap<String, Vec<usize>>, Index8ExtraVariables>,
-        query: &str,
-        titles: Vec<&str>,
-    ) {
+    fn search_match(index: &Index<HashMap<String, Vec<usize>>>, query: &str, titles: Vec<&str>) {
         dbg!(&query.to_string());
         let index_result: HashSet<String> = HashSet::from_iter(
             index

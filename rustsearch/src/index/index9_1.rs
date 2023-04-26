@@ -5,6 +5,8 @@ use std::error::Error;
 use crate::helpers::*;
 use crate::index::Index;
 
+use super::{ArticleTitles, Search};
+
 pub struct TrieNode {
     pub children_map: HashMap<char, TrieNode>,
     pub article_vec: Option<Vec<usize>>,
@@ -111,11 +113,7 @@ impl Trie {
     }
 }
 
-pub struct Index9ExtraVariables {
-    pub article_titles: Vec<String>,
-}
-
-impl Index<Trie, Index9ExtraVariables> {
+impl Index<Trie> {
     pub fn index9(config: &Config) -> Result<Self, Box<dyn Error>> {
         let mut database = Trie::new();
 
@@ -144,7 +142,7 @@ impl Index<Trie, Index9ExtraVariables> {
 
         Ok(Index {
             database,
-            extra_variables: Some(Index9ExtraVariables { article_titles }),
+            article_titles
         })
     }
 
@@ -154,7 +152,7 @@ impl Index<Trie, Index9ExtraVariables> {
 
     pub fn bitvec_to_articlelist(&self, bitvecs: Vec<usize>) -> Vec<String> {
         let mut output: Vec<String> = Vec::new();
-        let titles = &self.extra_variables.as_ref().unwrap().article_titles;
+        let titles = &self.article_titles;
         for i in 0..bitvecs.len() {
             for bit in 0..64 {
                 if (1 << bit) & bitvecs[i] > 0 {
@@ -169,6 +167,12 @@ impl Index<Trie, Index9ExtraVariables> {
     }
 }
 
+impl Search for Index<Trie> {
+    fn search(&self, query: super::Query) -> ArticleTitles {
+        todo!()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::{collections::HashSet, fs, iter::zip};
@@ -176,7 +180,7 @@ mod tests {
 
     use super::*;
 
-    fn setup_real() -> Index<Trie, Index9ExtraVariables> {
+    fn setup_real() -> Index<Trie> {
         let config = Config::build(&[
             "".to_string(),
             "data/WestburyLab.wikicorp.201004_100KB.txt".to_string(),
@@ -192,7 +196,7 @@ mod tests {
         }
     }
 
-    fn setup_test() -> Index<Trie, Index9ExtraVariables> {
+    fn setup_test() -> Index<Trie> {
         let mut database = Trie::new();
         database.insert(&"word1".to_string(), 0);
         insert_list_to_trie(&mut database, &"word1".to_string(), vec![0]);
@@ -213,11 +217,11 @@ mod tests {
         database.n_titles = 100;
         Index {
             database,
-            extra_variables: Some(Index9ExtraVariables { article_titles }),
+            article_titles
         }
     }
 
-    fn search_match(index: &Index<Trie, Index9ExtraVariables>, query: &str, titles: Vec<&str>) {
+    fn search_match(index: &Index<Trie>, query: &str, titles: Vec<&str>) {
         dbg!(&query.to_string());
         let index_result: HashSet<String> = HashSet::from_iter(
             index
@@ -331,7 +335,7 @@ mod tests {
             let depth_vec = &ast_vec[0];
 
             for (ast,word) in zip(depth_vec,word_vec)  {
-                    let article_list8_0 = index8.vec_to_articlelist(index8.evaluate_syntex_tree_naive(*ast.clone()));
+                    let article_list8_0 = index8.vec_to_articlelist(index8.evaluate_syntax_tree_naive(*ast.clone()));
                     let article_list9_0 = index9_0.trie_search(&word).unwrap_or([].to_vec());
                     let article_list9_1 = index9_1.trie_search_1(&word).unwrap_or([].to_vec());
 

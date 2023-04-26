@@ -1,9 +1,10 @@
-use super::index9_1::Index9ExtraVariables;
 use regex::Regex;
 use std::error::Error;
 
 use crate::helpers::*;
 use crate::index::Index;
+
+use super::{ArticleTitles, Search};
 
 pub struct TrieNodeLin {
     pub children_vec: Vec<(char, TrieNodeLin)>,
@@ -124,10 +125,10 @@ impl TrieLin {
     }
 }
 
-impl Index<TrieLin, Index9ExtraVariables> {
+impl Index<TrieLin> {
     pub fn index9_0(
         config: &Config,
-    ) -> Result<Index<TrieLin, Index9ExtraVariables>, Box<dyn Error>> {
+    ) -> Result<Self, Box<dyn Error>> {
         let mut database = TrieLin::new();
 
         let filecontents = read_file_to_string(&config.file_path)?;
@@ -155,7 +156,7 @@ impl Index<TrieLin, Index9ExtraVariables> {
 
         Ok(Index {
             database,
-            extra_variables: Some(Index9ExtraVariables { article_titles }),
+            article_titles
         })
     }
 
@@ -165,7 +166,7 @@ impl Index<TrieLin, Index9ExtraVariables> {
 
     pub fn bitvec_to_articlelist(&self, bitvecs: Vec<usize>) -> Vec<String> {
         let mut output: Vec<String> = Vec::new();
-        let titles = &self.extra_variables.as_ref().unwrap().article_titles;
+        let titles = &self.article_titles;
         for i in 0..bitvecs.len() {
             for bit in 0..64 {
                 if (1 << bit) & bitvecs[i] > 0 {
@@ -180,6 +181,12 @@ impl Index<TrieLin, Index9ExtraVariables> {
     }
 }
 
+impl Search for Index<TrieLin> {
+    fn search(&self, query: super::Query) -> ArticleTitles {
+        todo!()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::helpers::*;
@@ -187,7 +194,7 @@ mod tests {
 
     use super::*;
 
-    fn setup_real() -> Index<TrieLin, Index9ExtraVariables> {
+    fn setup_real() -> Index<TrieLin> {
         let config = Config::build(&[
             "".to_string(),
             "data/WestburyLab.wikicorp.201004_100KB.txt".to_string(),
@@ -203,7 +210,7 @@ mod tests {
         }
     }
 
-    fn setup_test() -> Index<TrieLin, Index9ExtraVariables> {
+    fn setup_test() -> Index<TrieLin> {
         let mut database = TrieLin::new();
         database.insert(&"word1".to_string(), 0);
         insert_list_to_trie(&mut database, &"word1".to_string(), vec![0]);
@@ -224,11 +231,11 @@ mod tests {
         database.n_titles = 100;
         Index {
             database,
-            extra_variables: Some(Index9ExtraVariables { article_titles }),
+            article_titles
         }
     }
 
-    fn search_match(index: &Index<TrieLin, Index9ExtraVariables>, query: &str, titles: Vec<&str>) {
+    fn search_match(index: &Index<TrieLin>, query: &str, titles: Vec<&str>) {
         dbg!(&query.to_string());
         let index_result: HashSet<String> = HashSet::from_iter(
             index
