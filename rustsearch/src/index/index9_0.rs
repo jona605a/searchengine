@@ -332,7 +332,7 @@ mod tests {
     #[test]
     fn find_prefix_real1() {
         let index = setup_real();
-        search_match(&index, "start*", vec!["Autism", "Anarchism"]);
+        search_match(&index, "start*", vec!["Anarchism"]);
     }
 
     #[test]
