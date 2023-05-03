@@ -53,7 +53,7 @@ impl Index<HashMap<String, HashSet<usize>>> {
             .collect()
     }
 
-    pub fn exact_search(&self, query: &String) -> ArticleTitles {
+    pub fn kmp_search(&self, query: &String) -> ArticleTitles {
         // Split sentence into words
         // Get article set for each word, and find intersection
         let art_intersect = query
@@ -174,9 +174,10 @@ impl Index<HashMap<String, HashSet<usize>>> {
 
 impl Search for Index<HashMap<String, HashSet<usize>>> {
     fn search(&self, query: &Query) -> ArticleTitles {
-        match query.search_type {
+        match &query.search_type {
             SearchType::SingleWordSearch => self.single_search(&query.search_string),
-            SearchType::ExactSearch => self.exact_search(&query.search_string),
+            SearchType::ExactSearch(x) if x=="KMP" => self.kmp_search(&query.search_string),
+            SearchType::ExactSearch(x) if x=="BoyerMoore" => self.boyer_moore_search(&query.search_string),
             _ => unimplemented!(),
         }
     }

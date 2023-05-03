@@ -6,7 +6,7 @@ use crate::helpers::*;
 use crate::index::Index;
 use crate::parsing::*;
 
-use super::ArticleTitles;
+use super::*;
 
 impl Index<HashMap<String, Vec<usize>>> {
     pub fn index8(config: &Config) -> Result<Self, Box<dyn Error>> {
@@ -137,9 +137,33 @@ impl Index<HashMap<String, Vec<usize>>> {
     }
 }
 
+impl Search for Index<HashMap<String, Vec<usize>>> {
+    fn search(&self, query: &Query) -> ArticleTitles {
+        match &query.search_type {
+            SearchType::SingleWordSearch => self.single_search(&query.search_string),
+            SearchType::BooleanSearch(x) if x == "Naive" => {
+                self.boolean_search_naive(&query.search_string)
+            }
+            SearchType::BooleanSearch(x) if x == "DeMorgan" => {
+                self.boolean_search_demorgan(&query.search_string)
+            }
+            SearchType::BooleanSearch(x) if x == "BinarySearch" => {
+                self.boolean_search_binary_search(&query.search_string)
+            }
+            SearchType::BooleanSearch(x) if x == "Hybrid" => {
+                self.boolean_search_hybrid(&query.search_string)
+            }
+            SearchType::BooleanSearch(x) if x == "Bitvecs" => {
+                self.boolean_search_articles_to_bitvecs(&query.search_string)
+            }
+            _ => unimplemented!(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::index::{self, gen_query::gen_a_lot_of_runs_bool, Search, Query, SearchType};
+    use crate::index::{self, gen_query::gen_a_lot_of_runs_bool, Query, Search, SearchType};
 
     use super::*;
     use std::{collections::HashSet, fs};
@@ -347,38 +371,36 @@ mod tests {
             })
             .unwrap();
 
-
             for depth_vec in ast_vec {
                 for word in &depth_vec {
-                    
                     let query1 = Query {
                         search_string: word.clone(),
-                        search_type: SearchType::BooleanSearch(" ".to_string())
+                        search_type: SearchType::BooleanSearch(" ".to_string()),
                     };
 
                     let query2 = Query {
                         search_string: word.clone(),
-                        search_type: SearchType::BooleanSearch("Naive".to_string())
+                        search_type: SearchType::BooleanSearch("Naive".to_string()),
                     };
 
                     let query3 = Query {
                         search_string: word.clone(),
-                        search_type: SearchType::BooleanSearch("DeMorgan".to_string())
+                        search_type: SearchType::BooleanSearch("DeMorgan".to_string()),
                     };
 
                     let query4 = Query {
                         search_string: word.clone(),
-                        search_type: SearchType::BooleanSearch("BinarySearch".to_string())
+                        search_type: SearchType::BooleanSearch("BinarySearch".to_string()),
                     };
 
                     let query5 = Query {
                         search_string: word.clone(),
-                        search_type: SearchType::BooleanSearch("Hybrid".to_string())
+                        search_type: SearchType::BooleanSearch("Hybrid".to_string()),
                     };
 
                     let query6 = Query {
                         search_string: word.clone(),
-                        search_type: SearchType::BooleanSearch("Bitvecs".to_string())
+                        search_type: SearchType::BooleanSearch("Bitvecs".to_string()),
                     };
 
                     let article_list7_0 = index7.search(&query1);

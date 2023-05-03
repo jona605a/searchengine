@@ -8,6 +8,7 @@ pub mod index8_4;
 pub mod index9_0;
 pub mod index9_1;
 pub mod index10_0;
+pub mod index10_1;
 pub mod index11_0;
 
 pub mod gen_query;
@@ -32,7 +33,7 @@ pub enum SearchType {
     SingleWordSearch,
     BooleanSearch(String),
     PrefixSearch,
-    ExactSearch,
+    ExactSearch(String),
     FuzzySearch,
 }
 
@@ -40,9 +41,9 @@ impl std::fmt::Display for SearchType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             SearchType::SingleWordSearch => write!(f, "SingleWordSearch"),
-            SearchType::BooleanSearch(x) => write!(f, "BooleanSearch, {}", x),
+            SearchType::BooleanSearch(x) => write!(f, "BooleanSearch ({})", x),
             SearchType::PrefixSearch => write!(f, "PrefixSearch"),
-            SearchType::ExactSearch => write!(f, "ExactSearch"),
+            SearchType::ExactSearch(x) => write!(f, "ExactSearch ({})", x),
             SearchType::FuzzySearch => write!(f, "FuzzySearch"),
         }
     }

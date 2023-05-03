@@ -1,8 +1,8 @@
 // https://bheisler.github.io/criterion.rs/book/getting_started.html
 // #![allow(non_snake_case)]
 use criterion::{criterion_group, criterion_main, Criterion};
-use rustsearch::index::{Query, Search, SearchType};
-use rustsearch::parsing::AstNode;
+use rustsearch::index::{Query, SearchType};
+
 use std::fs;
 
 use rustsearch::helpers::{read_file_to_string, Config};
@@ -61,7 +61,7 @@ pub fn indexing_9_0(c: &mut Criterion) {
 pub fn searching_template(c: &mut Criterion, i_string: &str,) {
     let files = fs::read_dir("../../data.nosync/");
 
-    let booleanSearchtype = match i_string {
+    let boolean_searchtype = match i_string {
         "7_0" => " ",
         "8_0" => "Naive",
         "8_1" => "DeMorgan",
@@ -93,7 +93,7 @@ pub fn searching_template(c: &mut Criterion, i_string: &str,) {
                 
                 let query = Query {
                     search_string: word.clone(),
-                    search_type: SearchType::BooleanSearch(booleanSearchtype.to_string())
+                    search_type: SearchType::BooleanSearch(boolean_searchtype.to_string())
                 };
                 
                 index.search(&query);

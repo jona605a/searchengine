@@ -27,7 +27,7 @@ fn user_dialog(index: Box<dyn Search>) {
         SingleWordSearch,
         BooleanSearch(String::new()),
         PrefixSearch,
-        ExactSearch,
+        ExactSearch(String::new()),
         FuzzySearch,
     ];
     loop {

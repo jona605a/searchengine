@@ -61,7 +61,7 @@ impl Index<HashMap<(String, String, String), Vec<usize>>> {
 }
 
 impl Search for Index<HashMap<(String, String, String), Vec<usize>>> {
-    fn search(&self, query: &Query) -> ArticleTitles {
+    fn search(&self, _query: &Query) -> ArticleTitles {
         todo!()
     }
 }

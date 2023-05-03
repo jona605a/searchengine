@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::index::Index;
 use crate::parsing::*;
 
-use super::*;
+use super::ArticleTitles;
 
 impl Index<HashMap<String, Vec<usize>>> {
     pub fn boolean_search_articles_to_bitvecs(&self, exp: &String) -> Vec<String> {
@@ -80,30 +80,6 @@ impl Index<HashMap<String, Vec<usize>>> {
         self.bitvec_to_articlelist(
             self.to_bitvec(self.database.get(query).unwrap_or(&vec![]).to_vec()),
         )
-    }
-}
-
-impl Search for Index<HashMap<String, Vec<usize>>> {
-    fn search(&self, query: &Query) -> ArticleTitles {
-        match &query.search_type {
-            SearchType::SingleWordSearch => self.single_search(&query.search_string),
-            SearchType::BooleanSearch(x) if x == "Naive" => {
-                self.boolean_search_naive(&query.search_string)
-            }
-            SearchType::BooleanSearch(x) if x == "DeMorgan" => {
-                self.boolean_search_demorgan(&query.search_string)
-            }
-            SearchType::BooleanSearch(x) if x == "BinarySearch" => {
-                self.boolean_search_binary_search(&query.search_string)
-            }
-            SearchType::BooleanSearch(x) if x == "Hybrid" => {
-                self.boolean_search_hybrid(&query.search_string)
-            }
-            SearchType::BooleanSearch(x) if x == "Bitvecs" => {
-                self.boolean_search_articles_to_bitvecs(&query.search_string)
-            }
-            _ => unimplemented!(),
-        }
     }
 }
 

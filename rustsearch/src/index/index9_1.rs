@@ -188,10 +188,10 @@ mod tests {
         helpers::*,
         index::{
             self,
-            gen_query::{gen_a_lot_of_runs_bool, gen_a_lot_of_runs_tries},
+            gen_query::gen_a_lot_of_runs_tries,
         },
     };
-    use std::{collections::HashSet, fs, iter::zip};
+    use std::{collections::HashSet, fs};
 
     use super::*;
 
