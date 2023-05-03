@@ -196,6 +196,9 @@ mod bool_tests {
     #[test]
     fn gen_a_lot_of_runs_bool_and_gen_a_lot_of_runs_tries_gives_the_same_words() {
         let files = fs::read_dir("../../data.nosync/");
+        if files.is_err() {
+            return
+        }
 
         for dir in files.unwrap() {
             let file = dir.unwrap().path().into_os_string().into_string().unwrap();

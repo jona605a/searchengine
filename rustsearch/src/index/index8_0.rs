@@ -349,6 +349,9 @@ mod tests {
     #[test]
     fn check_index7_and_index8_get_the_same_results() {
         let files = fs::read_dir("../../data.nosync/");
+        if files.is_err() {
+            return
+        }
 
         for dir in files.unwrap() {
             let file = dir.unwrap().path().into_os_string().into_string().unwrap();

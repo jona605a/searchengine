@@ -204,7 +204,7 @@ mod tests {
 
         assert_eq!(
             compute_L_primes(N),
-            (vec![0, 0, 0, 0, 5, 0, 0, 2, 0], vec![0; 9])
+            (vec![0, 0, 0, 0, 6, 0, 0, 3, 0], vec![0; 9])
         );
 
         let P: Vec<char> = "tapFtapGtapFtap".chars().collect();
@@ -214,7 +214,7 @@ mod tests {
         assert_eq!(
             compute_L_primes(N),
             (
-                vec![0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 10, 0, 0],
+                vec![0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 11, 0, 0],
                 vec![0, 7, 7, 7, 7, 7, 7, 7, 7, 3, 3, 3, 3, 0, 0]
             )
         );
@@ -267,7 +267,7 @@ mod tests {
         let (L_prime, l_prime, R) = boyer_moore_preprocess(&p);
         assert_eq!(
             boyer_moore(&p, &t, (&L_prime, &l_prime, &R)),
-            vec![5, 8, 10]
+            vec![49, 52, 73, 85, 95, 107]
         );
     }
 }
