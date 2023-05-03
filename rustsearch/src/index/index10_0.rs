@@ -56,12 +56,11 @@ impl Index<HashMap<String, HashSet<usize>>> {
     pub fn kmp_search(&self, query: &String) -> ArticleTitles {
         // Split sentence into words
         // Get article set for each word, and find intersection
-        let art_intersect = query
+        let mut x = query
             .split(' ')
-            .map(|w| self.database.get(w).unwrap_or(&HashSet::new()).to_owned())
-            .fold(HashSet::new(), |acc, art_set| {
-                art_set.intersection(&acc).map(|i| *i).collect()
-            });
+            .map(|w| self.database.get(w).unwrap_or(&HashSet::new()).to_owned());
+        let keys = x.next().unwrap();
+        let art_intersect: Vec<usize> = keys.into_iter().filter(|ar_no| x.all(|hs_a| hs_a.contains(ar_no))).collect();
 
         let query_words: Vec<&str> = query.split(' ').collect();
         let mut result: Vec<usize> = Vec::new();
@@ -89,36 +88,35 @@ impl Index<HashMap<String, HashSet<usize>>> {
             .collect()
     }
 
-    pub fn exact_search_locations(&self, query: &String) -> HashMap<usize, Vec<usize>> {
-        // Split sentence into words
-        // Get article set for each word, and find intersection
-        let art_intersect = query
-            .split(' ')
-            .map(|w| self.database.get(w).unwrap_or(&HashSet::new()).to_owned())
-            .fold(HashSet::new(), |acc, art_set| {
-                art_set.intersection(&acc).map(|i| *i).collect()
-            });
+    // fn exact_search_locations(&self, query: &String) -> HashMap<usize, Vec<usize>> {
+    //     // Split sentence into words
+    //     // Get article set for each word, and find intersection
+    //     let mut x = query
+    //         .split(' ')
+    //         .map(|w| self.database.get(w).unwrap_or(&HashSet::new()).to_owned());
+    //     let keys = x.next().unwrap();
+    //     let art_intersect: Vec<usize> = keys.into_iter().filter(|ar_no| x.all(|hs_a| hs_a.contains(ar_no))).collect();
 
-        let query_words: Vec<&str> = query.split(' ').collect();
-        let mut result: HashMap<usize, Vec<usize>> = HashMap::new();
-        let T = Index::kmp_table(&query_words);
+    //     let query_words: Vec<&str> = query.split(' ').collect();
+    //     let mut result: HashMap<usize, Vec<usize>> = HashMap::new();
+    //     let T = Index::kmp_table(&query_words);
 
-        for art_no in art_intersect {
-            // Read the file
-            let file_contents =
-                fs::read_to_string(format!("data/individual_articles/{:05}.txt", art_no)).expect(
-                    format!(
-                        "Article number {} not found in data/individual_articles/",
-                        art_no
-                    )
-                    .as_str(),
-                );
-            let match_pos = Index::kmp(file_contents, &query_words, &T);
-            result.insert(art_no, match_pos);
-        }
-        // Result to article names
-        result
-    }
+    //     for art_no in art_intersect {
+    //         // Read the file
+    //         let file_contents =
+    //             fs::read_to_string(format!("data/individual_articles/{:05}.txt", art_no)).expect(
+    //                 format!(
+    //                     "Article number {} not found in data/individual_articles/",
+    //                     art_no
+    //                 )
+    //                 .as_str(),
+    //             );
+    //         let match_pos = Index::kmp(file_contents, &query_words, &T);
+    //         result.insert(art_no, match_pos);
+    //     }
+    //     // Result to article names
+    //     result
+    // }
 
     pub fn kmp_table(query_words: &Vec<&str>) -> Vec<i32> {
         let mut T: Vec<i32> = vec![0; query_words.len() + 1];
@@ -176,8 +174,10 @@ impl Search for Index<HashMap<String, HashSet<usize>>> {
     fn search(&self, query: &Query) -> ArticleTitles {
         match &query.search_type {
             SearchType::SingleWordSearch => self.single_search(&query.search_string),
-            SearchType::ExactSearch(x) if x=="KMP" => self.kmp_search(&query.search_string),
-            SearchType::ExactSearch(x) if x=="BoyerMoore" => self.boyer_moore_search(&query.search_string),
+            SearchType::ExactSearch(x) if x == "KMP" => self.kmp_search(&query.search_string),
+            SearchType::ExactSearch(x) if x == "BoyerMoore" => {
+                self.boyer_moore_search(&query.search_string)
+            }
             _ => unimplemented!(),
         }
     }

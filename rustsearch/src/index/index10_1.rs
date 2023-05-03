@@ -139,12 +139,11 @@ impl Index<HashMap<String, HashSet<usize>>> {
 
         // Split sentence into words
         // Get article set for each word, and find intersection
-        let art_intersect = query
+        let mut x = query
             .split(' ')
-            .map(|w| self.database.get(w).unwrap_or(&HashSet::new()).to_owned())
-            .fold(HashSet::new(), |acc, art_set| {
-                art_set.intersection(&acc).map(|i| *i).collect()
-            });
+            .map(|w| self.database.get(w).unwrap_or(&HashSet::new()).to_owned());
+        let keys = x.next().unwrap();
+        let art_intersect: Vec<usize> = keys.into_iter().filter(|ar_no| x.all(|hs_a| hs_a.contains(ar_no))).collect();
 
         // let query_words: Vec<&str> = query.split(' ').collect();
         let mut result: Vec<usize> = Vec::new();
