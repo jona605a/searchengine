@@ -28,7 +28,7 @@ pub fn z_alg(s: &Vec<&char>) -> Vec<usize> {
     z
 }
 
-fn compute_L_primes(N: Vec<usize>) -> (Vec<usize>, Vec<usize>) {
+pub fn compute_L_primes(N: Vec<usize>) -> (Vec<usize>, Vec<usize>) {
     // Compute L'(i), l'(i)
     let n = N.len();
     let mut L_prime = vec![0; n];
@@ -47,7 +47,7 @@ fn compute_L_primes(N: Vec<usize>) -> (Vec<usize>, Vec<usize>) {
     (L_prime, l_prime)
 }
 
-fn compute_R(p: &Vec<char>) -> HashMap<&char, Vec<usize>> {
+pub fn compute_R(p: &Vec<char>) -> HashMap<&char, Vec<usize>> {
     let n = p.len();
     let mut R: HashMap<&char, Vec<usize>> = HashMap::new();
     for i in 0..n {
@@ -157,7 +157,7 @@ impl Index<HashMap<String, HashSet<usize>>> {
                     .chars()
                     .collect();
             match boyer_moore(&p, &t, (&L_prime, &l_prime, &R)) {
-                x if x == vec![] => (),   // Empty vector
+                x if x == Vec::<usize>::new() => (),   // Empty vector
                 _ => result.push(art_no), // There was at least one occurence
             }
         }

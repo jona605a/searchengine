@@ -77,7 +77,7 @@ impl Index<HashMap<String, HashSet<usize>>> {
                     .as_str(),
                 );
             match Index::kmp(file_contents, &query_words, &T) {
-                x if x == vec![] => (),   // Empty vector
+                x if x == Vec::<usize>::new() => (),   // Empty vector
                 _ => result.push(art_no), // There was at least one occurence
             }
         }

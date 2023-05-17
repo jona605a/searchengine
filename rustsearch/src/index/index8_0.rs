@@ -19,7 +19,15 @@ impl Index<HashMap<String, Vec<usize>>> {
         // In each article, it is assumed that the first line is the title, ending in a '.'
         // The contents of each article is split according to the regular expression.
         let articles_iter = filecontents.split("---END.OF.DOCUMENT---").map(|a| {
-            let (title, contents) = a.trim().split_once(".\n").unwrap_or(("", ""));
+            // let (title, contents) = a.trim().split_once(".\n").unwrap_or(("", ""));
+            let (title, contents) = match a.trim().split_once(".\n") {
+                None => ("", ""),
+                Some((t, c)) if t == "" => {
+                    // Some Windows shit
+                    c.split_once(".\r\n").unwrap_or(("", ""))
+                }
+                Some((t, c)) => (t, c),
+            };
             (title.to_string(), re.split(contents))
         });
         let mut article_titles: Vec<String> = Vec::new();
@@ -350,7 +358,7 @@ mod tests {
     fn check_index7_and_index8_get_the_same_results() {
         let files = fs::read_dir("../../data.nosync/");
         if files.is_err() {
-            return
+            return;
         }
 
         for dir in files.unwrap() {

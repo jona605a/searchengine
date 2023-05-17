@@ -1,65 +1,14 @@
-use regex::Regex;
-use std::collections::{HashMap, HashSet};
-use std::error::Error;
+#![allow(non_snake_case)]
+use std::{
+    collections::{HashMap, HashSet},
+    fs,
+};
+use crate::index::index10_1::{boyer_moore_preprocess, boyer_moore};
 
-use crate::helpers::*;
-use crate::index::Index;
-
-use super::*;
+use super::Index;
 
 impl Index<HashMap<(String, String, String), Vec<usize>>> {
-    pub fn index11(config: &Config) -> Result<Self, Box<dyn Error>> {
-        let mut database: HashMap<(String, String, String), Vec<usize>> = HashMap::new();
-
-        let filecontents = read_file_to_string(&config.file_path)?;
-        let re = Regex::new(r"\. |\.\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
-
-        // Articles are seperated by the delimiter "---END.OF.DOCUMENT---"
-        // In each article, it is assumed that the first line is the title, ending in a '.'
-        // The contents of each article is split according to the regular expression.
-        let articles_iter = filecontents.split("---END.OF.DOCUMENT---").map(|a| {
-            let (title, contents) = a.trim().split_once(".\n").unwrap_or(("", ""));
-            (title.to_string(), re.split(contents))
-        });
-        let mut article_titles: Vec<String> = Vec::new();
-
-        for (title, mut contents) in articles_iter {
-            if title != "" {
-                article_titles.push(title.to_string());
-
-                let mut prv1 = contents.next().unwrap();
-                let mut prv2 = contents.next().unwrap();
-
-                for word in contents {
-                    let v = database
-                        .entry((prv1.to_string(), prv2.to_string(), word.to_string()))
-                        .or_default();
-                    if (v.len() == 0) || (v[v.len() - 1] != article_titles.len() - 1) {
-                        v.push(article_titles.len() - 1);
-                    }
-
-                    prv1 = prv2;
-                    prv2 = word;
-                }
-            }
-        }
-
-        Ok(Index {
-            database,
-            article_titles,
-        })
-    }
-
-    // pub fn vec_to_articlelist(&self, vec: Vec<usize>) -> Vec<String> {
-    //     let mut output: Vec<String> = Vec::new();
-    //     let titles = &self.article_titles;
-    //     for i in vec {
-    //         output.push(titles[i].clone());
-    //     }
-    //     output
-    // }
-
-    pub fn fuzzy_triples_search(&self, query: &String) -> Vec<String> {
+    pub fn exact_triples_search(&self, query: &String) -> Vec<String> {
         // Split sentence into words
         // Get article set for each word, and find intersection
         let mut words_iter = query.split_ascii_whitespace();
@@ -100,28 +49,38 @@ impl Index<HashMap<(String, String, String), Vec<usize>>> {
             },
         );
 
-        // Map from article numbers to titles
-        art_intersect
-            .iter()
-            .map(|&a_no| self.article_titles[*a_no].to_owned())
-            .collect()
-    }
-}
+        // With the intersection, we can now go through each article that "pass the test" of having the correct triples, 
+        // and actually linear search through them to find the correct answers
+        let p: Vec<char> = query.chars().collect();
 
-impl Search for Index<HashMap<(String, String, String), Vec<usize>>> {
-    fn search(&self, query: &Query) -> ArticleTitles {
-        match &query.search_type {
-            SearchType::FuzzySearch => self.fuzzy_triples_search(&query.search_string),
-            SearchType::ExactSearch(x) if x == "BoyerMoore" => {
-                self.exact_triples_search(&query.search_string)
+        let mut result: Vec<usize> = Vec::new();
+        let (L_prime, l_prime, R) = boyer_moore_preprocess(&p);
+
+        for art_no in art_intersect {
+            // Read the file
+            let t: Vec<char> =
+                fs::read_to_string(format!("data/individual_articles/{:05}.txt", art_no))
+                    .expect(format!("Article number {} not found in data/individual_articles/", art_no).as_str(),)
+                    .chars()
+                    .collect();
+            match boyer_moore(&p, &t, (&L_prime, &l_prime, &R)) {
+                x if x == Vec::<usize>::new() => (),   // Empty vector
+                _ => result.push(*art_no), // There was at least one occurence
             }
-            _ => unimplemented!(),
         }
+        // Result to article names
+        result
+            .iter()
+            .map(|a_no| self.article_titles[*a_no].to_owned())
+            .collect()
+
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::{helpers::Config, index::{Query, Search, SearchType}};
+
     use super::*;
 
     fn setup_real() -> Index<HashMap<(String, String, String), Vec<usize>>> {
@@ -278,7 +237,6 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
     fn fuzzy_search_gives_the_wrong_answer_real() {
         let index = setup_real();
 
