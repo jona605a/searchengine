@@ -1,9 +1,9 @@
 #![allow(non_snake_case)]
+use crate::index::index10_1::{boyer_moore, boyer_moore_preprocess};
 use std::{
     collections::{HashMap, HashSet},
     fs,
 };
-use crate::index::index10_1::{boyer_moore_preprocess, boyer_moore};
 
 use super::Index;
 
@@ -49,7 +49,7 @@ impl Index<HashMap<(String, String, String), Vec<usize>>> {
             },
         );
 
-        // With the intersection, we can now go through each article that "pass the test" of having the correct triples, 
+        // With the intersection, we can now go through each article that "pass the test" of having the correct triples,
         // and actually linear search through them to find the correct answers
         let p: Vec<char> = query.chars().collect();
 
@@ -60,12 +60,18 @@ impl Index<HashMap<(String, String, String), Vec<usize>>> {
             // Read the file
             let t: Vec<char> =
                 fs::read_to_string(format!("data/individual_articles/{:05}.txt", art_no))
-                    .expect(format!("Article number {} not found in data/individual_articles/", art_no).as_str(),)
+                    .expect(
+                        format!(
+                            "Article number {} not found in data/individual_articles/",
+                            art_no
+                        )
+                        .as_str(),
+                    )
                     .chars()
                     .collect();
             match boyer_moore(&p, &t, (&L_prime, &l_prime, &R)) {
-                x if x == Vec::<usize>::new() => (),   // Empty vector
-                _ => result.push(*art_no), // There was at least one occurence
+                x if x == Vec::<usize>::new() => (), // Empty vector
+                _ => result.push(*art_no),           // There was at least one occurence
             }
         }
         // Result to article names
@@ -73,13 +79,15 @@ impl Index<HashMap<(String, String, String), Vec<usize>>> {
             .iter()
             .map(|a_no| self.article_titles[*a_no].to_owned())
             .collect()
-
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{helpers::Config, index::{Query, Search, SearchType}};
+    use crate::{
+        helpers::Config,
+        index::{Query, Search, SearchType},
+    };
 
     use super::*;
 
@@ -154,7 +162,7 @@ mod tests {
 
         let query = Query {
             search_string: "word2 word3 word4".to_string(),
-            search_type: SearchType::FuzzySearch,
+            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
         };
 
         search_match(
@@ -179,7 +187,7 @@ mod tests {
 
         let query = Query {
             search_string: "".to_string(),
-            search_type: SearchType::FuzzySearch,
+            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
         };
         let result = index.search(&query);
 
@@ -187,7 +195,7 @@ mod tests {
 
         let query = Query {
             search_string: "hej".to_string(),
-            search_type: SearchType::FuzzySearch,
+            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
         };
         let result = index.search(&query);
 
@@ -195,7 +203,7 @@ mod tests {
 
         let query = Query {
             search_string: "hej med".to_string(),
-            search_type: SearchType::FuzzySearch,
+            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
         };
         let result = index.search(&query);
 
@@ -208,7 +216,7 @@ mod tests {
 
         let query = Query {
             search_string: "word4 word5 word3".to_string(),
-            search_type: SearchType::FuzzySearch,
+            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
         };
         let result = index.search(&query);
 
@@ -221,7 +229,7 @@ mod tests {
 
         let query = Query {
             search_string: "word2 word3 word4 word5".to_string(),
-            search_type: SearchType::FuzzySearch,
+            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
         };
 
         search_match(
@@ -242,7 +250,7 @@ mod tests {
 
         let query = Query {
             search_string: "Sinope and the United".to_string(),
-            search_type: SearchType::FuzzySearch,
+            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
         };
 
         search_match(index, query, vec![]);
@@ -254,7 +262,7 @@ mod tests {
 
         let query = Query {
             search_string: "Etymology and terminology".to_string(),
-            search_type: SearchType::FuzzySearch,
+            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
         };
 
         search_match(index, query, vec!["Anarchism".to_string()]);
@@ -266,7 +274,7 @@ mod tests {
 
         let query = Query {
             search_string: "one of the".to_string(),
-            search_type: SearchType::FuzzySearch,
+            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
         };
 
         search_match(
@@ -286,7 +294,7 @@ mod tests {
 
         let query = Query {
             search_string: "it can be".to_string(),
-            search_type: SearchType::FuzzySearch,
+            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
         };
 
         search_match(
@@ -301,7 +309,7 @@ mod tests {
 
         let query = Query {
             search_string: "cantbefound cantbefound cantbefound".to_string(),
-            search_type: SearchType::FuzzySearch,
+            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
         };
 
         search_match(index, query, Vec::<String>::new());
