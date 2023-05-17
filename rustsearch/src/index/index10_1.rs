@@ -124,7 +124,7 @@ pub fn boyer_moore(
                 1
             };
 
-            dbg!(i, k, bc_shift, gs_shift);
+            // dbg!(i, k, bc_shift, gs_shift);
 
             k += max(bc_shift, gs_shift)
         }
@@ -143,7 +143,10 @@ impl Index<HashMap<String, HashSet<usize>>> {
             .split(' ')
             .map(|w| self.database.get(w).unwrap_or(&HashSet::new()).to_owned());
         let keys = x.next().unwrap();
-        let art_intersect: Vec<usize> = keys.into_iter().filter(|ar_no| x.all(|hs_a| hs_a.contains(ar_no))).collect();
+        let art_intersect: Vec<usize> = keys
+            .into_iter()
+            .filter(|ar_no| x.all(|hs_a| hs_a.contains(ar_no)))
+            .collect();
 
         // let query_words: Vec<&str> = query.split(' ').collect();
         let mut result: Vec<usize> = Vec::new();
@@ -153,12 +156,18 @@ impl Index<HashMap<String, HashSet<usize>>> {
             // Read the file
             let t: Vec<char> =
                 fs::read_to_string(format!("data/individual_articles/{:05}.txt", art_no))
-                    .expect(format!("Article number {} not found in data/individual_articles/", art_no).as_str(),)
+                    .expect(
+                        format!(
+                            "Article number {} not found in data/individual_articles/",
+                            art_no
+                        )
+                        .as_str(),
+                    )
                     .chars()
                     .collect();
             match boyer_moore(&p, &t, (&L_prime, &l_prime, &R)) {
-                x if x == Vec::<usize>::new() => (),   // Empty vector
-                _ => result.push(art_no), // There was at least one occurence
+                x if x == Vec::<usize>::new() => (), // Empty vector
+                _ => result.push(art_no),            // There was at least one occurence
             }
         }
         // Result to article names

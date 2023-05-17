@@ -55,7 +55,7 @@ fn user_dialog(index: Box<dyn Search>) {
 
         let search_type = search_types[query_type.trim().parse::<usize>().unwrap()].clone();
 
-        println!("Searching for {query_string}, using {search_type}");
+        println!("Searching for \"{}\" using {search_type}", query_string.trim());
         let query = Query {
             search_string: query_string.trim().to_string(),
             search_type,

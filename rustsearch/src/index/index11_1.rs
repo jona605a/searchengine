@@ -56,6 +56,8 @@ impl Index<HashMap<(String, String, String), Vec<usize>>> {
         let mut result: Vec<usize> = Vec::new();
         let (L_prime, l_prime, R) = boyer_moore_preprocess(&p);
 
+
+        // TODO: improve generality of this section **************************************
         for art_no in art_intersect {
             // Read the file
             let t: Vec<char> =

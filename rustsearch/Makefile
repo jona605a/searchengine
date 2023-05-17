@@ -4,7 +4,7 @@ ss ?= "third"
 output ?= "output.txt"
 
 run: 
-	cargo run -- $(file)
+	cargo run -- $(file) "9_0"
 
 file:
 	cargo run -- $(ss) $(file) > $(output)
