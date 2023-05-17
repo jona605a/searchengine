@@ -44,7 +44,7 @@ pub fn read_file_to_string(file_path: &String) -> Result<String, Box<dyn Error>>
 
 pub fn read_and_clean_file_to_iter(config: &Config) -> Result<Vec<(String,Vec<String>)>, Box<dyn Error>> {
     let filecontents = read_file_to_string(&config.file_path)?;
-    let re = Regex::new(r"\. |\.\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
+    let re = Regex::new(r"\. |\.\n|\.\r\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
 
     // Articles are seperated by the delimiter "---END.OF.DOCUMENT---"
     // In each article, it is assumed that the first line is the title, ending in a '.'
