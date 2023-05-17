@@ -51,7 +51,11 @@ pub fn read_and_clean_file_to_iter(config: &Config) -> Result<Vec<(String,Vec<St
     // The contents of each article is split according to the regular expression.
 
     let articles_iter: Vec<(String, Vec<String>)> = filecontents.split("---END.OF.DOCUMENT---").map(|a| {
-        let (title, contents) = a.trim().split_once(".\n").unwrap_or(("", ""));
+        // let (title, contents) = a.trim().split_once(".\n").unwrap_or(("", ""));
+        let (title, contents) = match a.trim().split_once(".\n") {
+            Some((t, c)) => (t, c),
+            None => a.trim().split_once(".\r\n").unwrap_or(("", "")), // Some Windows shit
+        };
         let x: Vec<String> = re.split(contents).map(|s| s.to_string()).collect();
         (title.to_string(), x)
     }).collect();
