@@ -1,5 +1,4 @@
 #![allow(non_snake_case)]
-use regex::Regex;
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
 use std::fs;
@@ -14,12 +13,7 @@ impl Index<HashMap<String, HashSet<usize>>> {
         // Setup
         let mut database: HashMap<String, HashSet<usize>> = HashMap::new();
 
-        let filecontents = read_file_to_string(&config.file_path)?;
-        let re = Regex::new(r"\. |\.\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
-        let articles_iter = filecontents.split("---END.OF.DOCUMENT---").map(|a| {
-            let (title, contents) = a.trim().split_once(".\n").unwrap_or(("", ""));
-            (title.to_string(), re.split(contents))
-        });
+        let articles_iter = read_and_clean_file_to_iter(config)?;
         let mut article_titles: Vec<String> = Vec::new();
         let mut article_no = 0;
 

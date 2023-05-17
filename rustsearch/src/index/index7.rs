@@ -1,4 +1,3 @@
-use regex::Regex;
 use std::collections::HashMap;
 use std::error::Error;
 
@@ -12,14 +11,7 @@ impl Index<HashMap<String, Vec<u64>>> {
     pub fn index7(config: &Config) -> Result<Self, Box<dyn Error>> {
         let mut database: HashMap<String, Vec<u64>> = HashMap::new();
 
-        let filecontents = read_file_to_string(&config.file_path)?;
-        let re = Regex::new(r"\. |\.\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
-
-        let articles_iter = filecontents.split("---END.OF.DOCUMENT---").map(|a| {
-            let (title, contents) = a.trim().split_once(".\n").unwrap_or(("", ""));
-            // dbg!(title, contents);
-            (title.to_string(), re.split(contents))
-        });
+        let articles_iter = read_and_clean_file_to_iter(config)?;
         let mut article_titles: Vec<String> = Vec::new();
 
         let mut n_titles = 0;

@@ -1,4 +1,3 @@
-use regex::Regex;
 use std::error::Error;
 
 use crate::helpers::*;
@@ -148,16 +147,7 @@ impl Index<TrieLin> {
     pub fn index9_0(config: &Config) -> Result<Self, Box<dyn Error>> {
         let mut database = TrieLin::new();
 
-        let filecontents = read_file_to_string(&config.file_path)?;
-        let re = Regex::new(r"\. |\.\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
-
-        // Articles are seperated by the delimiter "---END.OF.DOCUMENT---"
-        // In each article, it is assumed that the first line is the title, ending in a '.'
-        // The contents of each article is split according to the regular expression.
-        let articles_iter = filecontents.split("---END.OF.DOCUMENT---").map(|a| {
-            let (title, contents) = a.trim().split_once(".\n").unwrap_or(("", ""));
-            (title.to_string(), re.split(contents))
-        });
+        let articles_iter = read_and_clean_file_to_iter(config)?;
         let mut article_titles: Vec<String> = Vec::new();
 
         for (title, contents) in articles_iter {
