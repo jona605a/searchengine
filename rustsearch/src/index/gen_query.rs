@@ -1,4 +1,4 @@
-use crate::helpers::Config;
+use crate::helpers::{Config, read_and_clean_file_to_iter};
 use crate::parsing::{AstNode, BinaryOp};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
@@ -20,6 +20,15 @@ fn get_search_prefix(database_words: &Vec<&String>, rng: &mut StdRng) -> String 
             word.get(0..3).unwrap_or(&word).to_string() + "*"
         }
     };
+}
+
+fn get_search_fulltext(articles_iter:&Vec<(String,Vec<String>)>, rng: &mut StdRng) -> String{
+    
+    let article_idx = rng.gen_range(0..=articles_iter.len());
+    let (_title, content) = &articles_iter[article_idx];
+    let word_idx = rng.gen_range(0..=content.len()-5);
+
+    content[word_idx..word_idx+5].join(" ")
 }
 
 pub fn ast_to_string(node: AstNode) -> String{
@@ -103,6 +112,22 @@ pub fn gen_a_lot_of_runs_tries(file_path: String, number: usize, prefix: bool) -
             .map(|_| get_search_word(&database_words, &mut rng))
             .collect::<Vec<String>>(),
     };
+    search_queries
+}
+
+pub fn gen_a_lot_of_runs_full_text(file_path: String, number: usize) -> Vec<String> {
+    
+    let mut rng = StdRng::seed_from_u64(8008135);
+   
+    let config = Config::build(&[
+        "".to_string(),
+        file_path,
+        "11".to_string(),
+    ])
+    .unwrap();
+
+    let articles_iter:Vec<(String,Vec<String>)> = read_and_clean_file_to_iter(&config).unwrap();
+    let search_queries:Vec<String> = (1..=number).map(|_| get_search_fulltext(&articles_iter, &mut rng)).collect::<Vec<String>>();
     search_queries
 }
 
@@ -191,6 +216,12 @@ mod bool_tests {
         assert_eq!(result2, "wor*");
         assert_eq!(result3, "wor*");
         assert_eq!(result4, "wor*");
+    }
+
+    #[test]
+    fn get_search_word_full_text_can_be_seeded() {
+        let qurries = gen_a_lot_of_runs_full_text("data/WestburyLab.wikicorp.201004_100KB.txt".to_string(),5);
+        assert_eq!(qurries,vec!["arc  resulting in the", "knowledge of the intrinsic properties", "HFA   based on", "but were generally living at", "as avoiding eye contact The"])
     }
 
     #[test]
