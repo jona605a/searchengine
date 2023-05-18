@@ -15,7 +15,7 @@ fn main() {
 
     user_dialog(config.to_index().unwrap())
 
-    // separate_file_to_seperate_articles(&config);
+    //separate_file_to_seperate_articles(&config);
 
     // profile_memory_old(&config);
 }

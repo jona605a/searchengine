@@ -1,6 +1,7 @@
 // https://bheisler.github.io/criterion.rs/book/getting_started.html
 // #![allow(non_snake_case)]
 use criterion::{criterion_group, criterion_main, Criterion};
+use rustsearch::index::gen_query::gen_a_lot_of_runs_full_text;
 use rustsearch::index::{Query, SearchType};
 
 use std::fs;
@@ -57,8 +58,24 @@ pub fn indexing_9_1(c: &mut Criterion) {
     index_template(c, "9_1");
 }
 
+pub fn indexing_10_0(c: &mut Criterion) {
+    index_template(c, "10_0");
+}
+
+pub fn indexing_10_1(c: &mut Criterion) {
+    index_template(c, "10_1");
+}
+
+pub fn indexing_11_0(c: &mut Criterion) {
+    index_template(c, "11_0");
+}
+
+pub fn indexing_11_1(c: &mut Criterion) {
+    index_template(c, "11_1");
+}
+
 // Timing search times
-pub fn searching_template(c: &mut Criterion, i_string: &str,) {
+pub fn bool_searching_template(c: &mut Criterion, i_string: &str,) {
     let files = fs::read_dir("../../data.nosync/");
 
     let boolean_searchtype = match i_string {
@@ -104,27 +121,27 @@ pub fn searching_template(c: &mut Criterion, i_string: &str,) {
 } 
 
 pub fn searching_index_7_0(c: &mut Criterion) {
-    searching_template(c, "7_0");
+    bool_searching_template(c, "7_0");
 }
 
 pub fn searching_index_8_0(c: &mut Criterion) {
-    searching_template(c, "8_0");
+    bool_searching_template(c, "8_0");
 }
 
 pub fn searching_index_8_1(c: &mut Criterion) {
-    searching_template(c, "8_1");
+    bool_searching_template(c, "8_1");
 }
 
 pub fn searching_index_8_2(c: &mut Criterion) {
-    searching_template(c, "8_2");
+    bool_searching_template(c, "8_2");
 }
 
 pub fn searching_index_8_3(c: &mut Criterion) {
-    searching_template(c, "8_3");
+    bool_searching_template(c, "8_3");
 }
 
 pub fn searching_index_8_4(c: &mut Criterion) {
-    searching_template(c, "8_4");
+    bool_searching_template(c, "8_4");
 }
 
 pub fn prefix_search_template(c: &mut Criterion,i_string: &str,preix_bool:bool) {
@@ -145,7 +162,7 @@ pub fn prefix_search_template(c: &mut Criterion,i_string: &str,preix_bool:bool) 
         };
         let index = config.to_index().unwrap();
         
-        c.bench_function(&format!("{} {} {}",searchtype_string,i_string, filesize), |b| b.iter(|| {
+        c.bench_function(&format!("{} {} {}", searchtype_string, i_string, filesize), |b| b.iter(|| {
             for word in &word_vec {
                 let query = Query {
                     search_string: word.to_owned(),
@@ -174,7 +191,60 @@ pub fn prefix_search_index_9_1(c: &mut Criterion) {
     prefix_search_template(c,"9_1",true)
 }
 
+pub fn full_text_searching_template(c: &mut Criterion, i_string: &str,) {
+    let files = fs::read_dir("../../data.nosync/");
+
+    let full_text_searchtype = match i_string {
+        "10_0" => SearchType::ExactSearch("KMP".to_string()),
+        "10_1" => SearchType::ExactSearch("BoyerMoore".to_string()),
+        "11_0" => SearchType::FuzzySearch,
+        "11_1" => SearchType::ExactSearch("TripleBoyerMoore".to_string()),
+        _ => panic!()
+    };
+
+    for dir in files.unwrap() {
+        let file_path = dir.unwrap().path().into_os_string().into_string().unwrap();
+        let filesize = &file_path[46..file_path.len()-4];
+
+        let full_text_queries: Vec<String> = gen_a_lot_of_runs_full_text(file_path.clone(), 1000);
+
+        let config = Config {
+            file_path: file_path.to_owned(),
+            indexno: i_string.to_string(),
+        };
+        let index = config.to_index().unwrap();
+        
+        c.bench_function(&format!("Full text {} {}", i_string, filesize), |b| b.iter(|| {
+            for sentence in &full_text_queries {
+                let query = Query {
+                    search_string: sentence.clone(),
+                    search_type: full_text_searchtype.to_owned()
+                };
+                
+                index.search(&query);
+            }
+            }));
+    }
+} 
+ 
+
+pub fn full_text_search_10_0(c: &mut Criterion) {
+    full_text_searching_template(c,"10_0")
+}
+
+pub fn full_text_search_10_1(c: &mut Criterion) {
+    full_text_searching_template(c,"10_1")
+}
+
+pub fn full_text_search_11_0(c: &mut Criterion) {
+    full_text_searching_template(c,"11_0")
+}
+
+pub fn full_text_search_11_1(c: &mut Criterion) {
+    full_text_searching_template(c,"11_1")
+}
+
 //criterion_group!(benches,indexing_7,indexing_8_0,indexing_9_1,indexing_9_0,searching_index_7_0,searching_index_8_0,searching_index_8_1,searching_index_8_2,searching_index_8_3,searching_index_8_4,find_word_9_0,find_word_9_1,prefix_search_index_9_0,prefix_search_index_9_1);
-criterion_group!(benches,find_word_9_0,prefix_search_index_9_0);
+criterion_group!(benches,full_text_search_10_0,full_text_search_10_1,full_text_search_11_0,full_text_search_11_1);
 
 criterion_main!(benches);
