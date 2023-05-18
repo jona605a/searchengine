@@ -1,6 +1,5 @@
-use std::{env, fs, io, process};
+use std::{env, io, process};
 
-use regex::Regex;
 use rustsearch::helpers::*;
 use rustsearch::index::{Index, Query, Search, SearchType::*};
 
@@ -81,26 +80,3 @@ fn profile_memory_old(config: &Config) {
     }
 }
 
-#[allow(dead_code)]
-fn separate_file_to_seperate_articles(config: &Config) {
-    let filecontents = read_file_to_string(&config.file_path).unwrap();
-    let re = Regex::new(r"\. |\.\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
-
-    // Articles are seperated by the delimiter "---END.OF.DOCUMENT---"
-    // In each article, it is assumed that the first line is the title, ending in a '.'
-    // The contents of each article is split according to the regular expression.
-    let articles_iter = filecontents.split("---END.OF.DOCUMENT---").map(|a| {
-        let (title, contents) = a.trim().split_once(".\n").unwrap_or(("", ""));
-        (title.to_string(), re.split(contents))
-    });
-
-    let mut count = 0;
-
-    for (title, contents) in articles_iter {
-        if title != "" {
-            let x = contents.collect::<Vec<&str>>().join(" ");
-            fs::write(format!("data/individual_articles/{:05}.txt", count), x).unwrap();
-            count += 1;
-        }
-    }
-}

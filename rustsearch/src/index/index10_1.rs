@@ -154,19 +154,12 @@ impl Index<HashMap<String, HashSet<usize>>> {
 
         for art_no in art_intersect {
             // Read the file
-            let t: Vec<char> =
-                fs::read_to_string(format!("data/individual_articles/{:05}.txt", art_no))
-                    .expect(
-                        format!(
-                            "Article number {} not found in data/individual_articles/",
-                            art_no
-                        )
-                        .as_str(),
-                    )
+            let t: Vec<char> = fs::read_to_string(format!("data/individual_articles/{:05}.txt", art_no))
+                    .expect(format!("Article number {} not found in data/individual_articles/", art_no).as_str())
                     .chars()
                     .collect();
             match boyer_moore(&p, &t, (&L_prime, &l_prime, &R)) {
-                x if x == Vec::<usize>::new() => (), // Empty vector
+                x if x.len() == 0 => (), // Empty vector
                 _ => result.push(art_no),            // There was at least one occurence
             }
         }
