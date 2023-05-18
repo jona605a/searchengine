@@ -24,10 +24,13 @@ fn get_search_prefix(database_words: &Vec<&String>, rng: &mut StdRng) -> String 
 
 fn get_search_fulltext(articles_iter:&Vec<(String,Vec<String>)>, rng: &mut StdRng) -> String{
     
-    let article_idx = rng.gen_range(0..=articles_iter.len());
+    let article_idx = rng.gen_range(0..=(articles_iter.len()-1));
     let (_title, content) = &articles_iter[article_idx];
-    let word_idx = rng.gen_range(0..=content.len()-5);
+    let word_idx = rng.gen_range(0..=(content.len()-5));
 
+    if content.len()<5{
+        return get_search_fulltext(articles_iter, rng)
+    }
     content[word_idx..word_idx+5].join(" ")
 }
 
