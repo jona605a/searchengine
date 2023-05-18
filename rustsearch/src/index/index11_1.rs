@@ -8,34 +8,35 @@ use std::{
 use super::Index;
 
 impl Index<HashMap<(String, String, String), Vec<usize>>> {
-    pub fn exact_triples_search(&self, query: &String) -> Vec<String> {
+    fn article_intersection_from_query(&self, query: &String) -> Option<HashSet<&usize>> {
         // Split sentence into words
         // Get article set for each word, and find intersection
         let mut words_iter = query.split_ascii_whitespace();
         let mut prv1 = match words_iter.next() {
-            None => return vec![],
+            None => return None,
             Some(w) => w,
         };
         let mut prv2 = match words_iter.next() {
-            None => return vec![],
+            None => return None,
             Some(w) => w,
         };
         let mut art_lists = vec![];
 
         for word in words_iter {
             let triple = (prv1.to_owned(), prv2.to_owned(), word.to_owned());
-            match dbg!(self.database.get(dbg!(&triple))) {
-                None => return vec![],
+            // match dbg!(self.database.get(dbg!(&triple))) {
+            match self.database.get(&triple) {
+                None => return None,
                 Some(al) => art_lists.push(al),
             }
             prv1 = prv2;
             prv2 = word;
         }
-        dbg!(&art_lists);
+        // dbg!(&art_lists);
 
         let mut art_iter = art_lists.iter();
         let first_art = match art_iter.next() {
-            None => return vec![],
+            None => return None,
             Some(&x) => x,
         };
 
@@ -48,6 +49,14 @@ impl Index<HashMap<(String, String, String), Vec<usize>>> {
                     .collect()
             },
         );
+        Some(art_intersect)
+    }
+
+    pub fn exact_triples_search(&self, query: &String) -> Vec<String> {
+        let art_intersect = match self.article_intersection_from_query(query) {
+            None => return vec![],
+            Some(x) => x,
+        };
 
         // With the intersection, we can now go through each article that "pass the test" of having the correct triples,
         // and actually linear search through them to find the correct answers
@@ -55,7 +64,6 @@ impl Index<HashMap<(String, String, String), Vec<usize>>> {
 
         let mut result: Vec<usize> = Vec::new();
         let (L_prime, l_prime, R) = boyer_moore_preprocess(&p);
-
 
         // TODO: improve generality of this section **************************************
         for art_no in art_intersect {
@@ -72,8 +80,8 @@ impl Index<HashMap<(String, String, String), Vec<usize>>> {
                     .chars()
                     .collect();
             match boyer_moore(&p, &t, (&L_prime, &l_prime, &R)) {
-                x if x == Vec::<usize>::new() => (), // Empty vector
-                _ => result.push(*art_no),           // There was at least one occurence
+                x if x.len() == 0 => (),   // Empty vector
+                _ => result.push(*art_no), // There was at least one occurence
             }
         }
         // Result to article names
@@ -141,6 +149,33 @@ mod tests {
         for i in 0..100 {
             article_titles.push(format!("article {}", i).to_string());
         }
+
+        // Write the actual files
+        fs::write(format!("data/individual_articles/{:05}.txt", 0),
+            "word1 word2 word3 . word2 word3 word4 . word3 word4 word5",
+        ).unwrap();
+        fs::write(format!("data/individual_articles/{:05}.txt", 1),
+            "word2 word3 word4 . word4 word5 word6",
+        ).unwrap();
+        fs::write(format!("data/individual_articles/{:05}.txt", 2),
+            "word4 word5 word6 . word2 word3 word4 . word3 word4 word5",
+        ).unwrap();
+        fs::write(format!("data/individual_articles/{:05}.txt", 3),
+            "word4 word5 word6 . word2 word3 word4",
+        ).unwrap();
+        fs::write(format!("data/individual_articles/{:05}.txt", 4),
+            "word2 word3 word4 word5",
+        ).unwrap();
+        fs::write(format!("data/individual_articles/{:05}.txt", 5),
+            "word2 word3 word4",
+        ).unwrap();
+        fs::write(format!("data/individual_articles/{:05}.txt", 6),
+        "word2 word3 word4 word5",
+        ).unwrap();
+        fs::write(format!("data/individual_articles/{:05}.txt", 7),
+        "word2 word3 word4",
+        ).unwrap();
+        
         Index {
             database,
             article_titles,
@@ -238,8 +273,6 @@ mod tests {
             index,
             query,
             vec![
-                "article 0".to_string(),
-                "article 2".to_string(),
                 "article 4".to_string(),
                 "article 6".to_string(),
             ],

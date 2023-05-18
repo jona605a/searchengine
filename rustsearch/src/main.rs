@@ -1,4 +1,4 @@
-use std::{env, fs, io, process};
+use std::{env, io, process};
 
 use rustsearch::helpers::*;
 use rustsearch::index::{Index, Query, Search, SearchType::*};
@@ -80,18 +80,3 @@ fn profile_memory_old(config: &Config) {
     }
 }
 
-#[allow(dead_code)]
-fn separate_file_to_seperate_articles(config: &Config) {
-    
-    let articles_iter = read_and_clean_file_to_iter(config).unwrap();
-
-    let mut count = 0;
-
-    for (title, contents) in articles_iter {
-        if title != "" {
-            let x = contents.join(" ");
-            fs::write(format!("data/individual_articles/{:05}.txt", count), x).unwrap();
-            count += 1;
-        }
-    }
-}

@@ -32,6 +32,11 @@ impl Config {
             "9_0" => Ok(Box::new(Index::index9_0(&self)?)),
             "9_1" => Ok(Box::new(Index::index9_1(&self)?)),
             "10" => Ok(Box::new(Index::index10(&self)?)),
+            "10_0" => Ok(Box::new(Index::index10(&self)?)),
+            "10_1" => Ok(Box::new(Index::index10(&self)?)),
+            "11" => Ok(Box::new(Index::index11(&self)?)),
+            "11_0" => Ok(Box::new(Index::index11(&self)?)),
+            "11_1" => Ok(Box::new(Index::index11(&self)?)),
             _ => unimplemented!(),
         }
     }
@@ -43,7 +48,7 @@ pub fn read_file_to_string(file_path: &String) -> Result<String, Box<dyn Error>>
 }
 
 pub fn read_and_clean_file_to_iter(config: &Config) -> Result<Vec<(String,Vec<String>)>, Box<dyn Error>> {
-    let filecontents = read_file_to_string(&config.file_path)?;
+    let filecontents = fs::read_to_string(&config.file_path)?;
     let re = Regex::new(r"\. |\.\n|\.\r\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
 
     // Articles are seperated by the delimiter "---END.OF.DOCUMENT---"
@@ -54,7 +59,8 @@ pub fn read_and_clean_file_to_iter(config: &Config) -> Result<Vec<(String,Vec<St
         // let (title, contents) = a.trim().split_once(".\n").unwrap_or(("", ""));
         let (title, contents) = match a.trim().split_once(".\n") {
             Some((t, c)) => (t, c),
-            None => a.trim().split_once(".\r\n").unwrap_or(("", "")), // Some Windows shit
+            None => a.trim().split_once(".\r\n") // Some Windows shit
+                        .unwrap_or(("", "")), 
         };
         let x: Vec<String> = re.split(contents).map(|s| s.to_string()).collect();
         (title.to_string(), x)
@@ -64,7 +70,7 @@ pub fn read_and_clean_file_to_iter(config: &Config) -> Result<Vec<(String,Vec<St
 
 pub fn word_freq() {
     let file5mb = "data/WestburyLab.wikicorp.201004_5MB.txt";
-    let file_contents = read_file_to_string(&file5mb.to_string()).unwrap();
+    let file_contents = fs::read_to_string(&file5mb.to_string()).unwrap();
     // let re = Regex::new(r#"^[[:alpha:]/''`\-]"#).unwrap();
     let re = Regex::new(r#"\. |\.\n|; |[\[\]\{\}\\\n\(\) ",:/=?!*]"#).unwrap();
     let articles_iter = file_contents.split("---END.OF.DOCUMENT---").map(|a| {
@@ -84,3 +90,21 @@ pub fn word_freq() {
     }
     println!("{:#?}", word_freq)
 }
+
+pub fn write_article_files(config: &Config) {
+    let articles_iter = read_and_clean_file_to_iter(&config).unwrap();
+
+    let mut count = 0;
+
+    for (title, contents) in articles_iter {
+        if title != "" {
+            let x = contents.join(" ");
+            fs::write(format!("data/individual_articles/{:05}.txt", count), x).unwrap();
+            count += 1;
+        }
+        if count > 99999 {
+            panic!("Too many articles. It's over 99999.")
+        }
+    }
+}
+

@@ -10,6 +10,9 @@ use super::*;
 
 impl Index<HashMap<String, HashSet<usize>>> {
     pub fn index10(config: &Config) -> Result<Self, Box<dyn Error>> {
+        // Read all articles, run them through the regex and write each individual article to a file named in the format 00xxx.txt
+        write_article_files(config);
+
         // Setup
         let mut database: HashMap<String, HashSet<usize>> = HashMap::new();
 
@@ -64,14 +67,10 @@ impl Index<HashMap<String, HashSet<usize>>> {
             // Read the file
             let file_contents =
                 fs::read_to_string(format!("data/individual_articles/{:05}.txt", art_no)).expect(
-                    format!(
-                        "Article number {} not found in data/individual_articles/",
-                        art_no
-                    )
-                    .as_str(),
+                    format!("Article number {} not found in data/individual_articles/", art_no).as_str()
                 );
             match Index::kmp(file_contents, &query_words, &T) {
-                x if x == Vec::<usize>::new() => (),   // Empty vector
+                x if x.len() == 0 => (), // Empty vector
                 _ => result.push(art_no), // There was at least one occurence
             }
         }
@@ -261,4 +260,80 @@ mod tests {
             ]
         );
     }
+
+    // ==================== Test the actual index ====================
+    // fn setup_test() -> Index<HashMap<String, HashSet<usize>>> { {
+    //     let mut database: HashMap<String, HashSet<usize>> = HashMap::new();
+    //     database.insert(
+    //         (
+    //             "word1".to_string(),
+    //             "word2".to_string(),
+    //             "word3".to_string(),
+    //         ),
+    //         vec![0],
+    //     );
+    //     database.insert(
+    //         (
+    //             "word2".to_string(),
+    //             "word3".to_string(),
+    //             "word4".to_string(),
+    //         ),
+    //         vec![0, 1, 2, 3, 4, 5, 6, 7],
+    //     );
+    //     database.insert(
+    //         (
+    //             "word3".to_string(),
+    //             "word4".to_string(),
+    //             "word5".to_string(),
+    //         ),
+    //         vec![0, 2, 4, 6],
+    //     );
+    //     database.insert(
+    //         (
+    //             "word4".to_string(),
+    //             "word5".to_string(),
+    //             "word6".to_string(),
+    //         ),
+    //         vec![1, 2, 3],
+    //     );
+    //     let mut article_titles: Vec<String> = Vec::new();
+    //     for i in 0..100 {
+    //         article_titles.push(format!("article {}", i).to_string());
+    //     }
+
+    //     // Write the actual files
+    //     fs::write(format!("data/individual_articles/{:05}.txt", 0),
+    //         "word1 word2 word3 . word2 word3 word4 . word3 word4 word5",
+    //     ).unwrap();
+    //     fs::write(format!("data/individual_articles/{:05}.txt", 1),
+    //         "word2 word3 word4 . word4 word5 word6",
+    //     ).unwrap();
+    //     fs::write(format!("data/individual_articles/{:05}.txt", 2),
+    //         "word4 word5 word6 . word2 word3 word4 . word3 word4 word5",
+    //     ).unwrap();
+    //     fs::write(format!("data/individual_articles/{:05}.txt", 3),
+    //         "word4 word5 word6 . word2 word3 word4",
+    //     ).unwrap();
+    //     fs::write(format!("data/individual_articles/{:05}.txt", 4),
+    //         "word2 word3 word4 word5",
+    //     ).unwrap();
+    //     fs::write(format!("data/individual_articles/{:05}.txt", 5),
+    //         "word2 word3 word4",
+    //     ).unwrap();
+    //     fs::write(format!("data/individual_articles/{:05}.txt", 6),
+    //     "word2 word3 word4 word5",
+    //     ).unwrap();
+    //     fs::write(format!("data/individual_articles/{:05}.txt", 7),
+    //     "word2 word3 word4",
+    //     ).unwrap();
+        
+    //     Index {
+    //         database,
+    //         article_titles,
+    //     }
+    // }
+
+
+
+
 }

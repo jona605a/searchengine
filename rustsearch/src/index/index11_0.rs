@@ -8,12 +8,17 @@ use super::*;
 
 impl Index<HashMap<(String, String, String), Vec<usize>>> {
     pub fn index11(config: &Config) -> Result<Self, Box<dyn Error>> {
+        // Read all articles, run them through the regex and write each individual article to a file named in the format 00xxx.txt
+        write_article_files(config);
+
+        // Setup
         let mut database: HashMap<(String, String, String), Vec<usize>> = HashMap::new();
 
         let articles_iter = read_and_clean_file_to_iter(config)?;
-        
+
         let mut article_titles: Vec<String> = Vec::new();
 
+        // The actual indexing
         for (title, contents) in articles_iter {
             let mut contents = contents.iter();
             if title != "" {
@@ -41,15 +46,6 @@ impl Index<HashMap<(String, String, String), Vec<usize>>> {
             article_titles,
         })
     }
-
-    // pub fn vec_to_articlelist(&self, vec: Vec<usize>) -> Vec<String> {
-    //     let mut output: Vec<String> = Vec::new();
-    //     let titles = &self.article_titles;
-    //     for i in vec {
-    //         output.push(titles[i].clone());
-    //     }
-    //     output
-    // }
 
     pub fn fuzzy_triples_search(&self, query: &String) -> Vec<String> {
         // Split sentence into words

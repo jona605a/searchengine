@@ -50,12 +50,12 @@ pub fn indexing_8_0(c: &mut Criterion) {
     index_template(c, "8_0");
 }
 
-pub fn indexing_9_1(c: &mut Criterion) {
+pub fn indexing_9_0(c: &mut Criterion) {
     index_template(c, "9_0");
 }
 
-pub fn indexing_9_0(c: &mut Criterion) {
-    index_template(c, "9_0");
+pub fn indexing_9_1(c: &mut Criterion) {
+    index_template(c, "9_1");
 }
 
 pub fn indexing_10_0(c: &mut Criterion) {
