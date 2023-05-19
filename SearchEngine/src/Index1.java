@@ -1,20 +1,20 @@
 import java.io.*;
 import java.util.Scanner;
- 
+
 class Index1 {
- 
+
     WikiItem start;
- 
+
     private class WikiItem {
         String str;
         WikiItem next;
- 
+
         WikiItem(String s, WikiItem n) {
             str = s;
             next = n;
         }
     }
- 
+
     public Index1(String filename) {
         String word;
         WikiItem current, tmp;
@@ -23,7 +23,7 @@ class Index1 {
             word = input.next();
             start = new WikiItem(word, null);
             current = start;
-            while (input.hasNext()) {   // Read all words in input
+            while (input.hasNext()) { // Read all words in input
                 word = input.next();
                 System.out.println(word);
                 tmp = new WikiItem(word, null);
@@ -35,7 +35,7 @@ class Index1 {
             System.out.println("Error reading file " + filename);
         }
     }
- 
+
     public boolean search(String searchstr) {
         WikiItem current = start;
         while (current != null) {
@@ -46,7 +46,7 @@ class Index1 {
         }
         return false;
     }
- 
+
     public static void main(String[] args) {
         System.out.println("Preprocessing " + args[0]);
         Index1 i = new Index1(args[0]);
