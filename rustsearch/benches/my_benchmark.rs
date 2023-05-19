@@ -280,7 +280,7 @@ pub fn full_text_search_11_1(c: &mut Criterion) {
 //criterion_group!(benches,indexing_7,indexing_8_0,indexing_9_1,indexing_9_0,searching_index_7_0,searching_index_8_0,searching_index_8_1,searching_index_8_2,searching_index_8_3,searching_index_8_4,find_word_9_0,find_word_9_1,prefix_search_index_9_0,prefix_search_index_9_1);
 criterion_group!(
     benches,
-    // full_text_search_10_0,
+    full_text_search_10_0,
     full_text_search_10_1,
     full_text_search_11_0,
     full_text_search_11_1
