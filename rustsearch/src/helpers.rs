@@ -99,7 +99,7 @@ pub fn write_article_files(config: &Config) {
     for (title, contents) in articles_iter {
         if title != "" {
             let x = contents.join(" ");
-            fs::write(format!("data/individual_articles/{:05}.txt", count), x).unwrap();
+            fs::write(format!("data/individual_articles/{:08}.txt", count), x).unwrap();
             count += 1;
         }
         if count > 99999 {
