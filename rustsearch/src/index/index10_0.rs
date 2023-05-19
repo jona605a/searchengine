@@ -57,7 +57,10 @@ impl Index<HashMap<String, HashSet<usize>>> {
             .split(' ')
             .map(|w| self.database.get(w).unwrap_or(&HashSet::new()).to_owned());
         let keys = x.next().unwrap();
-        let art_intersect: Vec<usize> = keys.into_iter().filter(|ar_no| x.all(|hs_a| hs_a.contains(ar_no))).collect();
+        let art_intersect: Vec<usize> = keys
+            .into_iter()
+            .filter(|ar_no| x.all(|hs_a| hs_a.contains(ar_no)))
+            .collect();
 
         let query_words: Vec<&str> = query.split(' ').collect();
         let mut result: Vec<usize> = Vec::new();
@@ -67,10 +70,14 @@ impl Index<HashMap<String, HashSet<usize>>> {
             // Read the file
             let file_contents =
                 fs::read_to_string(format!("data/individual_articles/{:05}.txt", art_no)).expect(
-                    format!("Article number {} not found in data/individual_articles/", art_no).as_str()
+                    format!(
+                        "Article number {} not found in data/individual_articles/",
+                        art_no
+                    )
+                    .as_str(),
                 );
             match Index::kmp(file_contents, &query_words, &T) {
-                x if x.len() == 0 => (), // Empty vector
+                x if x.len() == 0 => (),  // Empty vector
                 _ => result.push(art_no), // There was at least one occurence
             }
         }
@@ -139,6 +146,7 @@ impl Index<HashMap<String, HashSet<usize>>> {
         let mut k = 0;
 
         let file_vec: Vec<&str> = file_contents.split_ascii_whitespace().collect();
+        // dbg!(&file_vec);
 
         while j < file_vec.len() {
             if query_words[k] == file_vec[j] {
@@ -150,6 +158,11 @@ impl Index<HashMap<String, HashSet<usize>>> {
                     k = T[k] as usize;
                 }
             } else {
+                // if k == 0 {
+                //     j += 1
+                // }
+                // k = (T[k] as usize) + 1;
+
                 match T[k] {
                     -1 => {
                         j += 1;
@@ -245,7 +258,7 @@ mod tests {
     fn kmp_3() {
         let file_contents: String =
             "When I find myself in times of trouble, Mother Mary comes to me Speaking words of wisdom, 
-            let it be And in my hour of darkness she is standing right in front of me Speaking words of wisdom, let it be Let it be  let it be let it be let it be Whisper words of wisdom, let it be And when the broken hearted people living in the world agree There will be an answer, let it be For though they may be parted, there is still a chance that they will see There will be an answer, let it be Let it be let it be let it be let it be There will be an answer, let it be Let it be let it be let it be let it be Whisper words of wisdom, let it be Let it be let it be let it be let it be Whisper words of wisdom, let it be be And when the night is cloudy there is still a light that shines on me Shinin' until tomorrow, let it be I wake up to the sound of music, Mother Mary comes to me Speaking words of wisdom, let it be And let it be let it be let it be let it be Whisper words of wisdom, let it be And let it be let it be let it be let it be Whisper words of wisdom, let it be"
+            let it be And in my hour of darkness she is standing right in front of me Speaking words of wisdom, let it be Let it be let it be let it be let it be Whisper words of wisdom, let it be And when the broken hearted people living in the world agree There will be an answer, let it be For though they may be parted, there is still a chance that they will see There will be an answer, let it be Let it be let it be let it be let it be There will be an answer, let it be Let it be let it be let it be let it be Whisper words of wisdom, let it be Let it be let it be let it be let it be Whisper words of wisdom, let it be be And when the night is cloudy there is still a light that shines on me Shinin' until tomorrow, let it be I wake up to the sound of music, Mother Mary comes to me Speaking words of wisdom, let it be And let it be let it be let it be let it be Whisper words of wisdom, let it be And let it be let it be let it be let it be Whisper words of wisdom, let it be"
                 .to_string()
                 .to_ascii_lowercase();
         let query_words: Vec<&str> = vec!["let", "it", "be"];
@@ -262,78 +275,101 @@ mod tests {
     }
 
     // ==================== Test the actual index ====================
-    // fn setup_test() -> Index<HashMap<String, HashSet<usize>>> { {
-    //     let mut database: HashMap<String, HashSet<usize>> = HashMap::new();
-    //     database.insert(
-    //         (
-    //             "word1".to_string(),
-    //             "word2".to_string(),
-    //             "word3".to_string(),
-    //         ),
-    //         vec![0],
-    //     );
-    //     database.insert(
-    //         (
-    //             "word2".to_string(),
-    //             "word3".to_string(),
-    //             "word4".to_string(),
-    //         ),
-    //         vec![0, 1, 2, 3, 4, 5, 6, 7],
-    //     );
-    //     database.insert(
-    //         (
-    //             "word3".to_string(),
-    //             "word4".to_string(),
-    //             "word5".to_string(),
-    //         ),
-    //         vec![0, 2, 4, 6],
-    //     );
-    //     database.insert(
-    //         (
-    //             "word4".to_string(),
-    //             "word5".to_string(),
-    //             "word6".to_string(),
-    //         ),
-    //         vec![1, 2, 3],
-    //     );
-    //     let mut article_titles: Vec<String> = Vec::new();
-    //     for i in 0..100 {
-    //         article_titles.push(format!("article {}", i).to_string());
-    //     }
+    fn setup_test() -> Index<HashMap<String, HashSet<usize>>> {
+        {
+            let mut database: HashMap<String, HashSet<usize>> = HashMap::new();
 
-    //     // Write the actual files
-    //     fs::write(format!("data/individual_articles/{:05}.txt", 0),
-    //         "word1 word2 word3 . word2 word3 word4 . word3 word4 word5",
-    //     ).unwrap();
-    //     fs::write(format!("data/individual_articles/{:05}.txt", 1),
-    //         "word2 word3 word4 . word4 word5 word6",
-    //     ).unwrap();
-    //     fs::write(format!("data/individual_articles/{:05}.txt", 2),
-    //         "word4 word5 word6 . word2 word3 word4 . word3 word4 word5",
-    //     ).unwrap();
-    //     fs::write(format!("data/individual_articles/{:05}.txt", 3),
-    //         "word4 word5 word6 . word2 word3 word4",
-    //     ).unwrap();
-    //     fs::write(format!("data/individual_articles/{:05}.txt", 4),
-    //         "word2 word3 word4 word5",
-    //     ).unwrap();
-    //     fs::write(format!("data/individual_articles/{:05}.txt", 5),
-    //         "word2 word3 word4",
-    //     ).unwrap();
-    //     fs::write(format!("data/individual_articles/{:05}.txt", 6),
-    //     "word2 word3 word4 word5",
-    //     ).unwrap();
-    //     fs::write(format!("data/individual_articles/{:05}.txt", 7),
-    //     "word2 word3 word4",
-    //     ).unwrap();
-        
-    //     Index {
-    //         database,
-    //         article_titles,
-    //     }
-    // }
+            database.insert(
+                "word1".to_string(),
+                HashSet::from_iter(vec![0, 1, 2, 3, 4, 5]),
+            );
+            database.insert(
+                "word2".to_string(),
+                HashSet::from_iter(vec![0, 1, 2, 3, 4, 5]),
+            );
+            database.insert(
+                "word3".to_string(),
+                HashSet::from_iter(vec![0, 1, 2, 3, 4, 5]),
+            );
+            database.insert(
+                "word4".to_string(),
+                HashSet::from_iter(vec![0, 1, 2, 3, 4, 5]),
+            );
 
+            let mut article_titles: Vec<String> = Vec::new();
+            for i in 0..100 {
+                article_titles.push(format!("article {}", i).to_string());
+            }
 
+            // Write the actual files
+            fs::write(
+                format!("data/individual_articles/{:05}.txt", 0),
+                "word1 word1 word2 word2 word3 word3 word4 word4",
+            )
+            .unwrap();
+            fs::write(
+                format!("data/individual_articles/{:05}.txt", 1),
+                "word1 word2 word3 word4 word4 word3 word2 word1",
+            )
+            .unwrap();
+            fs::write(
+                format!("data/individual_articles/{:05}.txt", 2),
+                "word2 word4 word1 word3",
+            )
+            .unwrap();
+            fs::write(
+                format!("data/individual_articles/{:05}.txt", 3),
+                "word1word2word3word4",
+            )
+            .unwrap();
+            fs::write(
+                format!("data/individual_articles/{:05}.txt", 4),
+                "word3 word3 word2 word3 word3 word3 word2 word3 word2 word2 word2 word3 word3 word3 word3 word3 word2 word3 word3 word3 word2",
+            )
+            .unwrap();
+            fs::write(
+                format!("data/individual_articles/{:05}.txt", 5),
+                "word2 word3 word4",
+            )
+            .unwrap();
 
+            Index {
+                database,
+                article_titles,
+            }
+        }
+    }
 
+    fn search_match(
+        index: Index<HashMap<String, HashSet<usize>>>,
+        query: Query,
+        expected: Vec<String>,
+    ) {
+        assert_eq!(
+            HashSet::from_iter(index.search(&query)),
+            HashSet::<String>::from_iter(expected)
+        )
+    }
+
+    #[test]
+    fn find_a_word() {
+        let index = setup_test();
+        let query = Query {
+            search_string: "word1 word2 word3 word4".to_string(),
+            search_type: SearchType::ExactSearch("KMP".to_string()),
+        };
+
+        search_match(index, query, vec!["article 1".to_string()])
+    }
+
+    #[test]
+    fn find_a_word2() {
+        let index = setup_test();
+        let query = Query {
+            search_string: "word1 word2 word3 word4".to_string(),
+            search_type: SearchType::ExactSearch("KMP".to_string()),
+        };
+
+        search_match(index, query, vec!["article 1".to_string()])
+    }
 }

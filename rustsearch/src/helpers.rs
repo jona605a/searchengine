@@ -62,7 +62,7 @@ pub fn read_and_clean_file_to_iter(config: &Config) -> Result<Vec<(String,Vec<St
             None => a.trim().split_once(".\r\n") // Some Windows shit
                         .unwrap_or(("", "")), 
         };
-        let x: Vec<String> = re.split(contents).map(|s| s.to_string()).collect();
+        let x: Vec<String> = re.split(contents).filter(|&s| s!="").map(|s| s.to_string()).collect();
         (title.to_string(), x)
     }).collect();
     Ok(articles_iter)

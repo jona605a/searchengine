@@ -199,7 +199,7 @@ mod tests {
 
         let query = Query {
             search_string: "word2 word3 word4".to_string(),
-            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
+            search_type: SearchType::ExactSearch("TripleBoyerMoore".to_string()),
         };
 
         search_match(
@@ -224,7 +224,7 @@ mod tests {
 
         let query = Query {
             search_string: "".to_string(),
-            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
+            search_type: SearchType::ExactSearch("TripleBoyerMoore".to_string()),
         };
         let result = index.search(&query);
 
@@ -232,7 +232,7 @@ mod tests {
 
         let query = Query {
             search_string: "hej".to_string(),
-            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
+            search_type: SearchType::ExactSearch("TripleBoyerMoore".to_string()),
         };
         let result = index.search(&query);
 
@@ -240,7 +240,7 @@ mod tests {
 
         let query = Query {
             search_string: "hej med".to_string(),
-            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
+            search_type: SearchType::ExactSearch("TripleBoyerMoore".to_string()),
         };
         let result = index.search(&query);
 
@@ -253,7 +253,7 @@ mod tests {
 
         let query = Query {
             search_string: "word4 word5 word3".to_string(),
-            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
+            search_type: SearchType::ExactSearch("TripleBoyerMoore".to_string()),
         };
         let result = index.search(&query);
 
@@ -266,7 +266,7 @@ mod tests {
 
         let query = Query {
             search_string: "word2 word3 word4 word5".to_string(),
-            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
+            search_type: SearchType::ExactSearch("TripleBoyerMoore".to_string()),
         };
 
         search_match(
@@ -285,7 +285,7 @@ mod tests {
 
         let query = Query {
             search_string: "Sinope and the United".to_string(),
-            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
+            search_type: SearchType::ExactSearch("TripleBoyerMoore".to_string()),
         };
 
         search_match(index, query, vec![]);
@@ -297,7 +297,7 @@ mod tests {
 
         let query = Query {
             search_string: "Etymology and terminology".to_string(),
-            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
+            search_type: SearchType::ExactSearch("TripleBoyerMoore".to_string()),
         };
 
         search_match(index, query, vec!["Anarchism".to_string()]);
@@ -309,7 +309,7 @@ mod tests {
 
         let query = Query {
             search_string: "one of the".to_string(),
-            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
+            search_type: SearchType::ExactSearch("TripleBoyerMoore".to_string()),
         };
 
         search_match(
@@ -329,7 +329,7 @@ mod tests {
 
         let query = Query {
             search_string: "it can be".to_string(),
-            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
+            search_type: SearchType::ExactSearch("TripleBoyerMoore".to_string()),
         };
 
         search_match(
@@ -344,7 +344,7 @@ mod tests {
 
         let query = Query {
             search_string: "cantbefound cantbefound cantbefound".to_string(),
-            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
+            search_type: SearchType::ExactSearch("TripleBoyerMoore".to_string()),
         };
 
         search_match(index, query, Vec::<String>::new());

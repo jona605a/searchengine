@@ -98,9 +98,9 @@ impl Index<HashMap<(String, String, String), Vec<usize>>> {
 
 impl Search for Index<HashMap<(String, String, String), Vec<usize>>> {
     fn search(&self, query: &Query) -> ArticleTitles {
-        match &query.search_type {
+        match dbg!(&query.search_type) {
             SearchType::FuzzySearch => self.fuzzy_triples_search(&query.search_string),
-            SearchType::ExactSearch(x) if x == "BoyerMoore" => {
+            SearchType::ExactSearch(x) if x == "TripleBoyerMoore" => {
                 self.exact_triples_search(&query.search_string)
             }
             _ => unimplemented!(),
