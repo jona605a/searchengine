@@ -218,7 +218,7 @@ pub fn prefix_search_index_9_1(c: &mut Criterion) {
 
 pub fn full_text_searching_template(c: &mut Criterion, i_string: &str) {
     let files = fs::read_dir("data/");
-
+    
     let full_text_searchtype = match i_string {
         "10_0" => SearchType::ExactSearch("KMP".to_string()),
         "10_1" => SearchType::ExactSearch("BoyerMoore".to_string()),
@@ -226,11 +226,17 @@ pub fn full_text_searching_template(c: &mut Criterion, i_string: &str) {
         "11_1" => SearchType::ExactSearch("TripleBoyerMoore".to_string()),
         _ => panic!(),
     };
+
     for dir in files.unwrap() {
         if dir.as_ref().unwrap().path().is_dir() {
             continue;
         }
+
         let file_path = dir.unwrap().path().into_os_string().into_string().unwrap();
+
+        if &file_path[0..9] != "data/West"{
+            continue;
+        }
 
         let filesize = match file_path.rsplit_once('_') {
             Some((_, suffix)) => {
@@ -242,30 +248,19 @@ pub fn full_text_searching_template(c: &mut Criterion, i_string: &str) {
             None => continue,
         };
 
-        // let filesize = file_path
-        //     .rsplit_once('_')
-        //     .unwrap()
-        //     .1
-        //     .split_once('.')
-        //     .unwrap()
-        //     .0;
-
         let full_text_queries: Vec<String> = gen_a_lot_of_runs_full_text(file_path.clone(), 1000);
-
         let config = Config {
             file_path: file_path.to_owned(),
             indexno: i_string.to_string(),
         };
         let index = config.to_index().unwrap();
-
         c.bench_function(&format!("Full text {} {}", i_string, filesize), |b| {
             b.iter(|| {
                 for sentence in &full_text_queries {
                     let query = Query {
-                        search_string: sentence.clone(),
+                        search_string: sentence.to_owned(),
                         search_type: full_text_searchtype.to_owned(),
                     };
-                    // dbg!(&sentence);
 
                     index.search(&query);
                 }
@@ -296,7 +291,7 @@ criterion_group!(
     // full_text_search_10_0,
     // full_text_search_10_1,
     full_text_search_11_0,
-    full_text_search_11_1
+    full_text_search_11_1,
 );
 
 criterion_main!(benches);
