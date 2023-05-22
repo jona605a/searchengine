@@ -20,14 +20,14 @@ impl Index<HashMap<(String, String, String), Vec<usize>>> {
 
         // The actual indexing
         for (title, contents) in articles_iter {
-            let mut contents = contents.iter();
-            if title != "" {
+            let mut contents_iter = contents.iter();
+            if contents.len()>1 {
                 article_titles.push(title.to_string());
 
-                let mut prv1 = contents.next().unwrap();
-                let mut prv2 = contents.next().unwrap();
+                let mut prv1 = contents_iter.next().unwrap();
+                let mut prv2 = contents_iter.next().unwrap();
 
-                for word in contents {
+                for word in contents_iter {
                     let v = database
                         .entry((prv1.to_string(), prv2.to_string(), word.to_string()))
                         .or_default();
@@ -63,14 +63,15 @@ impl Index<HashMap<(String, String, String), Vec<usize>>> {
 
         for word in words_iter {
             let triple = (prv1.to_owned(), prv2.to_owned(), word.to_owned());
-            match dbg!(self.database.get(dbg!(&triple))) {
+            // match dbg!(self.database.get(dbg!(&triple))) {
+            match self.database.get(&triple) {
                 None => return vec![],
                 Some(al) => art_lists.push(al),
             }
             prv1 = prv2;
             prv2 = word;
         }
-        dbg!(&art_lists);
+        // dbg!(&art_lists);
 
         let mut art_iter = art_lists.iter();
         let first_art = match art_iter.next() {
@@ -98,7 +99,7 @@ impl Index<HashMap<(String, String, String), Vec<usize>>> {
 
 impl Search for Index<HashMap<(String, String, String), Vec<usize>>> {
     fn search(&self, query: &Query) -> ArticleTitles {
-        match dbg!(&query.search_type) {
+        match &query.search_type {
             SearchType::FuzzySearch => self.fuzzy_triples_search(&query.search_string),
             SearchType::ExactSearch(x) if x == "TripleBoyerMoore" => {
                 self.exact_triples_search(&query.search_string)

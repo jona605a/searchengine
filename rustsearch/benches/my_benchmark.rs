@@ -227,15 +227,28 @@ pub fn full_text_searching_template(c: &mut Criterion, i_string: &str) {
         _ => panic!(),
     };
     for dir in files.unwrap() {
+        if dir.as_ref().unwrap().path().is_dir() {
+            continue;
+        }
         let file_path = dir.unwrap().path().into_os_string().into_string().unwrap();
 
-        let filesize = file_path
-            .rsplit_once('_')
-            .unwrap()
-            .1
-            .split_once('.')
-            .unwrap()
-            .0;
+        let filesize = match file_path.rsplit_once('_') {
+            Some((_, suffix)) => {
+                suffix
+                    .split_once('.')
+                    .expect("What kind of file doesn't end in a file extension?")
+                    .0
+            }
+            None => continue,
+        };
+
+        // let filesize = file_path
+        //     .rsplit_once('_')
+        //     .unwrap()
+        //     .1
+        //     .split_once('.')
+        //     .unwrap()
+        //     .0;
 
         let full_text_queries: Vec<String> = gen_a_lot_of_runs_full_text(file_path.clone(), 1000);
 
@@ -280,8 +293,8 @@ pub fn full_text_search_11_1(c: &mut Criterion) {
 //criterion_group!(benches,indexing_7,indexing_8_0,indexing_9_1,indexing_9_0,searching_index_7_0,searching_index_8_0,searching_index_8_1,searching_index_8_2,searching_index_8_3,searching_index_8_4,find_word_9_0,find_word_9_1,prefix_search_index_9_0,prefix_search_index_9_1);
 criterion_group!(
     benches,
-    full_text_search_10_0,
-    full_text_search_10_1,
+    // full_text_search_10_0,
+    // full_text_search_10_1,
     full_text_search_11_0,
     full_text_search_11_1
 );
