@@ -1,10 +1,10 @@
 import java.io.*;
 import java.util.Scanner;
- 
+
 class Index3 implements Index {
- 
+
     WikiItem start;
- 
+
     public Index3(String filename) {
         String word, title, previousWord;
         WikiItem tmp, newItem;
@@ -19,8 +19,8 @@ class Index3 implements Index {
         word = "---END.OF.DOCUMENT---"; // Assume that the first word is a title
         title = "";
         start = null;
-        
-        while (input.hasNext()) {   // Read all words in input
+
+        while (input.hasNext()) { // Read all words in input
             previousWord = word;
             word = input.next();
             if (word.equals("---END.OF.DOCUMENT---")) {
@@ -28,14 +28,15 @@ class Index3 implements Index {
             }
             // Update the current title
             if (previousWord.equals("---END.OF.DOCUMENT---")) {
-                title = word.substring(0,word.length()-1);
+                title = word.substring(0, word.length() - 1);
             }
 
-            // Find the word in the index (if it exists) and add the title to its articlelist
-            for (tmp = start; tmp!=null; tmp=tmp.next) {
-                if (tmp.str.equals(word)){
+            // Find the word in the index (if it exists) and add the title to its
+            // articlelist
+            for (tmp = start; tmp != null; tmp = tmp.next) {
+                if (tmp.str.equals(word)) {
                     ArticleItem tmp_article = tmp.articlelist;
-                    for (; tmp_article!=null; tmp_article = tmp_article.next) {
+                    for (; tmp_article != null; tmp_article = tmp_article.next) {
                         if (tmp_article.str.equals(title)) {
                             break;
                         }
@@ -49,7 +50,7 @@ class Index3 implements Index {
                 }
             }
 
-            // If the word was not in the index, add the new word. 
+            // If the word was not in the index, add the new word.
             if (tmp == null) {
                 newArticle = new ArticleItem(title, null);
                 newItem = new WikiItem(word, start, newArticle);
@@ -57,7 +58,7 @@ class Index3 implements Index {
             }
         }
         input.close();
-    
+
     }
 
     @Override
@@ -69,7 +70,7 @@ class Index3 implements Index {
         }
         return null;
     }
-    
+
     public static void main(String[] args) {
         System.out.println("Preprocessing " + args[0]);
         Index3 i = new Index3(args[0]);
@@ -84,8 +85,8 @@ class Index3 implements Index {
             if (titles == null) {
                 System.out.println(searchstr + " does not exist");
             } else {
-                System.out.print("\""+searchstr+"\"" + " exists in the following articles:\n   ");
-                for (ArticleItem current = titles; current != null && current.str != null; current=current.next) {
+                System.out.print("\"" + searchstr + "\"" + " exists in the following articles:\n   ");
+                for (ArticleItem current = titles; current != null && current.str != null; current = current.next) {
                     System.out.print(current.str + " ");
                 }
                 System.out.println("\n");

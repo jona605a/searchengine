@@ -69,7 +69,7 @@ impl Index<HashMap<(String, String, String), Vec<usize>>> {
         for art_no in art_intersect {
             // Read the file
             let t: Vec<char> =
-                fs::read_to_string(format!("data/individual_articles/{:05}.txt", art_no))
+                fs::read_to_string(format!("data/individual_articles/{:08}.txt", art_no))
                     .expect(
                         format!(
                             "Article number {} not found in data/individual_articles/",
@@ -151,28 +151,28 @@ mod tests {
         }
 
         // Write the actual files
-        fs::write(format!("data/individual_articles/{:05}.txt", 0),
+        fs::write(format!("data/individual_articles/{:08}.txt", 0),
             "word1 word2 word3 . word2 word3 word4 . word3 word4 word5",
         ).unwrap();
-        fs::write(format!("data/individual_articles/{:05}.txt", 1),
+        fs::write(format!("data/individual_articles/{:08}.txt", 1),
             "word2 word3 word4 . word4 word5 word6",
         ).unwrap();
-        fs::write(format!("data/individual_articles/{:05}.txt", 2),
+        fs::write(format!("data/individual_articles/{:08}.txt", 2),
             "word4 word5 word6 . word2 word3 word4 . word3 word4 word5",
         ).unwrap();
-        fs::write(format!("data/individual_articles/{:05}.txt", 3),
+        fs::write(format!("data/individual_articles/{:08}.txt", 3),
             "word4 word5 word6 . word2 word3 word4",
         ).unwrap();
-        fs::write(format!("data/individual_articles/{:05}.txt", 4),
+        fs::write(format!("data/individual_articles/{:08}.txt", 4),
             "word2 word3 word4 word5",
         ).unwrap();
-        fs::write(format!("data/individual_articles/{:05}.txt", 5),
+        fs::write(format!("data/individual_articles/{:08}.txt", 5),
             "word2 word3 word4",
         ).unwrap();
-        fs::write(format!("data/individual_articles/{:05}.txt", 6),
+        fs::write(format!("data/individual_articles/{:08}.txt", 6),
         "word2 word3 word4 word5",
         ).unwrap();
-        fs::write(format!("data/individual_articles/{:05}.txt", 7),
+        fs::write(format!("data/individual_articles/{:08}.txt", 7),
         "word2 word3 word4",
         ).unwrap();
         
@@ -199,7 +199,7 @@ mod tests {
 
         let query = Query {
             search_string: "word2 word3 word4".to_string(),
-            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
+            search_type: SearchType::ExactSearch("TripleBoyerMoore".to_string()),
         };
 
         search_match(
@@ -224,7 +224,7 @@ mod tests {
 
         let query = Query {
             search_string: "".to_string(),
-            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
+            search_type: SearchType::ExactSearch("TripleBoyerMoore".to_string()),
         };
         let result = index.search(&query);
 
@@ -232,7 +232,7 @@ mod tests {
 
         let query = Query {
             search_string: "hej".to_string(),
-            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
+            search_type: SearchType::ExactSearch("TripleBoyerMoore".to_string()),
         };
         let result = index.search(&query);
 
@@ -240,7 +240,7 @@ mod tests {
 
         let query = Query {
             search_string: "hej med".to_string(),
-            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
+            search_type: SearchType::ExactSearch("TripleBoyerMoore".to_string()),
         };
         let result = index.search(&query);
 
@@ -253,7 +253,7 @@ mod tests {
 
         let query = Query {
             search_string: "word4 word5 word3".to_string(),
-            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
+            search_type: SearchType::ExactSearch("TripleBoyerMoore".to_string()),
         };
         let result = index.search(&query);
 
@@ -266,7 +266,7 @@ mod tests {
 
         let query = Query {
             search_string: "word2 word3 word4 word5".to_string(),
-            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
+            search_type: SearchType::ExactSearch("TripleBoyerMoore".to_string()),
         };
 
         search_match(
@@ -285,7 +285,7 @@ mod tests {
 
         let query = Query {
             search_string: "Sinope and the United".to_string(),
-            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
+            search_type: SearchType::ExactSearch("TripleBoyerMoore".to_string()),
         };
 
         search_match(index, query, vec![]);
@@ -297,7 +297,7 @@ mod tests {
 
         let query = Query {
             search_string: "Etymology and terminology".to_string(),
-            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
+            search_type: SearchType::ExactSearch("TripleBoyerMoore".to_string()),
         };
 
         search_match(index, query, vec!["Anarchism".to_string()]);
@@ -309,7 +309,7 @@ mod tests {
 
         let query = Query {
             search_string: "one of the".to_string(),
-            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
+            search_type: SearchType::ExactSearch("TripleBoyerMoore".to_string()),
         };
 
         search_match(
@@ -329,7 +329,7 @@ mod tests {
 
         let query = Query {
             search_string: "it can be".to_string(),
-            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
+            search_type: SearchType::ExactSearch("TripleBoyerMoore".to_string()),
         };
 
         search_match(
@@ -344,7 +344,7 @@ mod tests {
 
         let query = Query {
             search_string: "cantbefound cantbefound cantbefound".to_string(),
-            search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
+            search_type: SearchType::ExactSearch("TripleBoyerMoore".to_string()),
         };
 
         search_match(index, query, Vec::<String>::new());

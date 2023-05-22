@@ -29,7 +29,7 @@ pub struct Query {
     pub search_string: String,
     pub search_type: SearchType
 }
-#[derive(Clone)]
+#[derive(Clone,Debug)]
 pub enum SearchType {
     SingleWordSearch,
     BooleanSearch(String),

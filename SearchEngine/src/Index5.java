@@ -1,17 +1,17 @@
 import java.io.*;
 import java.util.Scanner;
- 
-class Index5 implements Index{
- 
-    int n = 1_000; //Size of hash table
+
+class Index5 implements Index {
+
+    int n = 1_000; // Size of hash table
     int uniqeWords = 0;
     WikiItem[] wikiItems = new WikiItem[n]; // Hash table
 
     private int hashString(String s) {
-        
+
         return (s.hashCode() % n + n) % n;
     }
- 
+
     public Index5(String filename) {
         String word, title, previousWord;
         Scanner input;
@@ -23,8 +23,8 @@ class Index5 implements Index{
         }
         word = "---END.OF.DOCUMENT---"; // Assume that the first word is a title
         title = "";
-        
-        while (input.hasNext()) {   // Read all words in input
+
+        while (input.hasNext()) { // Read all words in input
             previousWord = word;
             word = input.next();
             if (word.equals("---END.OF.DOCUMENT---")) {
@@ -32,28 +32,29 @@ class Index5 implements Index{
             }
             // Update the current title
             if (previousWord.equals("---END.OF.DOCUMENT---")) {
-                title = word.substring(0,word.length()-1);
+                title = word.substring(0, word.length() - 1);
             }
 
             insertWord(word, title);
 
-            if(n <= uniqeWords){ //double space in hash table
+            if (n <= uniqeWords) { // double space in hash table
                 rehash();
-                //System.out.println(n);
+                // System.out.println(n);
             }
         }
         input.close();
     }
- 
-    public void insertWord(String word, String title){
+
+    public void insertWord(String word, String title) {
         int hash = hashString(word);
         ArticleItem newArticle;
         // Checks if place in hashtable is empty
         if (wikiItems[hash] == null) {
             newArticle = new ArticleItem(title, null);
             wikiItems[hash] = new WikiItem(word, null, newArticle);
-            uniqeWords ++;
-        // If not emty then go though linked list of word hashed to this hash value and find word 
+            uniqeWords++;
+            // If not emty then go though linked list of word hashed to this hash value and
+            // find word
         } else {
             WikiItem item = wikiItems[hash];
             for (; item != null; item = item.next) {
@@ -66,26 +67,26 @@ class Index5 implements Index{
                     break;
                 }
             }
-            // Hash existed, but word wasn't found (collision). Add the new word. 
+            // Hash existed, but word wasn't found (collision). Add the new word.
             if (item == null) {
                 newArticle = new ArticleItem(title, null);
-                WikiItem newItem = new WikiItem(word, wikiItems[hash],newArticle);
+                WikiItem newItem = new WikiItem(word, wikiItems[hash], newArticle);
                 wikiItems[hash] = newItem;
-                uniqeWords ++;
+                uniqeWords++;
             }
         }
     }
 
-    public void rehash(){
-        n = n*2;
+    public void rehash() {
+        n = n * 2;
         WikiItem[] NewwikiItems = new WikiItem[n];
 
-        for(int i = 0; i < n/2; i ++){
-            if (wikiItems[i] == null){
+        for (int i = 0; i < n / 2; i++) {
+            if (wikiItems[i] == null) {
                 continue;
             }
             WikiItem item = wikiItems[i];
-            while (item!=null) {
+            while (item != null) {
                 int hash = hashString(item.str);
                 WikiItem tmp = item.next;
                 item.next = NewwikiItems[hash];
@@ -99,7 +100,8 @@ class Index5 implements Index{
     @Override
     public ArticleItem search(String searchstr) {
         /*
-        Returns the Article list of titles where searchstr is present. If searchstr is not present in any articles return null.
+         * Returns the Article list of titles where searchstr is present. If searchstr
+         * is not present in any articles return null.
          */
         int hash = hashString(searchstr);
         if (wikiItems[hash] == null) {
@@ -112,9 +114,9 @@ class Index5 implements Index{
         }
         return null;
     }
-    
+
     public static void main(String[] args) {
-       // Run test
+        // Run test
         if (args.length > 1) {
             testCollisions(args);
             return;
@@ -133,8 +135,8 @@ class Index5 implements Index{
             if (titles == null) {
                 System.out.println(searchstr + " does not exist");
             } else {
-                System.out.print("\""+searchstr+"\"" + " exists in the following articles:\n   ");
-                for (ArticleItem current = titles; current != null && current.str != null; current=current.next) {
+                System.out.print("\"" + searchstr + "\"" + " exists in the following articles:\n   ");
+                for (ArticleItem current = titles; current != null && current.str != null; current = current.next) {
                     System.out.print(current.str + " ");
                 }
                 System.out.println("\n");
@@ -150,7 +152,7 @@ class Index5 implements Index{
         for (int j = 0; j < sizes.length; j++) {
             if (i.wikiItems[j] != null) {
                 int count = 0;
-                for (WikiItem item = i.wikiItems[j]; item!=null; item=item.next) {
+                for (WikiItem item = i.wikiItems[j]; item != null; item = item.next) {
                     count++;
                 }
                 sizes[j] = count;
@@ -161,7 +163,7 @@ class Index5 implements Index{
         for (int j = 0; j < sizes.length; j++) {
             if (sizes[j] > 0) {
                 unique++;
-                n_words+=sizes[j];
+                n_words += sizes[j];
             }
         }
         System.out.println("Unique hashes: " + unique);
@@ -172,18 +174,20 @@ class Index5 implements Index{
     public WikiItem getUniqueWords() {
         WikiItem uniqeWordsStart = null;
         WikiItem word, newUniqeWord;
-    
-        for(int i = 0; i!=n; i++) {   // Go though the hashmap
-            
-            if(wikiItems[i] != null){
-                for (word = wikiItems[i]; word!=null; word=word.next){ // Go though the linked list listed of words with hashvalue i
-                    newUniqeWord = new WikiItem(word.str,uniqeWordsStart,word.articlelist); //word is added as the head of uniqeWords
+
+        for (int i = 0; i != n; i++) { // Go though the hashmap
+
+            if (wikiItems[i] != null) {
+                for (word = wikiItems[i]; word != null; word = word.next) { // Go though the linked list listed of words
+                                                                            // with hashvalue i
+                    newUniqeWord = new WikiItem(word.str, uniqeWordsStart, word.articlelist); // word is added as the
+                                                                                              // head of uniqeWords
                     uniqeWordsStart = newUniqeWord;
-                }    
+                }
             }
 
         }
-        
+
         return uniqeWordsStart;
     }
 }

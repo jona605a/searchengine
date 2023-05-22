@@ -1,17 +1,16 @@
 import java.io.*;
 import java.util.Scanner;
- 
-class Index4 implements Index{
- 
+
+class Index4 implements Index {
+
     int n = 10_007; // Prime
     WikiItem[] wikiItems = new WikiItem[n];
 
-
     private int hashString(String s) {
-        
+
         return (s.hashCode() % n + n) % n;
     }
- 
+
     public Index4(String filename) {
         String word, title, previousWord;
         ArticleItem newArticle;
@@ -25,7 +24,7 @@ class Index4 implements Index{
         word = "---END.OF.DOCUMENT---";
         title = "";
 
-        while (input.hasNext()) {   // Read all words in input
+        while (input.hasNext()) { // Read all words in input
             previousWord = word;
             word = input.next();
             if (word.equals("---END.OF.DOCUMENT---")) {
@@ -33,11 +32,11 @@ class Index4 implements Index{
             }
             // Update the current title
             if (previousWord.equals("---END.OF.DOCUMENT---")) {
-                title = word.substring(0,word.length()-1);
+                title = word.substring(0, word.length() - 1);
             }
 
             int hash = hashString(word);
-            
+
             if (wikiItems[hash] == null) {
                 newArticle = new ArticleItem(title, null);
                 wikiItems[hash] = new WikiItem(word, null, newArticle);
@@ -59,7 +58,7 @@ class Index4 implements Index{
                 }
 
             }
-            
+
         }
         input.close();
     }
@@ -77,7 +76,7 @@ class Index4 implements Index{
         }
         return null;
     }
-    
+
     public static void main(String[] args) {
         if (args.length > 1) {
             testCollisions(args);
@@ -96,8 +95,8 @@ class Index4 implements Index{
             if (titles == null) {
                 System.out.println(searchstr + " does not exist");
             } else {
-                System.out.print("\""+searchstr+"\"" + " exists in the following articles:\n   ");
-                for (ArticleItem current = titles; current != null && current.str != null; current=current.next) {
+                System.out.print("\"" + searchstr + "\"" + " exists in the following articles:\n   ");
+                for (ArticleItem current = titles; current != null && current.str != null; current = current.next) {
                     System.out.print(current.str + " ");
                 }
                 System.out.println("\n");
@@ -113,7 +112,7 @@ class Index4 implements Index{
         for (int j = 0; j < sizes.length; j++) {
             if (i.wikiItems[j] != null) {
                 int count = 0;
-                for (WikiItem item = i.wikiItems[j]; item!=null; item=item.next) {
+                for (WikiItem item = i.wikiItems[j]; item != null; item = item.next) {
                     count++;
                 }
                 sizes[j] = count;
@@ -124,7 +123,7 @@ class Index4 implements Index{
         for (int j = 0; j < sizes.length; j++) {
             if (sizes[j] > 0) {
                 unique++;
-                n_words+=sizes[j];
+                n_words += sizes[j];
             }
         }
         System.out.println("Unique hashes: " + unique);
@@ -135,18 +134,20 @@ class Index4 implements Index{
     public WikiItem getUniqueWords() {
         WikiItem uniqueWordsStart = null;
         WikiItem word, newUniqueWord;
-    
-        for(int i = 0; i!=n; i++) {   // Go though the hashmap
-            
-            if(wikiItems[i] != null){
-                for (word = wikiItems[i]; word!=null; word=word.next){ // Go though the linked list listed of words with hashvalue i
-                    newUniqueWord = new WikiItem(word.str,uniqueWordsStart,word.articlelist); //word is added as the head of uniqueWords
+
+        for (int i = 0; i != n; i++) { // Go though the hashmap
+
+            if (wikiItems[i] != null) {
+                for (word = wikiItems[i]; word != null; word = word.next) { // Go though the linked list listed of words
+                                                                            // with hashvalue i
+                    newUniqueWord = new WikiItem(word.str, uniqueWordsStart, word.articlelist); // word is added as the
+                                                                                                // head of uniqueWords
                     uniqueWordsStart = newUniqueWord;
-                }    
+                }
             }
 
         }
-        
+
         return uniqueWordsStart;
     }
 }

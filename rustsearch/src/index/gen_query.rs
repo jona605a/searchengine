@@ -1,4 +1,4 @@
-use crate::helpers::{Config, read_and_clean_file_to_iter};
+use crate::helpers::{read_and_clean_file_to_iter, Config};
 use crate::parsing::{AstNode, BinaryOp};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
@@ -22,24 +22,40 @@ fn get_search_prefix(database_words: &Vec<&String>, rng: &mut StdRng) -> String 
     };
 }
 
-fn get_search_fulltext(articles_iter:&Vec<(String,Vec<String>)>, rng: &mut StdRng) -> String{
-    
-    let article_idx = rng.gen_range(0..=(articles_iter.len()-1));
+fn get_search_fulltext(articles_iter: &Vec<(String, Vec<String>)>, rng: &mut StdRng) -> String {
+    let article_idx = rng.gen_range(0..=(articles_iter.len() - 1));
     let (_title, content) = &articles_iter[article_idx];
-    let word_idx = rng.gen_range(0..=(content.len()-5));
 
-    if content.len()<5{
-        return get_search_fulltext(articles_iter, rng)
+    if content.len() < 5 {
+        return get_search_fulltext(articles_iter, rng);
     }
-    content[word_idx..word_idx+5].join(" ")
+
+    let word_idx = rng.gen_range(0..=(content.len() - 5));
+    content[word_idx..word_idx + 5].join(" ")
 }
 
-pub fn ast_to_string(node: AstNode) -> String{
-    match node{
-        AstNode::Invert(child) => {let mut x = "! ".to_string();x.push_str(&ast_to_string(*child)); x},
-        AstNode::Binary(BinaryOp::And,left_child, right_child) => {let mut x = ast_to_string(*left_child);let y = ast_to_string(*right_child);x.push_str(" and ");x.push_str(&y); x},
-        AstNode::Binary(BinaryOp::Or, left_child, right_child) => {let mut x = ast_to_string(*left_child);let y = ast_to_string(*right_child);x.push_str(" or ");x.push_str(&y); x},
-        AstNode::Name(word) =>  word,
+pub fn ast_to_string(node: AstNode) -> String {
+    match node {
+        AstNode::Invert(child) => {
+            let mut x = "! ".to_string();
+            x.push_str(&ast_to_string(*child));
+            x
+        }
+        AstNode::Binary(BinaryOp::And, left_child, right_child) => {
+            let mut x = ast_to_string(*left_child);
+            let y = ast_to_string(*right_child);
+            x.push_str(" and ");
+            x.push_str(&y);
+            x
+        }
+        AstNode::Binary(BinaryOp::Or, left_child, right_child) => {
+            let mut x = ast_to_string(*left_child);
+            let y = ast_to_string(*right_child);
+            x.push_str(" or ");
+            x.push_str(&y);
+            x
+        }
+        AstNode::Name(word) => word,
     }
 }
 
@@ -93,7 +109,6 @@ pub fn gen_a_lot_of_runs_bool(file_path: String, number: usize) -> Vec<Vec<Strin
         .collect::<Vec<Vec<String>>>();
 
     boolean_queries
-    
 }
 
 pub fn gen_a_lot_of_runs_tries(file_path: String, number: usize, prefix: bool) -> Vec<String> {
@@ -119,18 +134,14 @@ pub fn gen_a_lot_of_runs_tries(file_path: String, number: usize, prefix: bool) -
 }
 
 pub fn gen_a_lot_of_runs_full_text(file_path: String, number: usize) -> Vec<String> {
-    
     let mut rng = StdRng::seed_from_u64(8008135);
-   
-    let config = Config::build(&[
-        "".to_string(),
-        file_path,
-        "11".to_string(),
-    ])
-    .unwrap();
 
-    let articles_iter:Vec<(String,Vec<String>)> = read_and_clean_file_to_iter(&config).unwrap();
-    let search_queries:Vec<String> = (1..=number).map(|_| get_search_fulltext(&articles_iter, &mut rng)).collect::<Vec<String>>();
+    let config = Config::build(&["".to_string(), file_path, "11".to_string()]).unwrap();
+
+    let articles_iter: Vec<(String, Vec<String>)> = read_and_clean_file_to_iter(&config).unwrap();
+    let search_queries: Vec<String> = (1..=number)
+        .map(|_| get_search_fulltext(&articles_iter, &mut rng))
+        .collect::<Vec<String>>();
     search_queries
 }
 
@@ -223,15 +234,27 @@ mod bool_tests {
 
     #[test]
     fn get_search_word_full_text_can_be_seeded() {
-        let qurries = gen_a_lot_of_runs_full_text("data/WestburyLab.wikicorp.201004_100KB.txt".to_string(),5);
-        assert_eq!(qurries,vec!["arc  resulting in the", "knowledge of the intrinsic properties", "HFA   based on", "but were generally living at", "as avoiding eye contact The"])
+        let queries = gen_a_lot_of_runs_full_text(
+            "data/WestburyLab.wikicorp.201004_100KB.txt".to_string(),
+            5,
+        );
+        assert_eq!(
+            queries,
+            vec![
+                "from a knowledge of the",
+                "also be divided into syndromal",
+                "upon its side but in",
+                "kept its name with a",
+                "that autism's true prevalence has"
+            ]
+        )
     }
 
     #[test]
     fn gen_a_lot_of_runs_bool_and_gen_a_lot_of_runs_tries_gives_the_same_words() {
         let files = fs::read_dir("../../data.nosync/");
         if files.is_err() {
-            return
+            return;
         }
 
         for dir in files.unwrap() {

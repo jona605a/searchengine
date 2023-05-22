@@ -14,7 +14,7 @@ public interface Index {
         String str;
         WikiItem next;
         ArticleItem articlelist;
- 
+
         WikiItem(String s, WikiItem n, ArticleItem a) {
             str = s;
             next = n;

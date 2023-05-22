@@ -62,7 +62,7 @@ pub fn read_and_clean_file_to_iter(config: &Config) -> Result<Vec<(String,Vec<St
             None => a.trim().split_once(".\r\n") // Some Windows shit
                         .unwrap_or(("", "")), 
         };
-        let x: Vec<String> = re.split(contents).map(|s| s.to_string()).collect();
+        let x: Vec<String> = re.split(contents).filter(|&s| s!="").map(|s| s.to_string()).collect();
         (title.to_string(), x)
     }).collect();
     Ok(articles_iter)
@@ -99,7 +99,7 @@ pub fn write_article_files(config: &Config) {
     for (title, contents) in articles_iter {
         if title != "" {
             let x = contents.join(" ");
-            fs::write(format!("data/individual_articles/{:05}.txt", count), x).unwrap();
+            fs::write(format!("data/individual_articles/{:08}.txt", count), x).unwrap();
             count += 1;
         }
         if count > 99999 {

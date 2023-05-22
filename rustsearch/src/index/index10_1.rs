@@ -92,7 +92,7 @@ pub fn boyer_moore(
         }
         if i == 0 && p[i] == t[h] {
             // P matches T!
-            println!("Match!");
+            // println!("Match! P == {}", String::from_iter(p));
             match_indices.push(k);
             k += n - l_prime[1];
         } else {
@@ -154,7 +154,7 @@ impl Index<HashMap<String, HashSet<usize>>> {
 
         for art_no in art_intersect {
             // Read the file
-            let t: Vec<char> = fs::read_to_string(format!("data/individual_articles/{:05}.txt", art_no))
+            let t: Vec<char> = fs::read_to_string(format!("data/individual_articles/{:08}.txt", art_no))
                     .expect(format!("Article number {} not found in data/individual_articles/", art_no).as_str())
                     .chars()
                     .collect();
