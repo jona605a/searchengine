@@ -115,6 +115,7 @@ impl TrieLin {
             ),
             None => {
                 let mut children = node.children_vec.iter();
+                // Any node that is not a final node must have at least one child
                 let first_child = &children.next().unwrap().1;
                 children.fold(self.get_subtree_match(first_child), |acc, (_, child)| {
                     self.or_bitvec(acc, self.get_subtree_match(child))
@@ -189,6 +190,10 @@ impl Index<TrieLin> {
             }
         }
         output
+    }
+
+    pub fn get_trie_lin(&self) -> &TrieLin {
+        &self.database
     }
 }
 
