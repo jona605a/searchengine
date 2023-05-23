@@ -29,16 +29,13 @@
 
 \input{LaTeX/Chapters/01Introduction}
 
-\clearpage 
-\input{LaTeX/Frontmatter/Symboldescription}
-\clearpage
-
+\subfile{Chapters/ProblemDescriptionAndDataFiles/ProblemDescriptionAndDataFiles.tex}
 \subfile{Chapters/BasicPart/BasicPart.tex}
- 
+\subfile{LaTeX/Chapters/MovingToRust/movingtorust}
+\subfile{Chapters/BooleanSearch/BooleanSearch.tex}
  
 
 %%LaTeX/Chapters/BasicPart/01_Index1%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage \cite{biblatex} % to remove the yellow error
 \printbibliography[heading=bibintoc,title={Bibliography}]
 \cleardoublepage 
 \appendix

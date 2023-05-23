@@ -35,7 +35,7 @@ def plotfig(data,indexes,type,logy=False,logx=False):
         plt.yscale("log")
     if logx:
         plt.xscale("log")
-    plt.savefig(f"Plotting/Plots/BP{type}{indexes}")
+    plt.savefig(f"../../LaTeX/Pictures/Results/BP{type}{indexes}")
     plt.show()
 
 

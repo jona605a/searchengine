@@ -1,0 +1,48 @@
+\section{Index 8}
+Similarly to Index 7, the index in Index 8 consists of a Hash Map of words to article lists. Instead of bit vectors, containing a bit for each possible article, the list in Index 8 is instead a "positive list": an array of the articles in which the word appears. Under the assumption that most words do not appear in the majority of articles, this saves space by using $O(a)$ instead of $\Theta(a)$ space. 
+
+%Index 8 consist of a Hash Map that maps words to an array of article. For index 8 the article lists are stored as dynamic vectors of integers. If an integer $i$ is present in a given words article list this means that the word is present in the $i$th article. Thereby index 8 only stores information of which articles the words are present in, and not which articles the words are absent from. This is done to save on memory usage in the cases where words only appear in few articles.
+
+%\subsection{Construction of Index 8}
+%Before constructing Index 8, a regex, removing grammatical marks, is applied to the data set. 
+%The data set is then split into articles. Each word in each article is hashed to its article lists. If the corresponding article number of the word not is in article lists the article number is added. Checking if the corresponding article number already is present takes constant time, as it only is necessary to compare it to the last added article number. Constricting Index 8 thereby takes linear time according to the size of the data set.
+
+\subsection{Search techniques for Index 8}
+
+The search technique for Index 8 is overall the same as for Index 7: go through the syntax tree recursively, look up the words in the index, and combine them in the appropriate fashion. The following different variations of Index 8 implements various ways of looking up and combining the arrays. All Boolean indexes needs to support the operations AND, OR, and INVERT. 
+
+\subsubsection{Index 8.0: Merge/basic Search}
+The AND function takes two article lists, list $A_0$ and list $A_1$, as inputs and returns an article list, $A_{result}$, the intersection of the inputs. The article list $A_0$ and $A_1$ is already sorted as a consequence of how Index 8 is constructed. To construct $A_{result}$, a pointer is set at the first element of $A_0$ and $A_1$. If the two pointers points at two equal elements, the element is added to $A_{result}$. If the two pointers points at two unequal elements, the lower element's pointer moves to the next element of the list. This continues until one of pointers reaches the end of its list. The AND functions thereby takes $O(\texttt{len}(A_0) + \texttt{len}(A_1))$ to construct $A_{result}$, as it might have to traverse both $A_0$ and $A_1$. $A_{result}$ will also be sorted as the elements are added in increasing order.
+
+The OR function takes two article lists, list $A_0$ and list $A_1$, as inputs and returns an article list, $A_{result}$, of the Union of the inputs. To construct $A_{result}$ a pointer is set at the first element of $A_0$ and $A_1$. If the two pointers points at two equal elements, the element is added to $A_{result}$ and the pointers increment. If the two pointers points at two unequal elements, the smallest element is added and the lower pointer moves to the next element of the list. This continues until both of the pointers reaches the end of its list. The OR functions thereby takes $O(\texttt{len}(A_0) + \texttt{len}(A_1))$ to construct $A_{result}$. $A_{result}$ will again also be sorted.
+
+The INVERT function takes one article list $A_0$ as input and returns the inverted article list $A_{result}$ as output. The INVERT function simply transverses $A_0$ and adds all the elements not in $A_0$ to $A_{result}$.
+This takes $O(a)$ to do, where $a$ is the total number of articles in the index, as the function would potentially have to return a list of all but one article. A note about the INVERT operation is that it only has one child in the syntax tree, meaning that it reduces the branching (and thus the size) of the tree, resulting in halving the size of the subtree below it. This makes analysing the complexity using both unary and binary operations a bit more tricky, but the worst case run time is still $O(w\cdot a)$. 
+
+
+
+\subsubsection{Index 8.1: De-Morgan}
+This index has the same AND, OR and INVERT operations as Index 8.0.
+
+The INVERT operations is costly as it takes $O(a)$ time regardless of the length of the article list. De-Morgans laws tells that:
+
+$$!A \vee ! B \equiv !(A \wedge B)$$
+$$!A \wedge ! B \equiv !(A \vee B)$$
+
+By checking if the next operations are on the form $!A\, \vee\, !B$ or $!A\, \wedge\, ! B$ we can save a negation operation by evaluating $!(A \wedge B)$ or $!(A \vee B)$ instead.
+
+\subsubsection{Index 8.2: Binary Search}
+This index has the same OR and INVERT operations as Index 8.0.
+
+If one article list $A_0$ is much smaller than the other article list $A_1$ it might be preferred to search for all the elements of $A_0$ in $A_1$ using boolean search instead of using the AND operation described in Index 8.0. Searching for $\texttt{len}(A_0)$ words using binary search has the time complexity $O(\texttt{len}(A_0) \cdot log(\texttt{len}(A_1)))$. Index 8.2 checks if $\texttt{len}(A_0) \cdot log_2(\texttt{len}(A_1)) < \texttt{len}(A_0) + \texttt{len}(A_1)$ for each AND operations it does. If it is true, it uses binary search to construct $A_result$, and otherwise it uses the same AND operations as Index 8.0.
+
+\subsubsection{Index 8.3: De-Morgan and Binary Search}
+Index 8.3 is simply an index that combines the checks that Index 8.2 and Index 8.1 does.
+
+\subsection{Index 8.4: Bitwise operations}
+The AND, OR and INVERT functions from index 7.0 has much better time complexities than the operations in index 8.0. They are however based on another data structure that stores article list differently. But none the less can they be integrated in the index 8 data structure. This is done by converting the article list to a bit vector article list whenever an Boolean operation has to be performed with it. Converting an article list $A_0$ to a bit vector article list takes $O(\texttt{len}(A_0))$ time at it has to bit shift $\texttt{len}(A_0)$ bits. Index 8.4 is not expected to be better than Index 8.0 in the cases where the depth of the query is 1, as converting the article list to bit vector article list and then performing the bit wise Boolean operations has the same time complexity as simply performing the Boolean operations descried in Index 8.0. Whenever the depth of the query grows it is expected that Index 8.4 performed significantly better that any other Index 8 and similar to Index 7. 
+
+
+
+
+

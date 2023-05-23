@@ -30,11 +30,28 @@ pub fn opening_and_reading_file(c: &mut Criterion) {
 
 // Timing the indexing on different files
 pub fn index_template(c: &mut Criterion, i_string: &str) {
-    let files = fs::read_dir("../../data.nosync/");
+    let files = fs::read_dir("data/");
 
     for dir in files.unwrap() {
+        if dir.as_ref().unwrap().path().is_dir() {
+            continue;
+        }
+
         let file_path = dir.unwrap().path().into_os_string().into_string().unwrap();
-        let filesize = &file_path[46..file_path.len() - 4];
+
+        if &file_path[0..9] != "data/West"{
+            continue;
+        }
+
+        let filesize = match file_path.rsplit_once('_') {
+            Some((_, suffix)) => {
+                suffix
+                    .split_once('.')
+                    .expect("What kind of file doesn't end in a file extension?")
+                    .0
+            }
+            None => continue,
+        };
 
         let config = Config {
             file_path: file_path.to_owned(),
@@ -282,11 +299,12 @@ pub fn full_text_search_11_1(c: &mut Criterion) {
 
 //criterion_group!(benches,indexing_7,indexing_8_0,indexing_9_1,indexing_9_0,searching_index_7_0,searching_index_8_0,searching_index_8_1,searching_index_8_2,searching_index_8_3,searching_index_8_4,find_word_9_0,find_word_9_1,prefix_search_index_9_0,prefix_search_index_9_1);
 criterion_group!(
-    benches,
-    // full_text_search_10_0,
-    // full_text_search_10_1,
-    full_text_search_11_0,
-    full_text_search_11_1,
+    name = benches;
+    config = Criterion::default().sample_size(10);
+    targets = indexing_10_0,
+    indexing_10_1,
+    indexing_11_0,
+    indexing_11_1
 );
 
 criterion_main!(benches);
