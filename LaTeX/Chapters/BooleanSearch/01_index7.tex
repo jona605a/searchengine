@@ -1,0 +1,14 @@
+\section{Index 7}
+Index 7 stores the article lists as bit vectors. This means that every word has a list of bits, where each bit corresponds to whether the word appears in that article or not. For example, if the bit vector was 000...0101, the 1st and the 3rd bit are ones, which means the word appears in article 1 and 3. For databases with a low number of articles or when most words appear in most articles, this is very efficient, as it only uses one bit per article. However, for a large database of articles it becomes inefficient, as it uses $\Theta(u\cdot a)$ space, where $u$ is the number of unique words and $a$ is the number of articles. 
+
+In practice, a bit vector is an array of unsigned integers that are bit-encoded. Depending on the computer's architecture, this is either 32 or 64 bits per integer. So for an example, in a database of 128 articles on a 64-bit computer, one would only need to store 2 numbers for every unique word, no matter how many articles it appears in. The first number represents the first 64 bits and the second number the next 64 bits. 
+%To reduce verbosity, 64 bit architecture is assumed for the following examples. 
+
+\subsection{Search techniques for Index 7}
+Bit vectors are excellent for supporting boolean operations, as computers are very fast at this. Performing an AND or OR operation between two bit vectors means performing the operation on each integer in the two arrays. Performing an INVERT operation on one bit vector means inverting each integer in the array. Since the length of a bit vector is $\Theta(a/64) = \Theta(a)$, these operations also take $\Theta(a)$ time, although with small constants. 
+
+This method of performing a boolean operation on the bit vectors of the index are used in evaluating the entire syntax tree. Using the example from figure \ref{fig:bool-st-example}, a search query could be "(Shoe or Boot) and (not Sandal)". The search technique for index7 is going through the tree recursively. When encountering a word like "Shoe", the bit vector is looked up from the Hash Map. When evaluating a boolean operation, the children are first evaluated (thus being recursive) and then combined using the bit array operation described above. 
+
+In summary, the search technique for Index 7 goes through the syntax tree recursively, finds the bit vectors for all words and combines these using bitwise operations. Correctness follows from how the bitwise operations AND, OR and INVERT exactly correspond to what the AND, OR and NOT search keywords should mean. The size of the tree is $O(w)$, where $w$ is the number of words in the query. At each node, either a word is looked up or a boolean operation of AND, OR or NOT is performed. Looking up a word takes hashing time and the boolean operations take $O(a)$ time, making the whole search take $O(a\cdot w)$ time. 
+
+

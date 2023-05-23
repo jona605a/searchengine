@@ -1,0 +1,23 @@
+\section{Index 9.0}
+Index 9.0 supports prefix search, as it uses a trie as its data structure. The trie is constructed by traversing through all of the words in the database and performing the following steps:
+
+\begin{enumerate}
+  \item For each word in the database iterate through the characters of the word.
+  \item Begin at the root node and check if there is a child node representing the current character of the word. 
+  \item If a child node exists, move to that node and continue to the next character of the word.
+  \item If a child node does not exist for the current character, create a new node and link it to the current node as a child. Move to the newly created node.
+  \item Do step 3 and 4 for all characters in all words
+\end{enumerate}
+
+Index 9.0 Each note is a struct containing three fields: a character, describing which character they represent, a linked list, describing which children they have, and another linked list, describing that the word ending in this node, is present in the articles listed in the linked list.
+
+Step 3-4 takes $O(n)$ time, as it has to iterate through the linked list of children to see if the character exsist. The construction of Index 9.0 thereby runs in $O(n^2)$ time as all characters of the text need to be evaluated by step 3 or 4.  
+
+\subsection{Search techniques for Index 8}
+Given a query, the index simply traverses its way through the trie, according to the next character in the query, starting at the root node. If the next character of the query is not a child of the current node of the trie, then the index replies that the query not was found in the database. If There are no characters left of the query, and the article list of the current node does not exist, then the index replies that the query was not found in the database. If the article list exists, then the index simply returns the article list. It is thereby also possible to search for single complete words in the database.
+
+Searching for a single complete word in the index thereby takes $O(q\cdot n)$, where $q$ is the number of characters in the query, as it is necessary to search for characters in $q$ different linked lists. A tighter bound would be $O(q\cdot c)$, where $c$ is the maximal of children of any node, that is traversed when searching for the query. however $c$ is $O(n)$. 
+
+If the next character is "*" the index returns the union of all the article lists of the end notes end of the sub trie starting in the current node. To calculate this union, the sub trie is recursively traversed. When traversing the sub trie, if a node has an article list, the article list is transformed into a bitwise article list. Then the bitwise-OR operation from index 8.4 is used to calculate the union.
+
+Searching for a prefix in the index thereby takes $O(q\cdot n + u\cdot a)$. It is still necessary to traverse trie to find the node where the prefix ends. This takes $O(q\cdot c)$ time. It takes $O(a)$ time to transform an article list is transformed into a bitwise article list, and we need to transform $u$ of them. Here $u$ is the number of end nodes in the sub trie. Performing the bitwise-OR operation takes $O(a)$ time - note that this more precisely is $O(a/64)$. Performing the bitwise operation $u-1$ times then takes $O(a \cdot u)$ time. In total the prefix search thereby takes $O(q\cdot n + u\cdot a + u\cdot a) = O(q\cdot n + u\cdot a)$
