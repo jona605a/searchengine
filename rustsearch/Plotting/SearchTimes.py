@@ -76,6 +76,22 @@ for folderName in os.listdir("../target/criterion"):
         data[filesize][f"Find{(index,version)}"]["mean"] = estimates["mean"]["point_estimate"]
         data[filesize][f"Find{(index,version)}"]["lower_bound"] = estimates["mean"]["confidence_interval"]["lower_bound"]
         data[filesize][f"Find{(index,version)}"]["upper_bound"] = estimates["mean"]["confidence_interval"]["upper_bound"]
+
+    if folderName.split()[0] == "Full":
+        index,version = map(int,folderName.split()[2].split("_"))
+        filesize = int(folderName.split()[3][:-2])
+        
+        if filesize not in data: 
+            data[filesize] = {}
+        if f"Full{(index,version)}" not in data[filesize]:
+            data[filesize][f"Full{(index,version)}"] = {"mean": None, "lower_bound": None,"upper_bound": None}
+        
+        f = open(f"../target/criterion/{folderName}/new/estimates.json")
+        estimates = json.load(f)
+
+        data[filesize][f"Full{(index,version)}"]["mean"] = estimates["mean"]["point_estimate"]
+        data[filesize][f"Full{(index,version)}"]["lower_bound"] = estimates["mean"]["confidence_interval"]["lower_bound"]
+        data[filesize][f"Full{(index,version)}"]["upper_bound"] = estimates["mean"]["confidence_interval"]["upper_bound"]    
         
 
 def plot_indexing(data,indexes):
@@ -231,15 +247,39 @@ def plot_prefixsearch(data,indexes):
         plt.legend(loc='best')
     plt.show()
 
+def plot_fullsearch(data,indexes):
+    for index in indexes:
+        mean = np.array([])
+        upper_bound = np.array([])
+        lower_bound = np.array([])
+
+        x = [1, 2, 5, 10, 20, 50, 100, 200]
+
+        for filesize in x:
+            print(filesize)
+            mean = np.append(mean,data[filesize][f"Full{index}"]["mean"])
+            upper_bound = np.append(upper_bound,data[filesize][f"Full{index}"]["upper_bound"])
+            lower_bound = np.append(lower_bound,data[filesize][f"Full{index}"]["lower_bound"])
+    
+        plt.fill_between(x,lower_bound,upper_bound,label = f"index{index}")
+           
+        plt.xticks(x,["1MB", "2MB", "5MB", "10MB", "20MB", "50MB", "100MB", "200MB"])
+        plt.title("Full text search time over filesize")
+        plt.xlabel("Filesize")
+        plt.ylabel("Searching Time")
+        plt.legend(loc='best')
+    plt.show()
+
 booleanIndexes = [(7,0),(8,0),(8,1),(8,2),(8,3),(8,4)]
 
-plot_indexing(data,[(7,0),(8,0),(9,0),(9,1)])
+#plot_indexing(data,[(7,0),(8,0),(9,0),(9,1)])
 #plot_depth(data,booleanIndexes)
 #plot_filesize(data,booleanIndexes)
-plot_find_word(data,[(8,0),(9,0),(9,1)])
+#plot_find_word(data,[(8,0),(9,0),(9,1)])
 #plot_depth_filesize(data,booleanIndexes)
-plot_prefixsearch(data,[(9,0),(9,1)])
-            
+#plot_prefixsearch(data,[(9,0),(9,1)])
+plot_fullsearch(data,[(11,0),(11,1)])         
+plot_fullsearch(data,[(10,0),(10,1)])         
 
 
 
