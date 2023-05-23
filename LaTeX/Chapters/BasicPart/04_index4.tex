@@ -11,4 +11,4 @@ The worst case for Index4 would be if all words of the input file hashed to the 
 
 The expected search time of Index4 is $O(\frac{u}{k})$ as it takes constant time to calculate the hash value and $O(\frac{u}{k})$ time to go through the linked list. 
 
-The index stores a link for each unique word in the input and its article list, using $O(u\cdot a)$ space. Furthermore, the hash table itself takes up $k$ space making it $O(u\cdot a+k)$ space. The search uses only constant, $O(1)$, additional space. 
+The index stores a link for each unique word in the input and its article list, using $O(u\cdot a)$ space. Furthermore, the hash table itself takes up $O(k)$ space making it $O(u\cdot a+k)$ space. The search uses only constant, $O(1)$, additional space. 

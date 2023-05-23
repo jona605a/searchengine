@@ -1,0 +1,12 @@
+\section{Methods for Benchmarking Prefix search Indexes}
+To compare the Prefix indexes, the indexing and search functions of each index were timed. Timing the code was done using Rust Criterion. 
+
+To compare the indexing time, the code that indexed the different search engines where timed using criterion. All search engines were indexed over different file sizes.
+
+To compare the prefix search indexes to the previous indexes, the search time for complete single words where also times. Here 1000 words were found for each filesize. With a $90\%$ change a word from the database of the file size where selected. Otherwise, the string "icantbefound" where selected.
+
+To compare the prefix search function against each other 1000 prefixes were found for each filesize. These were the same words used for finding a complete word but now only the first 3 characters. Insted of the "icantbefound" string the string ". *" where used as ". " cant be found in any of the tires.
+
+For each file size, searching for the 1000 queries with complete words and the 1000 queries with prefixes were timed using Criterion.
+
+
