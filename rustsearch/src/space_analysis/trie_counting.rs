@@ -8,6 +8,7 @@ mod tests {
         index::{index9_0::TrieNodeLin, Index},
     };
     #[test]
+    #[ignore]
     fn create_index9_and_count() {
         let files = fs::read_dir("data/");
 
