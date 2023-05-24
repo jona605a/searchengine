@@ -98,26 +98,25 @@ def plot_indexing(data,indexes):
         mean = np.array([])
         upper_bound = np.array([])
         lower_bound = np.array([])
-        for filesize in sorted(data.keys()):
+        
+        x = [1, 2, 5, 10, 20, 50, 100, 200]
+
+        for filesize in x:
             if filesize == 400 and index == 9:
                 continue
             mean = np.append(mean,data[filesize][f"indexing{index}"]["mean"])
             upper_bound = np.append(upper_bound,data[filesize][f"indexing{index}"]["upper_bound"])
             lower_bound = np.append(lower_bound,data[filesize][f"indexing{index}"]["lower_bound"])
         
-        x = [1, 2, 5, 10, 20, 50, 100, 200]
-        #x = [1, 2, 5, 10, 20, 50, 100, 200,400]
-        
         plt.fill_between(x,lower_bound[:8],upper_bound[:8],label = f"index{index}")
         #plt.fill_between(x,lower_bound,upper_bound,label = f"index{index}")
            
         plt.xticks(x,["1MB", "2MB", "5MB", "10MB", "20MB", "50MB", "100MB", "200MB"])
-        #plt.xticks(x,["1MB", "2MB", "5MB", "10MB", "20MB", "50MB", "100MB", "200MB","400MB"])
         plt.title(f"Indexing Time over filesize.")
         plt.xlabel("Filesize")
         plt.ylabel("Searching Time")
         plt.legend(loc='best')
-    #plt.savefig(f"../../LaTeX/Pictures/Results/BooleanSearchIndexes")    
+    plt.savefig(f"../../LaTeX/Pictures/Results/Indexing{indexes}")    
     plt.show()
             
 def plot_depth(data, indexes):
@@ -275,14 +274,15 @@ def plot_fullsearch(data,indexes):
 
 booleanIndexes = [(7,0),(8,0),(8,1),(8,2),(8,3),(8,4)]
 
-plot_indexing(data,[(7,0),(8,0),(9,0),(9,1),(10,0),(10,1),(11,0),(11,1)])
-#plot_depth(data,booleanIndexes)
-#plot_filesize(data,booleanIndexes)
-#plot_find_word(data,[(8,0),(9,0),(9,1)])
-#plot_depth_filesize(data,booleanIndexes)
-#plot_prefixsearch(data,[(9,0),(9,1)])
-#plot_fullsearch(data,[(11,0),(11,1)])         
-#plot_fullsearch(data,[(10,0),(10,1)])         
+plot_indexing(data,[(7,0),(8,0),(9,0),(9,1)])
+plot_indexing(data,[(7,0),(8,0),(9,0),(9,1),(10,0),(11,0)])
+plot_depth(data,booleanIndexes)
+plot_filesize(data,booleanIndexes)
+plot_find_word(data,[(8,0),(9,0),(9,1)])
+plot_depth_filesize(data,booleanIndexes)
+plot_prefixsearch(data,[(9,0),(9,1)])
+plot_fullsearch(data,[(11,0),(11,1)])         
+plot_fullsearch(data,[(10,0),(10,1)])         
 
 
 
