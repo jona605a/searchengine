@@ -36,7 +36,7 @@ pub fn kmp(file_contents: String, query_words: &Vec<&str>, T: &Vec<i32>) -> Vec<
     let mut k = 0;
 
     let file_vec: Vec<&str> = file_contents.split_ascii_whitespace().collect();
-    
+
     // dbg!(&T, &file_contents, &query_words);
 
     while j < file_vec.len() {
@@ -350,5 +350,18 @@ mod tests {
         };
 
         search_match(index, query, vec!["article 103".to_string()])
+    }
+
+    #[test]
+    #[ignore]
+    fn measure_triples_in_100mb() {
+        let config = Config::build(&[
+            "".to_string(),
+            "data/WestburyLab.wikicorp.201004_100MB.txt".to_string(),
+            "10_0".to_string(),
+        ])
+        .unwrap();
+        let index = Index::index10(&config).unwrap();
+        dbg!(index.database.len());
     }
 }

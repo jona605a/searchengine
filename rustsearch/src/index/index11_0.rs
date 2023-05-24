@@ -21,7 +21,7 @@ impl Index<HashMap<(String, String, String), Vec<usize>>> {
         // The actual indexing
         for (title, contents) in articles_iter {
             let mut contents_iter = contents.iter();
-            if contents.len()>1 {
+            if contents.len() > 1 {
                 article_titles.push(title.to_string());
 
                 let mut prv1 = contents_iter.next().unwrap();
@@ -336,5 +336,18 @@ mod tests {
         };
 
         search_match(index, query, Vec::<String>::new());
+    }
+
+    #[test]
+    #[ignore]
+    fn measure_triples_in_100mb() {
+        let config = Config::build(&[
+            "".to_string(),
+            "data/WestburyLab.wikicorp.201004_100MB.txt".to_string(),
+            "11".to_string(),
+        ])
+        .unwrap();
+        let index = Index::index11(&config).unwrap();
+        dbg!(index.database.len());
     }
 }
