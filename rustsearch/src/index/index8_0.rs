@@ -126,6 +126,15 @@ impl Index<HashMap<String, Vec<usize>>> {
         }
         result
     }
+
+    pub fn get_database_lin(&self) -> &HashMap<String, Vec<usize>> {
+        &self.database
+    }
+
+    pub fn get_article_titles(&self) -> &Vec<String>{
+        &self.article_titles
+    }
+
 }
 
 impl Search for Index<HashMap<String, Vec<usize>>> {
