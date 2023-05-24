@@ -5,10 +5,11 @@ mod tests {
 
     use crate::{
         helpers::Config,
-        index::{index8_0, Index},
+        index::Index,
     };
     #[test]
-    fn Articlelist_length_count() {
+    #[ignore]
+    fn articlelist_length_count() {
         let files = fs::read_dir("data/");
         
         let mut stats: HashMap<String, Vec<usize>> = HashMap::new();

@@ -1,3 +1,3 @@
 pub mod trie_counting;
-pub mod ArticlelistLength;
+pub mod articlelist_length;
 

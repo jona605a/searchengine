@@ -15,14 +15,14 @@ pub fn z_alg(s: &Vec<&char>) -> Vec<usize> {
 
     for i in 1..n {
         if i < r {
-            z[i] = min(r - i + 1, z[i - l]);
+            z[i] = min(r - i, z[i - l]);
         }
         while i + z[i] < n && s[z[i]] == s[i + z[i]] {
             z[i] += 1
         }
-        if i + z[i] - 1 > r {
+        if i + z[i] > r {
             l = i;
-            r = i + z[i] - 1
+            r = i + z[i]
         }
     }
     z
@@ -112,16 +112,14 @@ pub fn boyer_moore(
             };
 
             // Good suffix rule
-            let gs_shift = if i == n - 1 {
+            let gs_shift = if i >= n - 1 {
                 1
-            } else if i + 1 < n {
+            } else {
                 if L_prime[i + 1] != 0 {
                     n - L_prime[i + 1]
                 } else {
                     n - l_prime[i + 1]
                 }
-            } else {
-                1
             };
 
             // dbg!(i, k, bc_shift, gs_shift);
@@ -131,6 +129,60 @@ pub fn boyer_moore(
     }
 
     match_indices
+}
+
+pub fn boyer_moore_truefalse(
+    p: &Vec<char>,
+    t: &Vec<char>,
+    (L_prime, l_prime, R): (&Vec<usize>, &Vec<usize>, &HashMap<&char, Vec<usize>>),
+) -> Option<usize> {
+    // Search stage
+    let n = p.len();
+    let m = t.len();
+    let mut k = n - 1;
+    while k < m {
+        let mut i = n - 1;
+        let mut h = k;
+        while i > 0 && p[i] == t[h] {
+            // Match as long as we can
+            i -= 1;
+            h -= 1;
+        }
+        if i == 0 && p[i] == t[h] {
+            // P matches T!
+            // println!("Match! P == {}", String::from_iter(p));
+            return Some(k);
+        } else {
+            // Bad character rule
+            let bc_shift = match R.get(&t[h]) {
+                Some(c_pos) => {
+                    let mut temp: i32 = -1;
+                    for ch_i in c_pos {
+                        if *ch_i < i {
+                            temp = *ch_i as i32;
+                            break;
+                        }
+                    }
+                    ((i as i32) - (temp)) as usize
+                }
+                None => i + 1,
+            };
+            // Good suffix rule
+            let gs_shift = if i >= n - 1 {
+                1
+            } else {
+                if L_prime[i + 1] != 0 {
+                    n - L_prime[i + 1]
+                } else {
+                    n - l_prime[i + 1]
+                }
+            };
+            // dbg!(i, k, bc_shift, gs_shift);
+            k += max(bc_shift, gs_shift)
+        }
+    }
+
+    None
 }
 
 impl Index<HashMap<String, HashSet<usize>>> {
@@ -148,19 +200,25 @@ impl Index<HashMap<String, HashSet<usize>>> {
             .filter(|ar_no| x.all(|hs_a| hs_a.contains(ar_no)))
             .collect();
 
-        // let query_words: Vec<&str> = query.split(' ').collect();
         let mut result: Vec<usize> = Vec::new();
         let (L_prime, l_prime, R) = boyer_moore_preprocess(&p);
 
         for art_no in art_intersect {
             // Read the file
-            let t: Vec<char> = fs::read_to_string(format!("data/individual_articles/{:08}.txt", art_no))
-                    .expect(format!("Article number {} not found in data/individual_articles/", art_no).as_str())
+            let t: Vec<char> =
+                fs::read_to_string(format!("data/individual_articles/{:08}.txt", art_no))
+                    .expect(
+                        format!(
+                            "Article number {} not found in data/individual_articles/",
+                            art_no
+                        )
+                        .as_str(),
+                    )
                     .chars()
                     .collect();
-            match boyer_moore(&p, &t, (&L_prime, &l_prime, &R)) {
-                x if x.len() == 0 => (), // Empty vector
-                _ => result.push(art_no),            // There was at least one occurence
+            match boyer_moore_truefalse(&p, &t, (&L_prime, &l_prime, &R)) {
+                None => (),                     // No occurence
+                Some(_) => result.push(art_no), // There was at least one occurence
             }
         }
         // Result to article names
@@ -220,6 +278,32 @@ mod tests {
             )
         );
     }
+
+    // #[test]
+    // fn boyer_moore_let_it_be() {
+    //     let t: Vec<char> =
+    //         "When I find myself in times of trouble, Mother Mary comes to me Speaking words of wisdom,
+    //         let it be And in my hour of darkness she is standing right in front of me Speaking words of wisdom, let it be Let it be let it be let it be let it be Whisper words of wisdom, let it be And when the broken hearted people living in the world agree There will be an answer, let it be For though they may be parted, there is still a chance that they will see There will be an answer, let it be Let it be let it be let it be let it be There will be an answer, let it be Let it be let it be let it be let it be Whisper words of wisdom, let it be Let it be let it be let it be let it be Whisper words of wisdom, let it be be And when the night is cloudy there is still a light that shines on me Shinin' until tomorrow, let it be I wake up to the sound of music, Mother Mary comes to me Speaking words of wisdom, let it be And let it be let it be let it be let it be Whisper words of wisdom, let it be And let it be let it be let it be let it be Whisper words of wisdom, let it be"
+    //         .to_string()
+    //         .to_ascii_lowercase().chars().collect();
+    //     let p: Vec<char> = "let it be".chars().collect();
+
+    //     let p_rev: Vec<&char> = p.iter().rev().collect();
+    //     let N: Vec<usize> = z_alg(&p_rev).iter().rev().map(|x| *x).collect();
+    //     dbg!(compute_L_primes(N));
+    //     let (L_prime, l_prime, R) = boyer_moore_preprocess(&p);
+    //     assert_eq!(
+    //         boyer_moore(&p, &t, (&L_prime, &l_prime, &R)),
+    //         vec![
+    //             17, 38, 41, 44, 47, 50, 57, 76, 99, 102, 105, 108, 111, 119, 122, 125, 128, 131,
+    //             138, 141, 144, 147, 150, 157, 179, 199, 203, 206, 209, 212, 219, 223, 226, 229,
+    //             232, 239
+    //         ]
+    //         .iter()
+    //         .map(|x| x - 1)
+    //         .collect::<Vec<usize>>()
+    //     );
+    // }
 
     #[test]
     fn correct_boyer_moore_let_it_be() {
