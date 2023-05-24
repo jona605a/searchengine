@@ -235,7 +235,7 @@ pub fn prefix_search_index_9_1(c: &mut Criterion) {
 
 pub fn full_text_searching_template(c: &mut Criterion, i_string: &str) {
     let files = fs::read_dir("data/");
-    
+
     let full_text_searchtype = match i_string {
         "10_0" => SearchType::ExactSearch("KMP".to_string()),
         "10_1" => SearchType::ExactSearch("BoyerMoore".to_string()),
@@ -251,17 +251,12 @@ pub fn full_text_searching_template(c: &mut Criterion, i_string: &str) {
 
         let file_path = dir.unwrap().path().into_os_string().into_string().unwrap();
 
-        if &file_path[0..9] != "data/West"{
+        if &file_path[0..9] != "data/West" {
             continue;
         }
 
         let filesize = match file_path.rsplit_once('_') {
-            Some((_, suffix)) => {
-                suffix
-                    .split_once('.')
-                    .expect("What kind of file doesn't end in a file extension?")
-                    .0
-            }
+            Some((_, suffix)) => suffix.split_once('.').unwrap().0,
             None => continue,
         };
 
