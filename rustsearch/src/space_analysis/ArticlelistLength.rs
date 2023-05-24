@@ -36,7 +36,7 @@ mod tests {
             let index = Index::index8(&config).unwrap();
 
             //let mut file_stat = vec![0;index.get_article_titles().len()];
-            let mut file_stat = vec![0;10000000];
+            let mut file_stat = vec![0;20001];
             
             let database = index.get_database_lin();
 
@@ -44,6 +44,7 @@ mod tests {
                 let n = articlelist.len();
                 file_stat[n-1] += 1
             }
+            file_stat[20000] = index.get_article_titles().len();
             
             stats.insert(filesize.to_string(), file_stat);
         }
