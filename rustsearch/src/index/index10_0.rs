@@ -6,7 +6,30 @@ use std::fs;
 use crate::helpers::*;
 use crate::index::Index;
 
-use super::*;
+use super::{ArticleTitles, Query, Search, SearchType};
+
+pub fn kmp_table_chars(query: &String) -> Vec<i32> {
+    let query: Vec<char> = query.chars().collect();
+    let mut T: Vec<i32> = vec![0; query.len() + 1];
+    let mut pos: usize = 1;
+    let mut cnd: i32 = 0;
+    T[0] = -1;
+
+    while pos < query.len() {
+        if query[pos] == query[cnd as usize] {
+            T[pos] = T[cnd as usize]
+        } else {
+            T[pos] = cnd;
+            while cnd >= 0 && query[pos] != query[cnd as usize] {
+                cnd = T[cnd as usize];
+            }
+        }
+        pos += 1;
+        cnd += 1;
+    }
+    T[pos] = cnd;
+    T
+}
 
 pub fn kmp_table(query_words: &Vec<&str>) -> Vec<i32> {
     let mut T: Vec<i32> = vec![0; query_words.len() + 1];
@@ -30,7 +53,42 @@ pub fn kmp_table(query_words: &Vec<&str>) -> Vec<i32> {
     T
 }
 
-pub fn kmp(file_contents: String, query_words: &Vec<&str>, T: &Vec<i32>) -> Vec<usize> {
+pub fn kmp_truefalse(file_contents: String, query: &String, T: &Vec<i32>) -> Option<usize> {
+    // let mut P: Vec<usize> = Vec::new();
+    let mut j = 0;
+    let mut k = 0;
+
+    let file_vec: Vec<char> = file_contents.chars().collect();
+    let p: Vec<char> = query.chars().collect();
+
+    // dbg!(&T, &file_contents, &query_words);
+    // let mut counter = 0;
+
+    while j < file_vec.len() {
+        // counter += 1;
+        if p[k] == file_vec[j] {
+            j += 1;
+            k += 1;
+            if k == p.len() {
+                // Occurence found
+                // println!("KMP ran {counter} iterations");
+                return Some(j - k);
+            }
+        } else {
+            match T[k] {
+                -1 => {
+                    j += 1;
+                    k = 0
+                }
+                x => k = x as usize,
+            }
+        }
+    }
+    // println!("KMP ran {counter} iterations");
+    return None;
+}
+
+pub fn kmp_allmatches(file_contents: String, query_words: &Vec<&str>, T: &Vec<i32>) -> Vec<usize> {
     let mut P: Vec<usize> = Vec::new();
     let mut j = 0;
     let mut k = 0;
@@ -115,10 +173,10 @@ impl Index<HashMap<String, HashSet<usize>>> {
             .filter(|ar_no| x.all(|hs_a| hs_a.contains(ar_no)))
             .collect();
 
-        let query_words: Vec<&str> = query.split(' ').collect();
+        // let query_words: Vec<&str> = query.split(' ').collect();
         let mut result: Vec<usize> = Vec::new();
         // Do the KMP preprocessing
-        let T = kmp_table(&query_words);
+        let T = kmp_table_chars(&query);
         // dbg!(&art_intersect);
 
         for art_no in art_intersect {
@@ -131,9 +189,41 @@ impl Index<HashMap<String, HashSet<usize>>> {
                     )
                     .as_str(),
                 );
-            match kmp(file_contents, &query_words, &T) {
-                x if x.len() == 0 => (),  // Empty vector
-                _ => result.push(art_no), // There was at least one occurence
+            match kmp_truefalse(file_contents, &query, &T) {
+                None => (),                     // No occurence
+                Some(_) => result.push(art_no), // There was at least one occurence
+            }
+        }
+        // Result to article names
+        result
+            .iter()
+            .map(|a_no| self.article_titles[*a_no].to_owned())
+            .collect()
+    }
+
+    pub fn dumidesearch(&self, query: &String) -> ArticleTitles {
+        let mut x = query
+            .split(' ')
+            .map(|w| self.database.get(w).unwrap_or(&HashSet::new()).to_owned());
+        let keys = x.next().unwrap();
+        let art_intersect: Vec<usize> = keys
+            .into_iter()
+            .filter(|ar_no| x.all(|hs_a| hs_a.contains(ar_no)))
+            .collect();
+        let mut result: Vec<usize> = Vec::new();
+        for art_no in art_intersect {
+            // Read the file
+            let file_contents =
+                fs::read_to_string(format!("data/individual_articles/{:08}.txt", art_no)).expect(
+                    format!(
+                        "Article number {} not found in data/individual_articles/",
+                        art_no
+                    )
+                    .as_str(),
+                );
+            // Ladies and gentlemen, behold the power of the .contains function
+            if file_contents.contains(&query[..]) {
+                result.push(art_no)
             }
         }
         // Result to article names
@@ -151,6 +241,9 @@ impl Search for Index<HashMap<String, HashSet<usize>>> {
             SearchType::ExactSearch(x) if x == "KMP" => self.kmp_search(&query.search_string),
             SearchType::ExactSearch(x) if x == "BoyerMoore" => {
                 self.boyer_moore_search(&query.search_string)
+            },
+            SearchType::ExactSearch(x) if x == "dumide" => {
+                self.dumidesearch(&query.search_string)
             }
             _ => unimplemented!(),
         }
@@ -210,7 +303,7 @@ mod tests {
         let query_words: Vec<&str> = vec!["A"];
         let T: Vec<i32> = kmp_table(&query_words);
 
-        assert_eq!(kmp(file_contents, &query_words, &T), vec![0]);
+        assert_eq!(kmp_allmatches(file_contents, &query_words, &T), vec![0]);
     }
 
     #[test]
@@ -219,7 +312,7 @@ mod tests {
         let query_words: Vec<&str> = vec!["A", "B"];
         let T: Vec<i32> = kmp_table(&query_words);
 
-        assert_eq!(kmp(file_contents, &query_words, &T), vec![0, 3, 6]);
+        assert_eq!(kmp_allmatches(file_contents, &query_words, &T), vec![0,3,6]);
     }
 
     #[test]
@@ -233,7 +326,7 @@ mod tests {
         let T: Vec<i32> = kmp_table(&query_words);
 
         assert_eq!(
-            kmp(file_contents, &query_words, &T),
+            kmp_allmatches(file_contents, &query_words, &T),
             vec![
                 17, 38, 41, 44, 47, 50, 57, 76, 99, 102, 105, 108, 111, 119, 122, 125, 128, 131,
                 138, 141, 144, 147, 150, 157, 179, 199, 203, 206, 209, 212, 219, 223, 226, 229,
@@ -342,7 +435,7 @@ mod tests {
     }
 
     #[test]
-    fn weird_test() {
+    fn find_a_word3() {
         let index = setup_test();
         let query = Query {
             search_string: "word1 word2 word1 word3 word1".to_string(),
@@ -350,6 +443,17 @@ mod tests {
         };
 
         search_match(index, query, vec!["article 103".to_string()])
+    }
+
+    #[test]
+    fn no_words_found() {
+        let index = setup_test();
+        let query = Query {
+            search_string: "cantbefound".to_string(),
+            search_type: SearchType::ExactSearch("KMP".to_string()),
+        };
+
+        search_match(index, query, vec![])
     }
 
     #[test]
