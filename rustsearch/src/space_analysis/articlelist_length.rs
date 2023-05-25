@@ -5,7 +5,7 @@ mod tests {
 
     use crate::{
         helpers::Config,
-        index::{index8_0, Index},
+        index::Index,
     };
     #[test]
     #[ignore]

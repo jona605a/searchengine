@@ -298,7 +298,9 @@ pub fn full_text_search_11_1(c: &mut Criterion) {
 }
 
 pub fn kmp_vs_boyer_moore(c: &mut Criterion) {
-    let file_path = "data/WestburyLab.wikicorp.201004_100KB.txt".to_string();
+    let file_size = "5MB";
+
+    let file_path = format!("data/WestburyLab.wikicorp.201004_{}.txt", file_size);
 
     let full_text_queries: Vec<String> = gen_a_lot_of_runs_full_text(file_path.clone(), 1000);
     let config = Config {
@@ -308,20 +310,20 @@ pub fn kmp_vs_boyer_moore(c: &mut Criterion) {
 
     let index = config.to_index().unwrap();
 
-    c.bench_function(&format!("Bench KMP 100KB"), |b| {
-        b.iter(|| {
-            for sentence in &full_text_queries {
-                let query = Query {
-                    search_string: sentence.to_owned(),
-                    search_type: SearchType::ExactSearch("KMP".to_string()),
-                };
+    // c.bench_function(&format!("Bench KMP {}", file_size), |b| {
+    //     b.iter(|| {
+    //         for sentence in &full_text_queries {
+    //             let query = Query {
+    //                 search_string: sentence.to_owned(),
+    //                 search_type: SearchType::ExactSearch("KMP".to_string()),
+    //             };
 
-                index.search(&query);
-            }
-        })
-    });
+    //             index.search(&query);
+    //         }
+    //     })
+    // });
 
-    c.bench_function(&format!("Bench BoyerMoore 100KB"), |b| {
+    c.bench_function(&format!("Bench BoyerMoore {}", file_size), |b| {
         b.iter(|| {
             for sentence in &full_text_queries {
                 let query = Query {
@@ -351,7 +353,7 @@ pub fn kmp_vs_boyer_moore(c: &mut Criterion) {
 //criterion_group!(benches,indexing_7,indexing_8_0,indexing_9_1,indexing_9_0,searching_index_7_0,searching_index_8_0,searching_index_8_1,searching_index_8_2,searching_index_8_3,searching_index_8_4,find_word_9_0,find_word_9_1,prefix_search_index_9_0,prefix_search_index_9_1);
 criterion_group!(
     name = benches;
-    config = Criterion::default().sample_size(100);
+    config = Criterion::default().sample_size(50);
     targets = kmp_vs_boyer_moore
     // targets = indexing_10_0,
     // indexing_10_1,

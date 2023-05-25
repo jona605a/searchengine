@@ -15,14 +15,14 @@ pub fn z_alg(s: &Vec<&char>) -> Vec<usize> {
 
     for i in 1..n {
         if i < r {
-            z[i] = min(r - i + 1, z[i - l]);
+            z[i] = min(r - i, z[i - l]);
         }
         while i + z[i] < n && s[z[i]] == s[i + z[i]] {
             z[i] += 1
         }
-        if i + z[i] - 1 > r {
+        if i + z[i] > r {
             l = i;
-            r = i + z[i] - 1
+            r = i + z[i]
         }
     }
     z
@@ -188,7 +188,7 @@ pub fn boyer_moore_truefalse(
                             break;
                         }
                     }
-                    ((i as i32) - (temp + 1)) as usize
+                    ((i as i32) - (temp)) as usize
                 }
                 None => i + 1,
             };
