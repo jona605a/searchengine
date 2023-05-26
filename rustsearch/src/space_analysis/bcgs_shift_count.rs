@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use std::{collections::HashMap, fs};
+    
 
     use crate::{
         helpers::Config,
@@ -8,7 +8,7 @@ mod tests {
     };
     #[test]
     #[ignore]
-    fn BadCharGoodSuf_shift_Count() {
+    fn bad_char_good_suf_shift_count() {
         let file_path = "data/WestburyLab.wikicorp.201004_5MB.txt".to_string();
     
         let config = Config {
