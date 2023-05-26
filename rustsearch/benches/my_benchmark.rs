@@ -317,7 +317,6 @@ pub fn kmp_vs_boyer_moore(c: &mut Criterion) {
     //                 search_string: sentence.to_owned(),
     //                 search_type: SearchType::ExactSearch("KMP".to_string()),
     //             };
-
     //             index.search(&query);
     //         }
     //     })
@@ -330,7 +329,18 @@ pub fn kmp_vs_boyer_moore(c: &mut Criterion) {
                     search_string: sentence.to_owned(),
                     search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
                 };
+                index.search(&query);
+            }
+        })
+    });
 
+    c.bench_function(&format!("Bench ApostolicoGiancarlo {}", file_size), |b| {
+        b.iter(|| {
+            for sentence in &full_text_queries {
+                let query = Query {
+                    search_string: sentence.to_owned(),
+                    search_type: SearchType::ExactSearch("ApostolicoGiancarlo".to_string()),
+                };
                 index.search(&query);
             }
         })

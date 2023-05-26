@@ -274,15 +274,15 @@ def plot_fullsearch(data,indexes):
 
 booleanIndexes = [(7,0),(8,0),(8,1),(8,2),(8,3),(8,4)]
 
-plot_indexing(data,[(7,0),(8,0),(9,0),(9,1)])
-plot_indexing(data,[(7,0),(8,0),(9,0),(9,1),(10,0),(11,0)])
-plot_depth(data,booleanIndexes)
-plot_filesize(data,booleanIndexes)
-plot_find_word(data,[(8,0),(9,0),(9,1)])
-plot_depth_filesize(data,booleanIndexes)
-plot_prefixsearch(data,[(9,0),(9,1)])
-plot_fullsearch(data,[(11,0),(11,1)])         
-plot_fullsearch(data,[(10,0),(10,1)])         
+#plot_indexing(data,[(7,0),(8,0),(9,0),(9,1)])
+#plot_indexing(data,[(7,0),(8,0),(9,0),(9,1),(10,0),(11,0)])
+#plot_depth(data,booleanIndexes)
+#plot_filesize(data,booleanIndexes)
+#plot_find_word(data,[(8,0),(9,0),(9,1)])
+#plot_depth_filesize(data,booleanIndexes)
+#plot_prefixsearch(data,[(9,0),(9,1)])
+#plot_fullsearch(data,[(11,0),(11,1)])         
+#plot_fullsearch(data,[(10,0),(10,1)])         
 
 
 

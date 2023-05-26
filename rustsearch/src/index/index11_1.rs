@@ -63,7 +63,7 @@ impl Index<HashMap<(String, String, String), Vec<usize>>> {
         let p: Vec<char> = query.chars().collect();
 
         let mut result: Vec<usize> = Vec::new();
-        let (L_prime, l_prime, R) = boyer_moore_preprocess(&p);
+        let (L_prime, l_prime, R,_) = boyer_moore_preprocess(&p);
 
         // TODO: improve generality of this section **************************************
         for art_no in art_intersect {
