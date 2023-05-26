@@ -106,7 +106,7 @@ pub fn boyer_moore(
                             break;
                         }
                     }
-                    ((i as i32) - (temp + 1)) as usize
+                    ((i as i32) - (temp)) as usize
                 }
                 None => i + 1,
             };
