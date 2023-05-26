@@ -13,7 +13,7 @@ pub fn apostolico_giancarlo(
     (L_prime, l_prime, R, N): (
         &Vec<usize>,
         &Vec<usize>,
-        &HashMap<&char, Vec<usize>>,
+        &HashMap<&char, usize>,
         &Vec<usize>,
     ),
 ) -> Vec<usize> {
@@ -85,7 +85,7 @@ pub fn apostolico_giancarlo_truefalse(
     (L_prime, l_prime, R, N): (
         &Vec<usize>,
         &Vec<usize>,
-        &HashMap<&char, Vec<usize>>,
+        &HashMap<&char, usize>,
         &Vec<usize>,
     ),
 ) -> bool {
@@ -144,25 +144,17 @@ pub fn apostolico_giancarlo_truefalse(
     false
 }
 
-fn calculate_shift_at_mismatch(
+pub fn calculate_shift_at_mismatch(
     th: &char,
     i: usize,
     n: usize,
-    (L_prime, l_prime, R): (&Vec<usize>, &Vec<usize>, &HashMap<&char, Vec<usize>>),
+    (L_prime, l_prime, R): (&Vec<usize>, &Vec<usize>, &HashMap<&char, usize>),
 ) -> usize {
     // Bad character rule
     let bc_shift = match R.get(th) {
-        Some(c_pos) => {
-            let mut temp: i32 = -1;
-            for ch_i in c_pos {
-                if *ch_i < i {
-                    temp = *ch_i as i32;
-                    break;
-                }
-            }
-            ((i as i32) - (temp)) as usize
-        }
-        None => i + 1,
+        Some(&c_pos) if c_pos < i => i - c_pos,
+        Some(_) => 1,
+        _ => i + 1,
     };
     // Good suffix rule
     let gs_shift = if i >= n - 1 {
