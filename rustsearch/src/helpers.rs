@@ -34,6 +34,7 @@ impl Config {
             "10" => Ok(Box::new(Index::index10(&self)?)),
             "10_0" => Ok(Box::new(Index::index10(&self)?)),
             "10_1" => Ok(Box::new(Index::index10(&self)?)),
+            "10_2" => Ok(Box::new(Index::index10(&self)?)),
             "11" => Ok(Box::new(Index::index11(&self)?)),
             "11_0" => Ok(Box::new(Index::index11(&self)?)),
             "11_1" => Ok(Box::new(Index::index11(&self)?)),

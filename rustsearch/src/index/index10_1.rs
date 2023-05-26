@@ -434,7 +434,7 @@ mod tests {
         let (L_prime, l_prime, R,_) = boyer_moore_preprocess(&p);
         assert_eq!(
             boyer_moore(&p, &t, (&L_prime, &l_prime, &R)),
-            vec![]
+            vec![29]
         );
     }
 

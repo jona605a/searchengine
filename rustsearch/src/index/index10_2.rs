@@ -92,13 +92,14 @@ pub fn apostolico_giancarlo_truefalse(
     // Search stage
     let n = p.len();
     let m = t.len();
-    let mut j = n;
+    let mut j = n - 1;
     let mut M: Vec<i32> = vec![-1; m];
     while j < m {
         let mut i = n - 1;
-        let mut h = j - 1;
+        let mut h = j;
 
         'phase: loop {
+            // dbg!((i, h, j), M[h]);
             if M[h] <= 0 {
                 if i == 0 && p[i] == t[h] {
                     // P matches T!
@@ -115,18 +116,18 @@ pub fn apostolico_giancarlo_truefalse(
                     break 'phase;
                 }
             }
-            if (M[h] as usize) < N[i] || (M[h] as usize == N[i] && N[i] < i) {
+            if (M[h] as usize) < N[i] || (M[h] as usize == N[i] && N[i] < i + 1) {
                 // Rule 2 and 5
                 i -= M[h] as usize;
                 h -= M[h] as usize;
                 continue 'phase;
             }
-            if M[h] as usize >= N[i] && N[i] == i {
+            if M[h] as usize >= N[i] && N[i] == i + 1 {
                 M[j] = (j - h) as i32;
                 // Occurence at position j
                 return true;
             }
-            if M[h] as usize > N[i] && N[i] < i {
+            if M[h] as usize > N[i] && N[i] < i + 1 {
                 assert_ne!(p[i - N[i]], t[h - N[i]]);
                 M[j] = (j - h) as i32;
                 j += calculate_shift_at_mismatch(
@@ -137,6 +138,7 @@ pub fn apostolico_giancarlo_truefalse(
                 );
                 break 'phase;
             }
+            panic!("This case should be unreachable as N[i] is always <= i + 1")
         }
     }
     false
