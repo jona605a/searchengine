@@ -99,9 +99,8 @@ pub fn boyer_moore(
             // P matches T!
             // println!("Match! P == {}", String::from_iter(p));
             
-            let shiftstringk = (0..k).map(|_| " ").collect::<String>();
-            let shiftstringp = (0..(k+1-p.len())).map(|_| " ").collect::<String>();
-        
+            // let shiftstringk = (0..k).map(|_| " ").collect::<String>();
+            // let shiftstringp = (0..(k+1-p.len())).map(|_| " ").collect::<String>();
             //println("{}{}",shiftstringk,&k);
             //println("{}", String::from_iter(t));
             //println("{}{}",shiftstringp, String::from_iter(p));
@@ -141,9 +140,8 @@ pub fn boyer_moore(
 
             // dbg!(i, k, bc_shift, gs_shift);
 
-            let shiftstringk = (0..k).map(|_| " ").collect::<String>();
-            let shiftstringp = (0..(k+1-p.len())).map(|_| " ").collect::<String>();
-        
+            // let shiftstringk = (0..k).map(|_| " ").collect::<String>();
+            // let shiftstringp = (0..(k+1-p.len())).map(|_| " ").collect::<String>();
             //println("{}{}",shiftstringk,&k);
             //println("{}", String::from_iter(t));
             //println("{}{}",shiftstringp, String::from_iter(p));
@@ -426,6 +424,7 @@ mod tests {
         );
     }
 
+    #[test]
     fn correct_boyer_moore_GOOD_SUF_l2() {
         let t: Vec<char> = "tapFtapGQapFtaptapFtapGtapFtap"
             .to_string()
