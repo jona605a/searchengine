@@ -333,6 +333,7 @@ pub fn kmp_vs_boyer_moore(c: &mut Criterion) {
             }
         })
     });
+
     c.bench_function(&format!("Bench ApostolicoGiancarlo {}", file_size), |b| {
         b.iter(|| {
             for sentence in &full_text_queries {

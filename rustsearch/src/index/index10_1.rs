@@ -98,17 +98,16 @@ pub fn boyer_moore(
         if i == 0 && p[i] == t[h] {
             // P matches T!
             // println!("Match! P == {}", String::from_iter(p));
-            
+
             // let shiftstringk = (0..k).map(|_| " ").collect::<String>();
             // let shiftstringp = (0..(k+1-p.len())).map(|_| " ").collect::<String>();
             //println("{}{}",shiftstringk,&k);
             //println("{}", String::from_iter(t));
             //println("{}{}",shiftstringp, String::from_iter(p));
             //println("MATCH \n");
-            
+
             match_indices.push(k);
             k += n - l_prime[1];
-
         } else {
             // Bad character rule
             let bc_shift = match R.get(&t[h]) {
@@ -150,19 +149,17 @@ pub fn boyer_moore(
             //println("GOOD SUF {} \n",gs_shift);
 
             k += max(bc_shift, gs_shift);
-        
         }
     }
 
     match_indices
 }
 
-
 pub fn boyer_moore_truefalse(
     p: &Vec<char>,
     t: &Vec<char>,
     (L_prime, l_prime, R): (&Vec<usize>, &Vec<usize>, &HashMap<&char, Vec<usize>>),
-) -> Option<usize> {
+) -> bool {
     // Search stage
     let n = p.len();
     let m = t.len();
@@ -178,7 +175,8 @@ pub fn boyer_moore_truefalse(
         if i == 0 && p[i] == t[h] {
             // P matches T!
             // println!("Match! P == {}", String::from_iter(p));
-            return Some(k);
+            // return Some(k);
+            return true;
         } else {
             // Bad character rule
             let bc_shift = match R.get(&t[h]) {
@@ -206,11 +204,9 @@ pub fn boyer_moore_truefalse(
             };
             // dbg!(i, k, bc_shift, gs_shift);
             k += max(bc_shift, gs_shift);
-            
         }
     }
-
-    None
+    false
 }
 
 impl Index<HashMap<String, HashSet<usize>>> {
@@ -244,9 +240,8 @@ impl Index<HashMap<String, HashSet<usize>>> {
                     )
                     .chars()
                     .collect();
-            match boyer_moore_truefalse(&p, &t, (&L_prime, &l_prime, &R)) {
-                None => (),                     // No occurence
-                Some(_) => result.push(art_no), // There was at least one occurence
+            if boyer_moore_truefalse(&p, &t, (&L_prime, &l_prime, &R)) {
+                result.push(art_no) // There was at least one occurence
             }
         }
         // Result to article names
@@ -369,16 +364,10 @@ mod tests {
 
     #[test]
     fn correct_boyer_moore_ab_result() {
-        let t: Vec<char> = "aabbbbacab"
-            .to_string()
-            .chars()
-            .collect();
+        let t: Vec<char> = "aabbbbacab".to_string().chars().collect();
         let p: Vec<char> = "ab".chars().collect();
-        let (L_prime, l_prime, R,_) = boyer_moore_preprocess(&p);
-        assert_eq!(
-            boyer_moore(&p, &t, (&L_prime, &l_prime, &R)),
-            vec![2,9]
-        );
+        let (L_prime, l_prime, R, _) = boyer_moore_preprocess(&p);
+        assert_eq!(boyer_moore(&p, &t, (&L_prime, &l_prime, &R)), vec![2, 9]);
     }
 
     #[test]
@@ -390,10 +379,7 @@ mod tests {
             .collect();
         let p: Vec<char> = "abcab".chars().collect();
         let (L_prime, l_prime, R, _) = boyer_moore_preprocess(&p);
-        assert_eq!(
-            boyer_moore(&p, &t, (&L_prime, &l_prime, &R)),
-            vec![23]
-        );
+        assert_eq!(boyer_moore(&p, &t, (&L_prime, &l_prime, &R)), vec![23]);
     }
 
     #[test]
@@ -403,11 +389,8 @@ mod tests {
             .chars()
             .collect();
         let p: Vec<char> = "AT THAT".chars().collect();
-        let (L_prime, l_prime, R,_) = boyer_moore_preprocess(&p);
-        assert_eq!(
-            boyer_moore(&p, &t, (&L_prime, &l_prime, &R)),
-            vec![28]
-        );
+        let (L_prime, l_prime, R, _) = boyer_moore_preprocess(&p);
+        assert_eq!(boyer_moore(&p, &t, (&L_prime, &l_prime, &R)), vec![28]);
     }
 
     #[test]
@@ -417,11 +400,8 @@ mod tests {
             .chars()
             .collect();
         let p: Vec<char> = "ASATQATTQAT".chars().collect();
-        let (L_prime, l_prime, R,_) = boyer_moore_preprocess(&p);
-        assert_eq!(
-            boyer_moore(&p, &t, (&L_prime, &l_prime, &R)),
-            vec![]
-        );
+        let (L_prime, l_prime, R, _) = boyer_moore_preprocess(&p);
+        assert_eq!(boyer_moore(&p, &t, (&L_prime, &l_prime, &R)), vec![]);
     }
 
     #[test]
@@ -431,11 +411,7 @@ mod tests {
             .chars()
             .collect();
         let p: Vec<char> = "tapFtapGtapFtap".chars().collect();
-        let (L_prime, l_prime, R,_) = boyer_moore_preprocess(&p);
-        assert_eq!(
-            boyer_moore(&p, &t, (&L_prime, &l_prime, &R)),
-            vec![29]
-        );
+        let (L_prime, l_prime, R, _) = boyer_moore_preprocess(&p);
+        assert_eq!(boyer_moore(&p, &t, (&L_prime, &l_prime, &R)), vec![29]);
     }
-
 }

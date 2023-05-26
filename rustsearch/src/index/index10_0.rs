@@ -53,7 +53,7 @@ pub fn kmp_table(query_words: &Vec<&str>) -> Vec<i32> {
     T
 }
 
-pub fn kmp_truefalse(file_contents: String, query: &String, T: &Vec<i32>) -> Option<usize> {
+pub fn kmp_truefalse(file_contents: String, query: &String, T: &Vec<i32>) -> bool {
     // let mut P: Vec<usize> = Vec::new();
     let mut j = 0;
     let mut k = 0;
@@ -72,7 +72,8 @@ pub fn kmp_truefalse(file_contents: String, query: &String, T: &Vec<i32>) -> Opt
             if k == p.len() {
                 // Occurence found
                 // println!("KMP ran {counter} iterations");
-                return Some(j - k);
+                // return Some(j - k);
+                return true;
             }
         } else {
             match T[k] {
@@ -85,7 +86,7 @@ pub fn kmp_truefalse(file_contents: String, query: &String, T: &Vec<i32>) -> Opt
         }
     }
     // println!("KMP ran {counter} iterations");
-    return None;
+    false
 }
 
 pub fn kmp_allmatches(file_contents: String, query_words: &Vec<&str>, T: &Vec<i32>) -> Vec<usize> {
@@ -189,9 +190,8 @@ impl Index<HashMap<String, HashSet<usize>>> {
                     )
                     .as_str(),
                 );
-            match kmp_truefalse(file_contents, &query, &T) {
-                None => (),                     // No occurence
-                Some(_) => result.push(art_no), // There was at least one occurence
+            if kmp_truefalse(file_contents, &query, &T) {
+                result.push(art_no) // There was at least one occurence
             }
         }
         // Result to article names
@@ -241,13 +241,11 @@ impl Search for Index<HashMap<String, HashSet<usize>>> {
             SearchType::ExactSearch(x) if x == "KMP" => self.kmp_search(&query.search_string),
             SearchType::ExactSearch(x) if x == "BoyerMoore" => {
                 self.boyer_moore_search(&query.search_string)
-            },
+            }
             SearchType::ExactSearch(x) if x == "ApostolicoGiancarlo" => {
                 self.apostolico_giancarlo_search(&query.search_string)
-            },
-            SearchType::ExactSearch(x) if x == "dumide" => {
-                self.dumidesearch(&query.search_string)
             }
+            SearchType::ExactSearch(x) if x == "dumide" => self.dumidesearch(&query.search_string),
             _ => unimplemented!(),
         }
     }
@@ -315,7 +313,10 @@ mod tests {
         let query_words: Vec<&str> = vec!["A", "B"];
         let T: Vec<i32> = kmp_table(&query_words);
 
-        assert_eq!(kmp_allmatches(file_contents, &query_words, &T), vec![0,3,6]);
+        assert_eq!(
+            kmp_allmatches(file_contents, &query_words, &T),
+            vec![0, 3, 6]
+        );
     }
 
     #[test]
