@@ -9,7 +9,7 @@ mod tests {
     };
     #[test]
     #[ignore]
-    fn articlelist_length_count() {
+    fn Articlelist_length_count() {
         let files = fs::read_dir("data/");
         
         let mut stats: HashMap<String, Vec<usize>> = HashMap::new();
