@@ -9,6 +9,7 @@ pub mod index9_0;
 pub mod index9_1;
 pub mod index10_0;
 pub mod index10_1;
+pub mod index10_2;
 pub mod index11_1;
 pub mod index11_0;
 

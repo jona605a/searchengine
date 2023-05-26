@@ -242,6 +242,9 @@ impl Search for Index<HashMap<String, HashSet<usize>>> {
             SearchType::ExactSearch(x) if x == "BoyerMoore" => {
                 self.boyer_moore_search(&query.search_string)
             },
+            SearchType::ExactSearch(x) if x == "ApostolicoGiancarlo" => {
+                self.apostolico_giancarlo_search(&query.search_string)
+            },
             SearchType::ExactSearch(x) if x == "dumide" => {
                 self.dumidesearch(&query.search_string)
             }

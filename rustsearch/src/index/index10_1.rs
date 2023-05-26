@@ -28,7 +28,7 @@ pub fn z_alg(s: &Vec<&char>) -> Vec<usize> {
     z
 }
 
-pub fn compute_L_primes(N: Vec<usize>) -> (Vec<usize>, Vec<usize>) {
+pub fn compute_L_primes(N: &Vec<usize>) -> (Vec<usize>, Vec<usize>) {
     // Compute L'(i), l'(i)
     let n = N.len();
     let mut L_prime = vec![0; n];
@@ -58,18 +58,23 @@ pub fn compute_R(p: &Vec<char>) -> HashMap<&char, Vec<usize>> {
 
 pub fn boyer_moore_preprocess(
     p: &Vec<char>,
-) -> (Vec<usize>, Vec<usize>, HashMap<&char, Vec<usize>>) {
+) -> (
+    Vec<usize>,
+    Vec<usize>,
+    HashMap<&char, Vec<usize>>,
+    Vec<usize>,
+) {
     // Compute N[j](P) values
     let p_rev: Vec<&char> = p.iter().rev().collect();
     let N: Vec<usize> = z_alg(&p_rev).iter().rev().map(|x| *x).collect();
 
     // Compute L' values
-    let (L_prime, l_prime) = compute_L_primes(N);
+    let (L_prime, l_prime) = compute_L_primes(&N);
 
     // Compute R values
     let R: HashMap<&char, Vec<usize>> = compute_R(p);
 
-    (L_prime, l_prime, R)
+    (L_prime, l_prime, R, N)
 }
 
 pub fn boyer_moore(
@@ -106,7 +111,7 @@ pub fn boyer_moore(
                             break;
                         }
                     }
-                    ((i as i32) - (temp + 1)) as usize
+                    ((i as i32) - (temp)) as usize
                 }
                 None => i + 1,
             };
@@ -201,7 +206,7 @@ impl Index<HashMap<String, HashSet<usize>>> {
             .collect();
 
         let mut result: Vec<usize> = Vec::new();
-        let (L_prime, l_prime, R) = boyer_moore_preprocess(&p);
+        let (L_prime, l_prime, R, _) = boyer_moore_preprocess(&p);
 
         for art_no in art_intersect {
             // Read the file
@@ -262,7 +267,7 @@ mod tests {
         let N: Vec<usize> = z_alg(&p_rev).iter().rev().map(|x| *x).collect();
 
         assert_eq!(
-            compute_L_primes(N),
+            compute_L_primes(&N),
             (vec![0, 0, 0, 0, 6, 0, 0, 3, 0], vec![0; 9])
         );
 
@@ -271,7 +276,7 @@ mod tests {
         let N: Vec<usize> = z_alg(&p_rev).iter().rev().map(|x| *x).collect();
 
         assert_eq!(
-            compute_L_primes(N),
+            compute_L_primes(&N),
             (
                 vec![0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 11, 0, 0],
                 vec![0, 7, 7, 7, 7, 7, 7, 7, 7, 3, 3, 3, 3, 0, 0]
@@ -313,10 +318,8 @@ mod tests {
                 .to_ascii_lowercase().chars().collect();
         let p: Vec<char> = "let it be".chars().collect();
 
-        let p_rev: Vec<&char> = p.iter().rev().collect();
-        let N: Vec<usize> = z_alg(&p_rev).iter().rev().map(|x| *x).collect();
-        dbg!(compute_L_primes(N));
-        let (L_prime, l_prime, R) = boyer_moore_preprocess(&p);
+        let (L_prime, l_prime, R, _) = boyer_moore_preprocess(&p);
+        dbg!((&L_prime, &l_prime));
         assert_eq!(
             boyer_moore(&p, &t, (&L_prime, &l_prime, &R)),
             vec![
@@ -349,7 +352,7 @@ mod tests {
             .chars()
             .collect();
         let p: Vec<char> = "abcab".chars().collect();
-        let (L_prime, l_prime, R) = boyer_moore_preprocess(&p);
+        let (L_prime, l_prime, R, _) = boyer_moore_preprocess(&p);
         assert_eq!(
             boyer_moore(&p, &t, (&L_prime, &l_prime, &R)),
             vec![49, 52, 73, 85, 95, 107]
