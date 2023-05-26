@@ -26,7 +26,7 @@ mod tests {
                 Some((_, suffix)) => suffix.split_once('.').unwrap().0,
                 None => continue,
             };
-            dbg!("Running on file {filesize}...");
+            dbg!("Running on file ", filesize);
             let config = Config {
                 file_path: file_path.to_owned(),
                 indexno: "9_0".to_string(),
@@ -34,14 +34,15 @@ mod tests {
             let index = Index::index9_0(&config).unwrap();
             let trie = index.get_trie_lin();
 
-            // 0, 1,    2,  3,          4,          5
-            // N, avg, max, avglayer0, avglayer1, avglayer2
-            let mut file_stat = vec![0.0; 6];
+            // 0, 1,    2,  3,          4,          5,          6
+            // N, avg, max, avglayer0, avglayer1, avglayer2, onecount
+            let mut file_stat = vec![0.0; 7];
             let mut depth_map: HashMap<usize, Vec<&TrieNodeLin>> = HashMap::new();
             depth_map.insert(0, vec![&trie.root]);
             let mut depth = 0;
 
             let mut leaves = 0.0;
+            let mut one_count = 0.0;
             let mut max_children = 0;
 
             while let Some(node_vec) = depth_map.get(&depth) {
@@ -55,6 +56,9 @@ mod tests {
                     if node.children_vec.len() == 0 {
                         leaves += 1.0
                     }
+                    if node.children_vec.len() == 1 && node.article_vec.is_none() {
+                        one_count += 1.0
+                    }
                     if node.children_vec.len() > max_children {
                         max_children = node.children_vec.len();
                     }
@@ -65,12 +69,14 @@ mod tests {
                     break;
                 }
                 if depth < 3 {
-                    file_stat[3 + depth] = depth_map[&(depth + 1)].len() as f64 / depth_map[&depth].len() as f64;
+                    file_stat[3 + depth] =
+                        depth_map[&(depth + 1)].len() as f64 / depth_map[&depth].len() as f64;
                 };
                 depth += 1;
             }
             file_stat[1] = (file_stat[0] - 1.0) / (file_stat[0] - leaves); // Avg children = #children / #parents
             file_stat[2] = max_children as f64;
+            file_stat[6] = one_count / file_stat[0];
             stats.insert(filesize.to_string(), file_stat);
         }
         let mut wtr = Writer::from_path("trie_counting.csv").unwrap();

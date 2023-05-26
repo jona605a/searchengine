@@ -317,7 +317,6 @@ pub fn kmp_vs_boyer_moore(c: &mut Criterion) {
     //                 search_string: sentence.to_owned(),
     //                 search_type: SearchType::ExactSearch("KMP".to_string()),
     //             };
-
     //             index.search(&query);
     //         }
     //     })
@@ -330,7 +329,17 @@ pub fn kmp_vs_boyer_moore(c: &mut Criterion) {
                     search_string: sentence.to_owned(),
                     search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
                 };
-
+                index.search(&query);
+            }
+        })
+    });
+    c.bench_function(&format!("Bench ApostolicoGiancarlo {}", file_size), |b| {
+        b.iter(|| {
+            for sentence in &full_text_queries {
+                let query = Query {
+                    search_string: sentence.to_owned(),
+                    search_type: SearchType::ExactSearch("ApostolicoGiancarlo".to_string()),
+                };
                 index.search(&query);
             }
         })
@@ -353,8 +362,12 @@ pub fn kmp_vs_boyer_moore(c: &mut Criterion) {
 //criterion_group!(benches,indexing_7,indexing_8_0,indexing_9_1,indexing_9_0,searching_index_7_0,searching_index_8_0,searching_index_8_1,searching_index_8_2,searching_index_8_3,searching_index_8_4,find_word_9_0,find_word_9_1,prefix_search_index_9_0,prefix_search_index_9_1);
 criterion_group!(
     name = benches;
-    config = Criterion::default().sample_size(10);
-    targets = full_text_search_10_1
+    config = Criterion::default().sample_size(50);
+    targets = kmp_vs_boyer_moore
+    // targets = indexing_10_0,
+    // indexing_10_1,
+    // indexing_11_0,
+    // indexing_11_1
 );
 
 criterion_main!(benches);
