@@ -5,7 +5,8 @@ use std::{
     fs,
 };
 
-use super::Index;
+use super::{Index, index10_2::calculate_shift_at_mismatch};
+
 
 pub fn z_alg(s: &Vec<&char>) -> Vec<usize> {
     let n = s.len();
@@ -47,23 +48,19 @@ pub fn compute_L_primes(N: &Vec<usize>) -> (Vec<usize>, Vec<usize>) {
     (L_prime, l_prime)
 }
 
-pub fn compute_R(p: &Vec<char>) -> HashMap<&char, Vec<usize>> {
+pub fn compute_R(p: &Vec<char>) -> HashMap<&char, usize> {
     let n = p.len();
-    let mut R: HashMap<&char, Vec<usize>> = HashMap::new();
+    let mut R: HashMap<&char, usize> = HashMap::new();
     for i in 0..n {
-        R.entry(&p[n - 1 - i]).or_default().push(n - 1 - i)
+        R.insert(&p[i], i);
+        // R.entry(&p[n - 1 - i]).or_default().push(n - 1 - i)
     }
     R
 }
 
 pub fn boyer_moore_preprocess(
     p: &Vec<char>,
-) -> (
-    Vec<usize>,
-    Vec<usize>,
-    HashMap<&char, Vec<usize>>,
-    Vec<usize>,
-) {
+) -> (Vec<usize>, Vec<usize>, HashMap<&char, usize>, Vec<usize>) {
     // Compute N[j](P) values
     let p_rev: Vec<&char> = p.iter().rev().collect();
     let N: Vec<usize> = z_alg(&p_rev).iter().rev().map(|x| *x).collect();
@@ -72,7 +69,7 @@ pub fn boyer_moore_preprocess(
     let (L_prime, l_prime) = compute_L_primes(&N);
 
     // Compute R values
-    let R: HashMap<&char, Vec<usize>> = compute_R(p);
+    let R: HashMap<&char, usize> = compute_R(p);
 
     (L_prime, l_prime, R, N)
 }
@@ -80,7 +77,7 @@ pub fn boyer_moore_preprocess(
 pub fn boyer_moore(
     p: &Vec<char>,
     t: &Vec<char>,
-    (L_prime, l_prime, R): (&Vec<usize>, &Vec<usize>, &HashMap<&char, Vec<usize>>),
+    (L_prime, l_prime, R): (&Vec<usize>, &Vec<usize>, &HashMap<&char, usize>),
 ) -> Vec<usize> {
     // Search stage
     let n = p.len();
@@ -111,17 +108,9 @@ pub fn boyer_moore(
         } else {
             // Bad character rule
             let bc_shift = match R.get(&t[h]) {
-                Some(c_pos) => {
-                    let mut temp: i32 = -1;
-                    for ch_i in c_pos {
-                        if *ch_i < i {
-                            temp = *ch_i as i32;
-                            break;
-                        }
-                    }
-                    ((i as i32) - (temp)) as usize
-                }
-                None => i + 1,
+                Some(&c_pos) if c_pos < i => i - c_pos,
+                Some(_) => 1,
+                _ => i + 1,
             };
 
             // Good suffix rule
@@ -158,7 +147,7 @@ pub fn boyer_moore(
 pub fn boyer_moore_truefalse(
     p: &Vec<char>,
     t: &Vec<char>,
-    (L_prime, l_prime, R): (&Vec<usize>, &Vec<usize>, &HashMap<&char, Vec<usize>>),
+    (L_prime, l_prime, R): (&Vec<usize>, &Vec<usize>, &HashMap<&char, usize>),
 ) -> bool {
     // Search stage
     let n = p.len();
@@ -174,36 +163,9 @@ pub fn boyer_moore_truefalse(
         }
         if i == 0 && p[i] == t[h] {
             // P matches T!
-            // println!("Match! P == {}", String::from_iter(p));
-            // return Some(k);
             return true;
         } else {
-            // Bad character rule
-            let bc_shift = match R.get(&t[h]) {
-                Some(c_pos) => {
-                    let mut temp: i32 = -1;
-                    for ch_i in c_pos {
-                        if *ch_i < i {
-                            temp = *ch_i as i32;
-                            break;
-                        }
-                    }
-                    ((i as i32) - (temp)) as usize
-                }
-                None => i + 1,
-            };
-            // Good suffix rule
-            let gs_shift = if i >= n - 1 {
-                1
-            } else {
-                if L_prime[i + 1] != 0 {
-                    n - L_prime[i + 1]
-                } else {
-                    n - l_prime[i + 1]
-                }
-            };
-            // dbg!(i, k, bc_shift, gs_shift);
-            k += max(bc_shift, gs_shift);
+            k += calculate_shift_at_mismatch(&t[h], i, n, (&L_prime, &l_prime, &R));
         }
     }
     false

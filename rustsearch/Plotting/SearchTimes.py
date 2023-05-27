@@ -90,7 +90,23 @@ for folderName in os.listdir("../target/criterion"):
 
         data[filesize][f"Full{(index,version)}"]["mean"] = estimates["mean"]["point_estimate"]
         data[filesize][f"Full{(index,version)}"]["lower_bound"] = estimates["mean"]["confidence_interval"]["lower_bound"]
-        data[filesize][f"Full{(index,version)}"]["upper_bound"] = estimates["mean"]["confidence_interval"]["upper_bound"]    
+        data[filesize][f"Full{(index,version)}"]["upper_bound"] = estimates["mean"]["confidence_interval"]["upper_bound"]
+
+    if folderName.split()[0] == "Long":
+        index,version = map(int,folderName.split()[4].split("_"))
+        filesize = int(folderName.split()[5][:-2])
+        
+        if filesize not in data: 
+            data[filesize] = {}
+        if f"Long{(index,version)}" not in data[filesize]:
+            data[filesize][f"Long{(index,version)}"] = {"mean": None, "lower_bound": None,"upper_bound": None}
+        
+        f = open(f"../target/criterion/{folderName}/new/estimates.json")
+        estimates = json.load(f)
+
+        data[filesize][f"Long{(index,version)}"]["mean"] = estimates["mean"]["point_estimate"]
+        data[filesize][f"Long{(index,version)}"]["lower_bound"] = estimates["mean"]["confidence_interval"]["lower_bound"]
+        data[filesize][f"Long{(index,version)}"]["upper_bound"] = estimates["mean"]["confidence_interval"]["upper_bound"]    
         
 
 def plot_indexing(data,indexes):
@@ -272,6 +288,29 @@ def plot_fullsearch(data,indexes):
     plt.savefig(f"../../LaTeX/Pictures/Results/Fulltext{indexes}")    
     plt.show()
 
+def plot_fullsearch_long(data,indexes):
+    for index in indexes:
+        mean = np.array([])
+        upper_bound = np.array([])
+        lower_bound = np.array([])
+
+        x = [1, 2, 5, 10, 20, 50, 100, 200]
+
+        for filesize in x:
+            mean = np.append(mean,data[filesize][f"Long{index}"]["mean"])
+            upper_bound = np.append(upper_bound,data[filesize][f"Long{index}"]["upper_bound"])
+            lower_bound = np.append(lower_bound,data[filesize][f"Long{index}"]["lower_bound"])
+    
+        plt.fill_between(x,lower_bound,upper_bound,label = f"index{index}")
+           
+        plt.xticks(x,["1MB", "2MB", "5MB", "10MB", "20MB", "50MB", "100MB", "200MB"])
+        plt.title("Full text search time over filesize long query")
+        plt.xlabel("Filesize")
+        plt.ylabel("Searching Time")
+        plt.legend(loc='best')
+    plt.savefig(f"../../LaTeX/Pictures/Results/Fulltexlong{indexes}")    
+    plt.show()
+
 booleanIndexes = [(7,0),(8,0),(8,1),(8,2),(8,3),(8,4)]
 
 #plot_indexing(data,[(7,0),(8,0),(9,0),(9,1)])
@@ -282,8 +321,8 @@ booleanIndexes = [(7,0),(8,0),(8,1),(8,2),(8,3),(8,4)]
 #plot_depth_filesize(data,booleanIndexes)
 #plot_prefixsearch(data,[(9,0),(9,1)])
 #plot_fullsearch(data,[(11,0),(11,1)])         
-#plot_fullsearch(data,[(10,0),(10,1)])         
-
-
+plot_fullsearch(data,[(10,0),(10,1),(10,2)])         
+plot_fullsearch_long(data,[(10,0),(10,1),(10,2)])
+plot_fullsearch_long(data,[(11,0),(11,1)])
 
 
