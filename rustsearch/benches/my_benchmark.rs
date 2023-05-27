@@ -239,6 +239,7 @@ pub fn full_text_searching_template(c: &mut Criterion, i_string: &str) {
     let full_text_searchtype = match i_string {
         "10_0" => SearchType::ExactSearch("KMP".to_string()),
         "10_1" => SearchType::ExactSearch("BoyerMoore".to_string()),
+        "10_2" => SearchType::ExactSearch("ApostolicoGiancarlo".to_string()),
         "11_0" => SearchType::FuzzySearch,
         "11_1" => SearchType::ExactSearch("TripleBoyerMoore".to_string()),
         _ => panic!(),
@@ -266,7 +267,7 @@ pub fn full_text_searching_template(c: &mut Criterion, i_string: &str) {
             indexno: i_string.to_string(),
         };
         let index = config.to_index().unwrap();
-        c.bench_function(&format!("Full text {} {}", i_string, filesize), |b| {
+        c.bench_function(&format!("Long Query Full text {} {}", i_string, filesize), |b| {
             b.iter(|| {
                 for sentence in &full_text_queries {
                     let query = Query {
@@ -287,6 +288,10 @@ pub fn full_text_search_10_0(c: &mut Criterion) {
 
 pub fn full_text_search_10_1(c: &mut Criterion) {
     full_text_searching_template(c, "10_1")
+}
+
+pub fn full_text_search_10_2(c: &mut Criterion) {
+    full_text_searching_template(c, "10_2")
 }
 
 pub fn full_text_search_11_0(c: &mut Criterion) {
@@ -363,12 +368,8 @@ pub fn kmp_vs_boyer_moore(c: &mut Criterion) {
 //criterion_group!(benches,indexing_7,indexing_8_0,indexing_9_1,indexing_9_0,searching_index_7_0,searching_index_8_0,searching_index_8_1,searching_index_8_2,searching_index_8_3,searching_index_8_4,find_word_9_0,find_word_9_1,prefix_search_index_9_0,prefix_search_index_9_1);
 criterion_group!(
     name = benches;
-    config = Criterion::default().sample_size(50);
-    targets = kmp_vs_boyer_moore
-    // targets = indexing_10_0,
-    // indexing_10_1,
-    // indexing_11_0,
-    // indexing_11_1
+    config = Criterion::default().sample_size(10);
+    targets = full_text_search_10_0,full_text_search_10_1,full_text_search_10_2,full_text_search_11_1,full_text_search_11_0
 );
 
 criterion_main!(benches);
