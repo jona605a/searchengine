@@ -1,0 +1,184 @@
+\section{Introduction to Exact string matching}
+
+\subsection{Problem introduction}
+
+A very desirable feature in many search engines is to support queries of the form "Which documents contain the entire sentence 'X Y Z'?", instead of only searching for a single word or prefix of a word at a time. This create a new challenge for the search engine, as the best data structure is now unclear. 
+
+Since a user might search for a sentence of arbitrary length, a first approach might be to simply store all possible sentences and then look up in which documents they appear. This, however, is a very bad idea and would require an enormous amount of space, as there are too many possibilities for every possible sentence. 
+
+Other approaches might for each word store its context, such that the local environment (i.e. part of the sentence) could be looked up in the index. An example of this could be to store each word together with its next two words in a triple. If the size of the query sentence was upper bounded by a constant $O(1)$, this would be a good solution. However, for a query of unknown length, the index could never store enough local information to support every possible query. 
+
+\kommentar{Nævn at suffix træer er en mulighed men at vi har valgt at prioritere andet}
+
+This leaves the search engine with one way of looking up words: go back to the original text documents and use a string matching algorithm to find the sentence. How to decide which documents to look through is an important decision as it determines the total size of the search text. This will be discussed in section \ref{sec:index10}. 
+
+\subsection{Naive search}
+
+There exist many different algorithm for string matching, each with different strengths and weaknesses depending on the use case. Notable mentions are the Knuth-Morris-Pratt (KMP), Boyer-Moore, Rabin Karp, Aho-Corasick, and Apostolico–Giancarlo algorithms (the latter two being extensions of the first two). 
+
+What are the differences betwween these algorithms and which ones are suitable for the problem of searching for a few occurences of a sentence of a couple of words in a text in the English language? 
+
+To be able to compare various string matching algorithms, it is useful to have a baseline. A naive search method for string matching is described in algorithm \ref{alg:naivematch}. For each character in the text $T$, this algorithm uses $O(|P|)=O(n)$ time which results in $O(m\cdot n)$ total time. 
+
+\begin{algorithm}[t]
+\caption{Naive string matching algorithm}\label{alg:naivematch}
+\begin{algorithmic}
+\State Align $P$ to the left end of $T$.
+\State Match each character in $P$ with the corresponding character in $T$ until a mismatch occurs.
+\State If no mismatch occurs, report an match at the given position.
+\State Increment the alignment of $P$ by one and repeat until $T$ is exhausted. 
+\end{algorithmic}
+\end{algorithm}
+
+The way to achieve a speed-up to run in linear time, $(O(m+n)$, all algorithms use some sort of knowledge of either the pattern or the text to either shift $P$ by more than one character at a time or completely skip characters in $T$ if a match is not possible for some section. Before explaining the precise algorithms, an illustration of this can be helpful. 
+
+Consider the text T=\verb|XABXYABXYABXZ| of length 13 and the pattern P=\verb|ABXYABXZ| of length 8. Following an example with notation from Gusfield\cite{Gusfield1997AlgorithmsOS}, the naive algorithm can be compared to two smarter possible versions, see figure \ref{fig:stringmatchingexample}. 
+
+\begin{figure}
+\begin{verbatim}
+      0        1              0        1              0        1   
+      1234567890123           1234567890123           1234567890123
+   T: XABXYABXYABXZ        T: XABXYABXYABXZ        T: XABXYABXYABXZ
+   P: ABXYABXZ             P: ABXYABXZ             P: ABXYABXZ     
+      *                       *                       *            
+       ABXYABXZ                ABXYABXZ                ABXYABXZ    
+       ^^^^^^^*                ^^^^^^^*                ^^^^^^^*    
+        ABXYABXZ                   ABXYABXZ                ABXYABXZ
+        *                          ^^^^^^^^                   ^^^^^
+         ABXYABXZ                                                  
+         *                                                         
+          ABXYABXZ                                                 
+          *                                                        
+           ABXYABXZ                                                
+           ^^^^^^^^                                                
+\end{verbatim}
+    \caption{A visual example of matching the a pattern P with a text T, using the naive algorithm and two smarter versions. A star beneath a character indicates a mismatch and a caret a match. }
+    \label{fig:stringmatchingexample}
+\end{figure}
+
+The naive algorithm starts by finding a mismatch. It then shifts $P$ by one position, immediately and matches the next seven characters before finding the next mismatch at position 9 in $T$. It then shifts $P$ by one position and finds a mismatch three times before finally matching the whole pattern. 
+
+A smarter algorithm recognises that when position 8 of $P$ mismatches with position 9 of $T$, then the next three shifts must be mismatches as the first letter $A$ will not match before encountering the next $A$ in the text. It knows this because the next $A$ in $P$ does not occur before position 5, so the smarter algorithm can shift the pattern three positions to align the two $A$s. 
+
+
+\begin{comment} % How to algorithm
+\begin{algorithm}
+\caption{An algorithm with caption}\label{alg:cap}
+\begin{algorithmic}
+\Require $n \geq 0$
+\Ensure $y = x^n$
+\State $y \gets 1$
+\State $X \gets x$
+\State $N \gets n$
+\While{$N \neq 0$}
+\If{$N$ is even}
+    \State $X \gets X \times X$
+    \State $N \gets \frac{N}{2}$  \Comment{This is a comment}
+\ElsIf{$N$ is odd}
+    \State $y \gets y \times X$
+    \State $N \gets N - 1$
+\EndIf
+\EndWhile
+\end{algorithmic}
+\end{algorithm}
+\end{comment}
+
+\subsection{What is preprocessing}
+
+
+
+\subsection{The Z algorithm}
+
+
+
+
+
+
+\section{Knuth-Morris-Pratt Algorithm}
+The Knuth-Morris-Pratt (KMP) algorithm is a string-matching algorithm that efficiently searches for occurrences of a pattern within a larger text. It utilises a preprocessing step to build a partial match table, also known as the failure function. The failure function allows the algorithm to skip unnecessary comparisons during the matching process, resulting in improved performance.
+
+The failure function built in the preprocessing step stores the lengths of the longest proper prefixes of $P$ that are also suffixes of the pattern up to each position $P[1..i]$. It is used to determine the number of characters to skip in the pattern when a mismatch occurs during matching and can be calculated in linear time using either a direct approach or the Z algorithm. 
+
+Before searching the pattern is placed such that the first character of the pattern aligns with the first character of the search text. The first characters that are compared are the first character of the pattern and of the search text. 
+
+If the characters match, the next character of the pattern and of the search text is compared, as KMP uses a left-to-right scan. 
+If a mismatch occurs, the algorithm uses the information stored in the failure function to determine the next position to compare in the pattern. If the Failure function at the position of the mismatch in the pattern is greater than zero, it means that there is a prefix of the pattern of a length given in the Failure function, that is also a suffix of the substring matched until that point. In such cases, the pattern shifts such that the mismatched character of the search text aligns with the index of the pattern given by the failure function of the position of the mismatched character of the pattern.
+
+The process continues until either a complete match is found, or if there is no text left to search in. If a match is found, the algorithm can either continue searching for additional occurrences or stop and return the index where the match starts.
+
+By utilising the failure function to determine the number of characters to skip, the KMP algorithm avoids unnecessary comparisons and achieves a linear time complexity in the worst case, making it highly efficient for string-matching tasks.
+
+\section{Boyer-Moore}
+
+\subsection{Intro to Boyer Moore}
+The key components in the Boyer-Moore algorithm are the right-to-left scan, the Bad Character Rule and the Good Suffix rule, which play a crucial role in improving the search process, as they are methods used to determine the amount by which a pattern can be shifted to the right during a search. By utilising the Good suffix rule and the Bad Character Rule, the algorithm reduces the number of unnecessary comparisons and skips larger portions of the search text. This allows the algorithm to avoid reading the entire text and in the best case achieve a sub-linear running time of $O(m/n)$, thus performing better than KMP in the best case. The Boyer-Moore algorithm runs in $O(m)$ time when the pattern does not appear in the text and in general $O(nm)$ when the pattern does appear. The case where one is only interested in finding the first occurrence of a pattern is the same as when the pattern does not appear in the text $O(m)$. Additionally, the Apostolico-Giancarlo extension of the algorithm makes it a $O(m)$ time in all cases. 
+
+\subsection{Right to left scan}
+In contrast to the naive methods, which use a left-to-right scan, the Boyer-Moore algorithm uses a right-to-left scan. Firstly the pattern is placed such that the first character of the pattern aligns with the first character of the search text. The first characters that are compared are however the most right character of the pattern and the aligned letter of the text. If it is a match it continues to compare the characters to the left. If it is a mismatch the patterns moved according to the Bad Character Rule or the Good Suffix Rule. If the whole pattern is matched, it is shifted again according to the Good Suffix Rule, which could be 1 position. The running time is hence $O(n\cdot m)$, as it in the worst case needs to match the whole pattern for each character of the text. An example of this worst case is when both the text and the pattern consist of the same repeated character, where Boyer-Moore becomes identical to the Naive algorithm and exactly $n(m-n+1)$ comparisons. With the Apostolico-Giancarlo extension however, the algorithm matches and/or mismatches each character in the text at most once, resulting in at most $2m$ comparisons and giving $O(m)$ in all cases. 
+
+\subsection{The Bad Character Rule}
+There exists an Extended Bad Character Rule besides the Bad Character Rule. The original Boyer-Moore Algorithm only used the Bad Character Rule, whereas this chapter will focus on the Extended Bad Character Rule.
+
+\subsubsection{The Bad Character Rule}
+When a mismatch occurs, between a character $c_p$ from the pattern and a character $c_t$ from the text, the Bad Character Rule reasons that the pattern can be shifted, so that the rightmost occurrence of $c_t$ in the Pattern matches $c_t$, if the occurrence is placed to the left of the mismatch. If the rightmost occurrence is placed on the right of the mismatch, the Bad Character Rule can only shift the pattern once. If no occurrences of $c_t$ exist in the pattern then the patterns can be shifted to the left until there no longer is an overlap of the pattern and $c_t$.
+
+\kommentar{Figure om shift tilfælde}
+\begin{figure}
+\begin{verbatim}
+      0        1                   0        1      
+      1234567890123456             12345678901
+   T: SomeBadCharacter          T: aabbabacdab
+   P: BadCharacter              P: bacdab          
+                 *                    *^^
+          BadCharacter                bacdab
+          ^^^^^^^^^^^^                
+\end{verbatim}
+    \caption{Showing the bad character rule and the extended bad character rule}
+    \label{fig:badcharacterrule_example}
+\end{figure}
+
+\subsubsection{The Extended Bad Character Rule}
+When a mismatch occurs in the Extended Bad Character Rule tells that the pattern can be shifted to the left until a character in the pattern left for the mismatch, matches the $c_t$. If the mismatch happens at the most left character of the pattern, the Bad Character Rule only allows shifting the pattern one step further.  If no occurrences of $c_t$ exist in the pattern then the patterns can still be shifted to the left until there no longer is an overlap of the pattern and $c_t$
+
+\kommentar{Figure om shift tilfælde}
+
+\subsubsection{R(x) values}
+To calculate the number of characters the algorithm is allowed to skip, using the Bad Character Rule, without skipping the starting position of a potential match, the R(x) values need to be introduced.\\
+
+\textbf{Definition} For each character in the alphabet, let R(x) be the position of the rightmost occurrence of character x in the P. R(x) is defined to be zero if x does not occur in P.
+ 
+The R(x) values can be calculated in O(n) time, where n is the length of the pattern, using a Hashmap. The hashmap has a key for every letter in the pattern and each key has a value representing at which position the rightmost occurrence of the letter is at. By iterating through the pattern from right to left, the position of a character in the pattern can be saved in the hashmap if the key, representing that letter, does not yet have a value. In this way, R(x) is calculated in O(n) time and is only using extra  linear space in the size of the number of quine letters in the pattern.
+
+\kommentar{Figure om R(x) non extended values}
+
+When using the Extended Bad Character Rule, it is not only the rightmost occurrence of character, that is interesting to save the position of,  but all occurrences. This is because the pattern may be shifted to the rightmost occurrence of the $c_t$ left for the mismatch. A Hashmap is still used to keep of R(x) values, but the values of each key are now a list of positions in descending order. The lists are generated by iterating through the pattern from left to right, adding all positions of characters to the representative list in the Hashmap. This still takes O(n) time but now also used O(n) space.
+
+\kommentar{Figure om R(x) extended values}
+
+\subsection{The Good Suffix rule}
+
+L values
+L' values
+l' values
+
+
+\section{Full text Indexes}\label{sec:index10}
+Four Indexes where generated to support full-text searching.
+
+\subsection{Index 10.0 and 10.1}
+The Indexation of indexes 10.0 and 10.1 is exactly like in index 8: A hash map where each unique word has a key, and the value of each key is an Article list, representing which articles the word is present in. The indexing time is therefore still linear. However, the search functions differ, as these indexes support full-text indexing.
+
+When searching for a query, The article list for each word in the query is looked up and the intersection of the article list is calculated. This takes $O(tri_q\cdot a)$ time as looking up $tri_q$ articles list in the hash table takes $O(tri_q\cdot a)$ time and performing $tri_q - 1 $ AND operations to calculate the intersection takes $O(tri_q\cdot a)$ time.
+
+All the articles that contain all of the words of the query are then searched through to find the exact match of the query using KMP in index 10.0 and Boyer-Moore in 10.1. Both algorithms run in linear time. 
+
+\subsection{Index 11.0 and 11.1}
+The Indexation of indexes 11.0 and 11.1 does not hash individual words when indexing, like index 10, but rather triples of continuous words in a string. 
+
+\textbf{Definition} A triplet of a sentence is three continuous words in the sentence. There are thereby n-2 triplets in a sentence.
+
+When searching for a query, The article list for each triplet of the query is looked up and the intersection of the article list is calculated. These indexes thereby used $O(tri_t\cdot a)$ space, where a is the number of articles and $tri_t$ is the number of unique triplets in a text. Technically, t is upper bounded by $O(u^3)$ (where u is upper bounded by $O(n)$) as there could be all possible configurations of triplets. This poor space complexity should especially be considered if the nature of a search text is prone to contain all possible combinations of triplets of unique words (eg if DNA basepairs were considered as words and the full text were a long DNA string).  $O(u^3)$ is here considered to be an overestimation when considering an English text. It is therefore that the variable $tri_t$ is introduced.
+
+The search function in Index 11.0 simply returns the intersection as the result. This result may be incorrect as it is possible that all triplets of a query exist in a text but not in one continuous sequence. This search function is however very fast as it simply needs to look up $tri_q$ articles list, where $tri_q$ is the number of triplets in the query, and find the intersection of these queries. This takes $O(tri_q\cdot a)$ time as looking op $tri_q$ articles list in the hash table takes $O(tri_q\cdot a)$ time and performing $tri_q - 1 $ AND operations to calculate the intersection takes $O(tri_q\cdot a)$ time.
+
+The search function in index 11.1 searches through all the articles that contain all of the triplets of the query, using Boyer-Moore. This gives an exact result and is predicted to be much faster than index 10, as many articles may be excluded, making the total search string much smaller. The factor of the reduction of the search string depends tremendously on the content of the query and the search text.
