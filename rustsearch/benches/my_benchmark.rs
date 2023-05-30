@@ -8,7 +8,7 @@ use std::fs;
 
 use rustsearch::helpers::{read_file_to_string, Config};
 use rustsearch::index::{
-    self,
+    
     gen_query::{gen_a_lot_of_runs_bool, gen_a_lot_of_runs_tries},
 };
 
@@ -113,7 +113,7 @@ pub fn bool_searching_template(c: &mut Criterion, i_string: &str) {
     for dir in files.unwrap() {
         let file_path = dir.unwrap().path().into_os_string().into_string().unwrap();
         let filesize = &file_path[46..file_path.len() - 4];
-
+  
         let ast_vec: Vec<Vec<String>> = gen_a_lot_of_runs_bool(file_path.clone(), 1000);
 
         let config = Config {
@@ -182,8 +182,23 @@ pub fn prefix_search_template(c: &mut Criterion, i_string: &str, prefix_bool: bo
         true => "prefix search 9_0 in file",
     };
 
+    let search_type = match i_string {
+        "8_0" => SearchType::BooleanSearch("Naive".to_string()),
+        _ => SearchType::PrefixSearch
+    };
+
     for dir in files.unwrap() {
+
+        if dir.as_ref().unwrap().path().is_dir() {
+            continue;
+        }
+
         let file_path = dir.unwrap().path().into_os_string().into_string().unwrap();
+
+        if &file_path[0..9] != "data/West" {
+            continue;
+        }
+        
         let filesize = file_path
             .rsplit_once('_')
             .unwrap()
@@ -193,7 +208,7 @@ pub fn prefix_search_template(c: &mut Criterion, i_string: &str, prefix_bool: bo
             .0;
 
         let word_vec = gen_a_lot_of_runs_tries(file_path.clone(), 1000, prefix_bool);
-
+    
         let config = Config {
             file_path: file_path.to_owned(),
             indexno: i_string.to_string(),
@@ -207,7 +222,7 @@ pub fn prefix_search_template(c: &mut Criterion, i_string: &str, prefix_bool: bo
                     for word in &word_vec {
                         let query = Query {
                             search_string: word.to_owned(),
-                            search_type: index::SearchType::PrefixSearch,
+                            search_type: search_type.to_owned(),
                         };
                         index.search(&query);
                     }
@@ -215,6 +230,10 @@ pub fn prefix_search_template(c: &mut Criterion, i_string: &str, prefix_bool: bo
             },
         );
     }
+}
+
+pub fn find_word_8_0(c: &mut Criterion) {
+    prefix_search_template(c, "8_0", false)
 }
 
 pub fn find_word_9_0(c: &mut Criterion) {
@@ -368,8 +387,8 @@ pub fn kmp_vs_boyer_moore(c: &mut Criterion) {
 //criterion_group!(benches,indexing_7,indexing_8_0,indexing_9_1,indexing_9_0,searching_index_7_0,searching_index_8_0,searching_index_8_1,searching_index_8_2,searching_index_8_3,searching_index_8_4,find_word_9_0,find_word_9_1,prefix_search_index_9_0,prefix_search_index_9_1);
 criterion_group!(
     name = benches;
-    config = Criterion::default().sample_size(10);
-    targets = full_text_search_10_0,full_text_search_10_1,full_text_search_10_2,full_text_search_11_1,full_text_search_11_0
+    config = Criterion::default().sample_size(100);
+    targets = indexing_9_1,indexing_9_0
 );
 
 criterion_main!(benches);

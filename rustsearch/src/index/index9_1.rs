@@ -237,7 +237,6 @@ mod tests {
     }
 
     fn search_match(index: &Index<Trie>, query: &str, titles: Vec<&str>) {
-        dbg!(&query.to_string());
         let index_result: HashSet<String> =
             HashSet::from_iter(index.prefix_search(&query.to_string()));
         assert_eq!(

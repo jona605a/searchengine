@@ -180,20 +180,21 @@ def plot_filesize(data, indexes):
 
 def plot_find_word(data, indexes):
     
+    x = [1, 2, 5, 10, 20, 50, 100, 200]
+
     for index in indexes:
             mean = np.array([])
             upper_bound = np.array([])
             lower_bound = np.array([])
             
-            for filesize in sorted(data.keys()):
+            for filesize in x:
                 mean = np.append(mean,data[filesize][f"Find{index}"]["mean"])
                 upper_bound = np.append(upper_bound,data[filesize][f"Find{index}"]["upper_bound"])
                 lower_bound = np.append(lower_bound,data[filesize][f"Find{index}"]["lower_bound"])
 
-            x = [1, 2, 5, 10, 20, 50, 100, 200, 400]
             plt.fill_between(x,lower_bound,upper_bound,label = f"index {index}")
                     
-    plt.xticks([1, 2, 5, 10, 20, 50, 100, 200, 400],["1MB", "2MB", "5MB", "10MB", "20MB", "50MB", "100MB", "200MB","400MB"])
+    plt.xticks([1, 2, 5, 10, 20, 50, 100, 200],["1MB", "2MB", "5MB", "10MB", "20MB", "50MB", "100MB", "200MB"])
     plt.title(f"Searching Time for whole word over filesize")
     plt.xlabel("Filesize")
     plt.ylabel("Searching Time")
@@ -313,6 +314,7 @@ def plot_fullsearch_long(data,indexes):
 
 booleanIndexes = [(7,0),(8,0),(8,1),(8,2),(8,3),(8,4)]
 
+#plot_indexing(data,[(7,0),(8,0)])
 #plot_indexing(data,[(7,0),(8,0),(9,0),(9,1)])
 #plot_indexing(data,[(7,0),(8,0),(9,0),(9,1),(10,0),(11,0)])
 #plot_depth(data,booleanIndexes)
@@ -321,8 +323,8 @@ booleanIndexes = [(7,0),(8,0),(8,1),(8,2),(8,3),(8,4)]
 #plot_depth_filesize(data,booleanIndexes)
 #plot_prefixsearch(data,[(9,0),(9,1)])
 #plot_fullsearch(data,[(11,0),(11,1)])         
-plot_fullsearch(data,[(10,0),(10,1),(10,2)])         
-plot_fullsearch_long(data,[(10,0),(10,1),(10,2)])
-plot_fullsearch_long(data,[(11,0),(11,1)])
+#plot_fullsearch(data,[(10,0),(10,1),(10,2)])         
+#plot_fullsearch_long(data,[(10,0),(10,1),(10,2)])
+#plot_fullsearch_long(data,[(11,0),(11,1)])
 
 

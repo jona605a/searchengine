@@ -15,7 +15,7 @@ impl Index<HashMap<String, Vec<usize>>> {
         let mut article_titles: Vec<String> = Vec::new();
 
         for (title, contents) in articles_iter {
-            dbg!(&title);
+            //dbg!(&title);
             if title != "" {
                 article_titles.push(title.to_string());
                 for word in contents {

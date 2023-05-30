@@ -29,6 +29,7 @@ impl Config {
             "7" => Ok(Box::new(Index::index7(&self)?)),
             "7_0" => Ok(Box::new(Index::index7(&self)?)),
             "8" => Ok(Box::new(Index::index8(&self)?)),
+            "8_0" => Ok(Box::new(Index::index8(&self)?)),
             "9_0" => Ok(Box::new(Index::index9_0(&self)?)),
             "9_1" => Ok(Box::new(Index::index9_1(&self)?)),
             "10" => Ok(Box::new(Index::index10(&self)?)),
