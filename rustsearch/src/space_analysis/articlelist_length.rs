@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
     use csv::Writer;
+    use core::num;
     use std::{collections::HashMap, fs};
 
     use crate::{
@@ -59,5 +60,43 @@ mod tests {
             s.push(k);
             wtr.write_record(s).unwrap();
         }
+    }
+
+    #[test]
+    #[ignore]
+    fn mean_lenght_article_list() {
+        let files = fs::read_dir("data/");
+        
+        for dir in files.unwrap() {
+            if dir.as_ref().unwrap().path().is_dir() {
+                continue;
+            }
+            let file_path = dir.unwrap().path().into_os_string().into_string().unwrap();
+            if &file_path[0..9] != "data/West" {
+                continue;
+            }
+            
+            let filesize = match file_path.rsplit_once('_') {
+                Some((_, suffix)) => suffix.split_once('.').unwrap().0,
+                None => continue,
+            };
+            dbg!(filesize);
+            
+            let config = Config {
+                file_path: file_path.to_owned(),
+                indexno: "8_0".to_string(),
+            };
+            
+            let index = Index::index8(&config).unwrap();
+            
+            let database = index.get_database_lin();
+            let sum_of_length: usize  = database.values().map(|x|x.len()).sum();
+            let number_of_list: usize = database.keys().len();
+            let mean: f64 = sum_of_length as f64 /number_of_list as f64 ;
+            let a:usize  = index.get_article_titles().len();
+            let threshold: f64  = a as f64 /64 as f64 ;
+            dbg!(mean,threshold);
+        }
+        
     }
 }

@@ -115,7 +115,7 @@ pub fn gen_a_lot_of_runs_tries(file_path: String, number: usize, prefix: bool) -
     let mut rng = StdRng::seed_from_u64(8008135);
 
     let config: Config =
-        Config::build(&["".to_string(), file_path.clone(), "7".to_string()]).unwrap();
+        Config::build(&["".to_string(), file_path.clone(), "8".to_string()]).unwrap();
 
     let index8 = Index::index8(&config).unwrap();
 
