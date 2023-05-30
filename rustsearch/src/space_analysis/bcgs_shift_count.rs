@@ -18,9 +18,10 @@ mod tests {
         
         let index = Index::index10(&config).unwrap();
         
-        let full_text_queries = gen_a_lot_of_runs_full_text(file_path.clone(), 1);
+        let full_text_queries = gen_a_lot_of_runs_full_text(file_path.clone(), 10);
 
         for sentence in &full_text_queries {
+            println!("{}", sentence);
             let query = Query {
                 search_string: sentence.to_owned(),
                 search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
