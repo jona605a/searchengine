@@ -1,27 +1,20 @@
 \section{Testing the basic part}
-To test the correctness, time complexity, and space complexity of the Indexes a testing framework was implemented. For indexes 2-5, a testing function was implemented to return a linked list of all the unique words and their corresponding article in their data structure.
+To test the correctness, time complexity, and space complexity of the Indices a testing framework was implemented. For indices 2-5, a testing function was implemented to return a linked list of all the unique words and their corresponding article in their data structure. Index1 was not tested as it is not comparable with the other indices and it merely returns a boolean value and not an article list. Index2 can be considered as the expansion of Index1 such that it is comparable with the other indices.
 
-\subsubsection{Correctness}
-The correctness of the indexes is tested using the approach that index 2 is correct. This is argued for in \ref{section:Index2}.
+\subsection{Correctness}
+The correctness of the indices is tested using the approach that Index2 is correct. This is argued for in section \ref{section:Index2}.
 
 The correctness of index 3-4 were tested on 3 different levels:
 
 \begin{enumerate}
     \item[] \textbf{Level 1:} Number of unique words 
     \item[] \textbf{Level 2:} Same unique words
-    \item[] \textbf{Level 3:} Same article list pr unique word
+    \item[] \textbf{Level 3:} Same article list per unique word
 \end{enumerate}
 
-Based on the assumption of the correctness of index 2, it is given that the data structure of a given index that passes all 3 levels will have all the unique words and their belonging article lists in the data frame and no more. The indexes correctness was verified based on testing using the file \textit{WestburyLab.wikicorp.201004\_100KB.txt}.
+Using the assumption of the correctness of Index2, the other indices can be verified. If the data structure of a given index passes all three levels, it will contain the same unique words with corresponding article lists and not any more. In practice, their correctness was tested using the 100 KB file. 
 
-\subsubsection{Time complexity}
-The time of constructing the data frame for each index was measured along size the time of searching all unique words in the text. Index 2-3 was tested using the text files of size 100 KB, 1 MB, 2 MB, 5 MB, and 10 MB. Index 4-5 was tested using the text files of size 100 KB, 1 MB, 2 MB, 5 MB, 10 MB, 20 MB, 50 MB, 100 MB, 200 MB, 400 MB, and 800 MB.
-
-%\subsubsection{Memory}
-%Memory allocation was measured when constructing the data structures of the different indexes. Measures of the allocated memory are tested using the same files used for testing time complexity for the indexes.  
-
-
-
-
-
+\subsection{Time complexity}
+For each index, the time of constructing the database as well as the time of searching for every unique word in the file was measured. Index2 and Index3 were tested using the text files of sizes from 100 KB up to 10 MB. Index4 and Index5 were tested using the text files of sizes from 100 KB up to 800 MB.
+Each point measurement has only been measured once, as indexing the indices is a time-consuming task to do in Java and the variance of the measurement is expected to be low when the time is on the scale of hours. It is however important to keep in mind when inspecting the results as they merely are point measurements with no further statistical depth.   
 

@@ -1,13 +1,27 @@
 \section{Results}
-Figure \ref{} shows the measured search times for the prefix search indexes, when finding a prefix.
+Figure \ref{fig:SearchtimePrefix} shows the measured search times for the prefix search indexes, when finding a prefix.
 
 \begin{figure}[ht!]
     \centering
-    \includegraphics[width=.5\textwidth]{LaTeX/Figures}
-    \caption{}
+    \includegraphics[width=.5\textwidth]{LaTeX/Pictures/Results/Prefixsearch.png}
+    \caption{Search times for the prefix search function of index 9.0 and 9.1}
     \label{fig:SearchtimePrefix}
 \end{figure}
 
-Figure \ref{} shows the measured indexing time for the prefix search indexes and the Boolean indexes for comparison.
+Figure \ref{fig:IndexingBoolPrefi} shows the measured indexing time for the prefix search indexes and the Boolean indexes for comparison.
 
-Figure \ref{} shows measured search times for the prefix search indexes, when finding a singular complete word.
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=.5\textwidth]{LaTeX/Pictures/Results/Indexing[(7, 0), (8, 0), (9, 0), (9, 1)].png}
+    \caption{Indexing times for the prefix search function of index 9.0 and 9.1}
+    \label{fig:IndexingBoolPrefi}
+\end{figure}
+
+Figure \ref{fig:findword} shows measured search times for the prefix search indexes, when finding a singular complete word.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=.5\textwidth]{LaTeX/Pictures/Results/Findword.png}
+    \caption{Searching times for finding a complete single word in index 8.0, 9.0 and 9.1}
+    \label{fig:findword}
+\end{figure}

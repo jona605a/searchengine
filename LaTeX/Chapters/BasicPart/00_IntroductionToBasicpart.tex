@@ -1,15 +1,17 @@
 \section{Introduction to the Basic part}
 
-\kommentar{skriv lidt problem analyse og måske lidt om hvordan vi har tænkt os at løse problemet i starten i Java}
+In this chapter, we will introduce a few basic approaches to making a search engine. These approaches are meant to gently introduce the search engine problem and get an understanding of what features a search engine can have, as well as the challenges there might occur. Each search engine, or "Index", is introduced and then analysed in terms of correctness and space and time complexity. We then compare them in terms of both theoretical complexities as well as observed measurements. 
 
-5 different Indexes will be implemented. Index 2-5 are all expansions of Index1 and the previous index. The initial code for Index1 was given by our supervisors to start from. All other code has been written by us. 
+\subsection{Overview of the five basic indices}
+
+The list below gives an overview of the five indices implemented in this section. Each index aside from the first is an extension or improvement of the previous indices. The initial code for Index1 was given by our supervisors to start from, and all other code has been written by us. 
 
 \begin{enumerate}
-    \item[] \textbf{Index1:} Creates a linked list of all words in the database. The search functions return a boolean value of the presence of the search string in the database.
-    \item[] \textbf{Index2:} Creates a linked list of all words in the database alongside an article list of the titles where each word is present. The search function returns an article list of the titles the search appears in. 
-    \item[] \textbf{Index3:} Creates a linked list of all the unique words in the database alongside an article list of the titles where each word is present. The search function return an article list of the titles the search appears in.
-    \item[] \textbf{Index4:} Creates a hash table of a fixed size of all the unique words in the database alongside an article list of the titles where each word is present. The search function return an article list of the titles the search appears in.
-    \item[] \textbf{Index5:} Creates a dynamic hash table of all the unique words in the database alongside an article list of the titles where each word is present. The search function return an article list of the titles the search appears in.
+    \item[] \textbf{Index1:} Creates a linked list of all words in the database. The search functions linearly searches through every word and returns a boolean value of the whether search string was present in the database.
+    \item[] \textbf{Index2:} Creates a linked list of all words in the database. The search function linearly searches through every word and returns an article list of the titles the search appears in. 
+    \item[] \textbf{Index3:} Creates a linked list of all the unique words in the database. The search function linearly searches through every word and returns an article list of the titles the search appears in.
+    \item[] \textbf{Index4:} Creates a hash table of a fixed size of all the unique words in the data-base alongside an article list of the titles where each word is present. The search function returns an article list of the titles the search appears in.
+    \item[] \textbf{Index5:} Creates a dynamic hash table of all the unique words in the database alongside an article list of the titles where each word is present. The search function returns an article list of the titles the search appears in.
 \end{enumerate}
 
 
