@@ -29,13 +29,13 @@ def plotfig(data,indexes,type,logy=False,logx=False):
 
     plt.title(f"{type} time over file sizes. Basic part")
     plt.ylabel(f"{type} time (ms)")
-    plt.xlabel("Filesize (kb)")
+    plt.xlabel("Filesize (MB)")
     plt.legend()
     if logy:
         plt.yscale("log")
     if logx:
         plt.xscale("log")
-    plt.savefig(f"../../LaTeX/Pictures/Results/BP{type}{indexes}")
+    plt.savefig(f"../LaTeX/Pictures/Results/BP{type}{indexes}")
     plt.show()
 
 
