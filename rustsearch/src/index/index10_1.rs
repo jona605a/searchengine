@@ -5,8 +5,7 @@ use std::{
     fs,
 };
 
-use super::{Index, index10_2::calculate_shift_at_mismatch};
-
+use super::{index10_2::calculate_shift_at_mismatch, Index};
 
 pub fn z_alg(s: &Vec<&char>) -> Vec<usize> {
     let n = s.len();
@@ -40,10 +39,11 @@ pub fn compute_L_primes(N: &Vec<usize>) -> (Vec<usize>, Vec<usize>) {
             L_prime[i] = j;
         }
 
-        l_prime[n - j] = max(
-            if N[j - 1] == j { N[j - 1] } else { 0 },
-            if 1 < j { l_prime[n - j + 1] } else { 0 },
-        );
+        if j == N[j - 1] {
+            l_prime[n - j] = j
+        } else {
+            l_prime[n - j] = if 1 < j { l_prime[n - j + 1] } else { 0 };
+        }
     }
     (L_prime, l_prime)
 }

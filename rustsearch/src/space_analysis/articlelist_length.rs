@@ -1,7 +1,6 @@
 #[cfg(test)]
 mod tests {
     use csv::Writer;
-    use core::num;
     use std::{collections::HashMap, fs};
 
     use crate::{

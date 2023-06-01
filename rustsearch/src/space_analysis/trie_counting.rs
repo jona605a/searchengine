@@ -36,7 +36,7 @@ mod tests {
 
             // 0, 1,    2,  3,          4,          5,          6
             // N, avg, max, avglayer0, avglayer1, avglayer2, onecount
-            let mut file_stat = vec![0.0; 7];
+            let mut file_stat: Vec<f64> = vec![0.0; 7];
             let mut depth_map: HashMap<usize, Vec<&TrieNodeLin>> = HashMap::new();
             depth_map.insert(0, vec![&trie.root]);
             let mut depth = 0;
