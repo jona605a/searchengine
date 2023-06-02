@@ -78,13 +78,13 @@ A query tree of depth $d$ consisting of either AND operators or OR operators is 
 
 It thereby comes down to if 8.0 evaluates the second half of the query tree (all the nodes in the tree with a height of 2 or more) faster than 8.4.  $\sum_{n=2^d}^{2^{d+1}-2}(|A_n|)$ is upper bounded by $O(a)$ whereas $((2^{d}-1) \cdot \lceil \frac{a}{64} \rceil$ is tightly bounded by $\Theta(a)$. 8.4 is therefore expected to perform more steps than 8.0. 8.4 is however still expected to be faster as it utilises bitwise Boolean operation, which can be performed super fast, compared to 8.0, which compares two characters, adds one of them to a result list, and hereafter moves a pointer. This is the same tendency as seen in figure \ref{fig:Searchtimebool1}, where 7.0 where the fasted index. The performance of 8.0 compared to 8.4 is however greatly dependent on the expected length of the article list in the second half of the query tree. A short article list compared to $\lceil \frac{a}{64} \rceil$ will give 8.0 a great advantage that at some point might outperform the bit-wise operations of 8.4. The length of the article list in the second half of the query tree is however greatly dependent on the boolean operators in the tree. 
 
-The AND operation returns the intersection, $A_{result}$, of the article list of the two children, $A_i$ and $A_j$. This means that $|A_{result}|\leq min(|A_i|,|A_j|)$. The AND operation is therefore expected to run faster at nodes higher in a tree, only constructed by AND operations, as the incoming article list is expected to be shortened. 
+The AND operation returns the intersection, $A_{result}$, of the article list of the two children, $A_i$ and $A_j$. This means that $|A_{result}|\leq min(|A_i|,|A_j|)$. The AND operation is therefore expected to run faster at nodes higher in a tree, only constructed by AND operations, as the incoming article list is expected to be shortened. A boolean query tree consisting of exclusively AND operator will appear in the section of Full Text indexing - Index 8.4 is therefore not used to calculate this intersection.
 
 The exact opposite is expected for a tree only consisting of OR notes as OR notes calculate the union of two article lists making $|A_result|\geq min(|A_i|,|A_j|)$. This is a great disadvantage for 8.0 and makes 8.4 much better at evaluating boolean trees, with a large $d$, only consisting of OR operators. This exact type of tree will appear in the section Prefix search.
 
 For a Boolean query tree of mixed tree 
 
-\kommentar{Skriv færdigt}
+\kommentar{Skriv færdigt (Lauge hjælp)}
 
 \begin{table}[H]
 \begin{tabular}{l|lllllllll}

@@ -1,7 +1,11 @@
 \section{Introduction to Prefix search}
 The indexes created so far only return the list of article titles where there is an exact match of the query. This can inhibit the user experience as this search form might miss relevant articles where a buzzword simply is written in another tense or in  pluralism, which could add different suffixes to the word. To improve the user experience of the search engine and to explore the data structure of tries indexes that support prefix search where implemented.
 
-Prefix search enables users to input partial words and retrieve relevant results that match the given prefix. If the user want to search for a prefix they simply need to add a star as a suffix of their query. For instance, when typing "pre*" in a search engine, it the indexes will return all articles titles of articles where a word with the prefix "pre" is present. 
+Prefix search enables users to input partial words and retrieve relevant results that match the given prefix. If the user want to search for a prefix they simply need to add a star as a suffix of their query. For instance, when typing "pre*" in a search engine, the indexes will return all articles titles of articles where a word with the prefix "pre" is present. 
+
+
+\section{Tries}
+\kommentar{Skriv afsnit om tries her}
 
 To implement prefix search efficiently, one effective data structure that can be employed is a trie, also known as a prefix tree. A trie is a tree-like structure that stores a database, with each node representing a character in the string. Tries offer an optimized approach for prefix search by allowing rapid traversal and retrieval of words based on their prefixes.
 
