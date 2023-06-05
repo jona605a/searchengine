@@ -1,8 +1,8 @@
 \section{Index1}
 
-Index1 is a very simple search engine. It takes a file containing a collection of articles as input, goes through all words and creates one big linked list with every word appended. It performs no extra checks, such as if the word has already been added. When performing a query of the form "is word X in the dataset?", the search function simply goes through the entire linked list, essentially the file itself, and checks if the word is present. If the query is not found in the linked list, it returns false. 
+Index1 is a very simple search engine. It takes a file containing a collection of articles as input, goes through all words and creates a linked list with every word appended. It performs no extra checks, such as if the word has already been added. When performing a query of the form "Is word X in the database?", the search function simply goes through the entire linked list, essentially the file itself, and checks if the word is present. If the query is not found in the linked list, it returns false. 
 
-Index1 answers queries correctly, since there is no loss of information and it naively checks every word in the dataset. 
+Index1 answers queries correctly since there is no loss of information and it naively checks every word in the database. 
 
 Since every word is read once and only appended to a linked list, the indexing uses constant time for each word in the input, using $\Theta(n)$ time in total. The search goes through every link in the list and checks if it matches the query. As there are $n$ words to look through, the search takes $O(n)$ time in the worst case when the answer is false. 
 

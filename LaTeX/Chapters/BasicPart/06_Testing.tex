@@ -1,5 +1,5 @@
 \section{Testing the basic part}
-To test the correctness, time complexity, and space complexity of the Indices a testing framework was implemented. For indices 2-5, a testing function was implemented to return a linked list of all the unique words and their corresponding article in their data structure. Index1 was not tested as it is not comparable with the other indices and it merely returns a boolean value and not an article list. Index2 can be considered as the expansion of Index1 such that it is comparable with the other indices.
+To test the correctness and time complexity of the Indices a testing framework was implemented. For indices 2-5, a testing function was implemented to return a linked list of all the unique words and their corresponding article in their data structure. Index1 was not tested as it is not comparable with the other indices and it merely returns a Boolean value and not an article list. Index2 can be considered as the expansion of Index1 such that it is comparable with the other indices.
 
 \subsection{Correctness}
 The correctness of the indices is tested using the approach that Index2 is correct. This is argued for in section \ref{section:Index2}.
@@ -15,6 +15,6 @@ The correctness of index 3-4 were tested on 3 different levels:
 Using the assumption of the correctness of Index2, the other indices can be verified. If the data structure of a given index passes all three levels, it will contain the same unique words with corresponding article lists and not any more. In practice, their correctness was tested using the 100 KB file. 
 
 \subsection{Time complexity}
-For each index, the time of constructing the database as well as the time of searching for every unique word in the file was measured. Index2 and Index3 were tested using the text files of sizes from 100 KB up to 10 MB. Index4 and Index5 were tested using the text files of sizes from 100 KB up to 800 MB.
+For each index, the time of constructing the database as well as the time of searching for every unique word in the file was measured. Index2 and Index3 were tested using text files of sizes from 100 KB up to 10 MB. Index4 and Index5 were tested using text files of sizes from 100 KB up to 800 MB.
 Each point measurement has only been measured once, as indexing the indices is a time-consuming task to do in Java and the variance of the measurement is expected to be low when the time is on the scale of hours. It is however important to keep in mind when inspecting the results as they merely are point measurements with no further statistical depth.   
 

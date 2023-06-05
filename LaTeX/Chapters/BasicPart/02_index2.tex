@@ -1,10 +1,10 @@
 \section{Index2}
 \label{section:Index2}
 
-Index2 introduces the important feature that searches from now on return the list of articles in which the query is present instead of a boolean answer indicating only if the query is present at all. 
+Index2 introduces the important feature that searches from now on return the list of articles in which the query is present instead of a Boolean answer indicating only if the query is present at all. 
 
-In Index2, this is implemented as simply as possible. It performs the same indexing as Index1, but now the search has more functionality. When searching, it goes through all words while keeping track of the title of the current article as well as a (linked) list of each article it is about to return. Each time it encounters the query in the index, it appends the current title to its list of articles if it hasn't already. When it has read through every word in the index, it returns its gathered list of titles. 
+In Index2, this is implemented as simply as possible. It performs the same indexing as Index1, but now the search has more functionality. When searching, it goes through all words while keeping track of the title of the current article as well as a list of each article it is about to return. Each time it encounters the query in the index, it appends the current title to its list of articles if it hasn't already. When it has read through every word in the index, it returns its gathered list of titles. 
 
-The correctness of Index2 follows from the fact that the index is ordered, i.e. all words in the index are in the same order as in the text. This means that after a new article title has been read, an occurrence of the search query in that article will get that title appended to its list of which articles in which it occurs. 
+The correctness of Index2 follows from the fact that the index is ordered, i.e. all words in the index are in the same order as in the text. This means that after a new article title has been read, an occurrence of the search query in that article will get that title appended to its list of articles in which it occurs. 
 
 The time for indexing is still linear in the total number of words, $\Theta(n)$, and uses the same amount of space, $\Theta(n)$. Searching now always looks through the entire index and no longer stops at the first occurrence, taking $\Theta(n)$ time. In addition, the search uses an amount of extra space proportional to the number of returned articles, at most the total number of articles $O(a)$. 

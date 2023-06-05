@@ -3,7 +3,7 @@
 
 Index3 is an attempt to use more time on the indexing in order to save time during the search. Each word appears only as a single link in the linked list and has a list of each article it occurs in. Index3 runs through the input text and adds each word as a link in the linked list only if the word does not already appear in the linked list. If the word already exists, the title of the article of the current word is simply added to the article list of the word.
 
-For each word, it needs to check if the word already is present in the linked list. This takes $O(u)$ time for each word, where $u$ is the total number of unique words in the input. To see if the title has already been added to the article list takes constant time as it only is necessary to compare the head of the article list as this is the most recently added title. It, therefore, takes $O(n\cdot u)$ time to complete the indexing, which is the worst complexity thus far. In the worst case where every word is unique, $u=n$, it will take $O(n^2)$ time. 
+For each word, it needs to check if the word already is present in the linked list. This takes $O(u)$ time for each word, where $u$ is the total number of unique words in the input. To see if the title has already been added to the article list takes constant time as it only is necessary to compare the head of the article list as this is the most recently added title. It, therefore, takes $O(n\cdot u)$ time to complete the indexing, which is the worst indexing complexity observed in this project. In the worst case where every word is unique, $u=n$, it will take $O(n^2)$ time. 
 
 Searching for a word runs in $O(u)$ time as it is necessary to iterate through the linked list until the link that matches the search string is found. 
 

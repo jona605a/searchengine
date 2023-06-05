@@ -1,7 +1,7 @@
 \section{Introduction to Prefix search}
 The indices created so far only return the list of article titles where there is an exact match of the query. This can inhibit the user experience as this search form might miss relevant articles where a buzzword simply is written in another tense or in  pluralism, which could add different suffixes to the word. To improve the user experience of the search engine and to explore the data structure of tries, indices that support prefix search were implemented.
 
-Prefix search enables users to input partial words and retrieve relevant results that match the given prefix. If the user want to search for a prefix they simply need to add a star as a suffix of their query. For instance, when typing "pre*" in a search engine, the indices will return the title of all articles where a word with the prefix "pre" is present. 
+Prefix search enables users to input partial words and retrieve relevant results that match the given prefix. If the user want to search for a prefix they simply need to add a star representing a suffix of their query. For instance, when typing "pre*" in a search engine, the indices will return the title of all articles where a word with the prefix "pre" is present. 
 
 \section{Tries}
 To implement prefix search efficiently, one effective data structure that can be employed is a trie, also known as a prefix tree. A trie is a tree-like structure that stores a database, with each edge, or node depending on the implementation, representing a character in the string. Tries offer an efficient approach for prefix search by allowing rapid traversal and retrieval
@@ -29,7 +29,7 @@ When constructing a trie, words in the database are read one-by-one and inserted
   \item For each word in the database iterate through the characters of the word.
   \item Begin at the root node and check if there is a child node representing the current character of the word. 
   \item If an edge corresponding to the current character exists, move to that child node and continue to the next character of the word.
-  \item If a child node does not exist for the current character, add the character to the children of the current node. Move to the newly created node.
+  \item If a child node does not exist for the current character, make a new node as a child of the current node with the character as an edge. Move to the newly created node.
   \item Do step 3 and 4 for all characters in the word until the end is reached. 
   \item Mark the last node as an accepting node since its associated key is in the database and optionally add satellite data to the node. 
 \end{enumerate}
@@ -47,14 +47,14 @@ One way is to maintain the children of a node as pointers in an array of size $|
     \label{fig:trie_array}
 \end{figure}
 
-Another way that uses less space is to maintain the children of a node as a linked list, with each link containing the character on the node/edge and a pointer to that child node. The space used is upper bounded by the size of the alphabet but no longer lower bounded by it, resulting in $O(|\Sigma|)$ space for each node in the worst case and on average better. However, now the time for locating the child matching a character is proportional to the number of children, which is also $O(\Sigma)$. 
+Another way that uses less space is to maintain the children of a node as a linked list, with each link containing the character on the node/edge and a pointer to that child node. The space used is upper bounded by the size of the alphabet but no longer lower bounded by it, resulting in $O(|\Sigma|)$ space for each node in the worst case and on average better. However, now the time for locating the child matching a character is proportional to the number of children, which is also $O(|\Sigma|)$. 
 
-As mentioned above, looking up a key in a trie where it takes constant time to find the child of a node matching a character is similar to a hash table, if the hash function uses $O(s)$ time for a string of length $s$. Conversely, a hash table can also be used internally in a trie to locate the children of a node if the alphabet is expected to be large but each node is expected to have few children. This approach uses $O(p\cdot\Sigma)$ space for the trie in total but because of the constant lookup time for each character, uses $O(s)$ time to locate a key. This approach becomes less efficient if the time to calculate the hash value of a string is not proportional to the length of the hashed string, as section \ref{sec:index9.1} regarding Index9.1 will discuss. 
+As mentioned above, looking up a key in a trie where it takes constant time to find the child of a node matching a character is similar to a hash table, if the hash function uses $O(s)$ time for a string of length $s$. Conversely, a hash table can also be used internally in a trie to locate the children of a node if the alphabet is expected to be large but each node is expected to have few children. This approach uses $O(p\cdot|\Sigma|)$ space for the trie in total but because of the constant lookup time for each character, uses $O(s)$ time to locate a key. This approach becomes less efficient if the time to calculate the hash value of a string is not proportional to the length of the hashed string, as section \ref{sec:index9.1} regarding Index9.1 will discuss. 
 
 
 \subsection{Constant vs non-constant alphabets}
 
-A few factors in the complexities of the tries change when the alphabet is no longer constant or known from the beginning. The method of using a constant size array of pointers is not usable in this scenario and the linked list gets a worse complexity. However, an interesting thing about the linked list solution here is that when the values are inserted in order of first appearance in the input, the most common letters are among the first characters, and less common characters (like chinese and greek letters in the Wiki files that are in English) are further in the list. In practice, this means that when searching for an English word, the key to the next edge, if it exists, is expected to be found within the first part of the linked list, compared to some of the input files in which the alphabet has a size of $|\Sigma|\geq2000$ characters. 
+A few factors in the complexities of the tries change when the alphabet is no longer constant or known from the beginning. The method of using a constant size array of pointers is not usable in this scenario and the linked list gets a worse complexity. However, an interesting thing about the linked list solution here is that when the values are inserted in order of first appearance in the input, the most common letters are among the first characters, and less common characters (like Chinese and Greek letters in the Wiki files that are in English) are further in the list. In practice, this means that when searching for an English word, the key to the next edge, if it exists, is expected to be found within the first part of the linked list, compared to some of the input files in which the alphabet has a size of $|\Sigma|\geq2000$ characters. 
 
 
 

@@ -5,11 +5,11 @@ Similarly to Index7, the index in Index8 consists of a hash map of words to arti
 
 \subsection{Construction of Index8}
 %Before constructing Index8, a regex, removing grammatical marks, is applied to the data set. 
-The indexing is done by iteration though all articles. For each word in the article, the article list of the word will append the article number if it is not already the last added article number. Indexing thereby takes $\Theta(n)$ time.
+The indexing is done by iteration through all articles. For each word in the article, the article list of the word will append the article number if it is not already the last added article number. Indexing thereby takes $\Theta(n)$ time.
 
 \subsection{Search techniques for Index8}
 
-The search technique for Index8 is overall the same as for Index7: go through the syntax tree recursively, look up the words in the index, and combine them in the appropriate fashion. There are five different implementations of Index8. The following different variations implement various ways of looking up and combining the arrays. All Boolean indices need to support the operations AND, OR, and INVERT. 
+The search technique for Index8 is overall the same as for Index7: go through the Boolean query tree recursively, look up the words in the index, and combine them in the appropriate fashion. There are five different implementations of Index8. The following different variations implement various ways of looking up and combining the arrays. All Boolean indices need to support the operations AND, OR, and INVERT. 
 
 \subsubsection{Index8.0: Merge/basic Search}
 The AND function takes two article lists, list $A_i$ and list $A_j$, as inputs and returns an article list, $A_{result}$, the intersection of the inputs. The article lists $A_i$ and $A_j$ are already sorted as a consequence of how Index8 is constructed. To construct $A_{result}$, a pointer is set at the first element of $A_i$ and $A_j$. If the two pointers point at two equal elements, the element is added to $A_{result}$. If the two pointers points at two unequal elements, the lower element's pointer moves to the next element of the list. This continues until one of the pointers reaches the end of its list. The AND functions thereby takes $O(|A_i| + |A_j|))$ to construct $A_{result}$, as it might have to traverse both $A_i$ and $A_j$. $A_{result}$ will also be sorted as the elements are added in increasing order.
@@ -19,14 +19,14 @@ The OR function takes two article lists, list $A_i$ and list $A_j$, as inputs an
 The INVERT function takes one article list $A_i$ as input and returns the inverted article list $A_{result}$ as output. The INVERT function simply transverses $A_i$ and adds all the elements not in $A_i$ to $A_{result}$.
 This takes $\Theta(a)$ to do, where $a$ is the total number of articles in the index. 
 
-Correctness of the And operations follows from that the two pointer system never would miss an article number as it only moves the pointer of the smaller element. If an article number is present in both article lists both pointers will thereby eventually meet it at the same time and add it to the result. If an article number is not present in both article list, it will not be added to the result as elements only are added when both pointers point at the same element.
+Correctness of the And operations follows from that the two pointer system never would miss an article number as it only moves the pointer of the smaller element. If an article number is present in both article lists both pointers will thereby eventually meet it at the same time and add it to the result. If an article number is not present in both article lists, it will not be added to the result as elements only are added when both pointers point at the same element.
 
-Correctness of the OR operations follows from that the two pointer system will add all article numbers they meet to the result. No repetitions will occur as the two pointer system only adds one element if they point at the same article number. If an article number is present in both article list, the two pointer system assures that the two pointers at some point will point at the article number in both lists and only add it once.
+Correctness of the OR operations follows from that the two pointer system will add all article numbers they meet to the result. No repetitions will occur as the two pointer system only adds one element if they point at the same article number. If an article number is present in both article lists, the two pointer system assures that the two pointers at some point will point at the article number in both lists and only add it once.
 
 Correctness of the inversion operation follows from that it simply adds all the article numbers that not are in the list, which is the definition of an inversion.
 
 \subsubsection{Index8.1: De-Morgan}
-In general, this index has the same AND, OR and INVERT operations as Index8.0. Certain cases, however, can be sped up by changing the order of the boolean operations.
+In general, this index has the same AND, OR and INVERT operations as Index8.0. Certain cases, however, can be sped up by changing the order of the Boolean operations.
 
 The INVERT operation is costly as it takes $\Theta(a)$ time regardless of the length of the article list. De-Morgans laws tell that:
 
@@ -38,7 +38,7 @@ By checking if the next operations are on the form $!A\, \vee\, !B$ or $!A\, \we
 \subsubsection{Index8.2: Binary Search}
 This index has the same OR and INVERT operations as Index8.0.
 
-If one article list $A_i$ is much shorter than the other article list $A_j$ it might be preferred to search for all the elements of $A_i$ in $A_j$ using binary search instead of using the AND operation described in Index8.0. Searching for $|A_i|$ words using binary search has the time complexity $O(|A_i| \cdot log(|A_j|))$. Index8.2 checks if $|A_i| \cdot log_2(|A_j|) < |A_i| + |A_j|$ for each AND operation it does and vice versa for the other combination. If it is true, the index uses binary search to construct $A_result$ and otherwise it uses the same AND operations as Index8.0. 
+If one article list $A_i$ is much shorter than the other article list $A_j$ it might be preferred to search for all the elements of $A_i$ in $A_j$ using binary search instead of using the AND operation described in Index8.0. Searching for $|A_i|$ words using binary search has the time complexity $O(|A_i| \cdot log(|A_j|))$. Index8.2 checks if $|A_i| \cdot log_2(|A_j|) < |A_i| + |A_j|$ for each AND operation it does and vice versa for the other combination. If it is true, the index uses binary search to construct $A_result$ and otherwise, it uses the same AND operations as Index8.0. 
 
 Correctness of the Binary search AND operation follows from that finding all the appearance of article numbers in one list of another will create the intersection.
 
@@ -46,7 +46,7 @@ Correctness of the Binary search AND operation follows from that finding all the
 Index8.3 is simply an index that combines the checks that Index8.2 and Index8.1 perform. 
 
 \subsubsection{Index8.4: Bitwise operations}
-The AND, OR and INVERT functions from Index7 have great potential as it utilises the bit wise operations, instead of the two-pointer system. There is a trade-off between the two methods, where the bit wise operations are preferred when $a$ is relatively small, most boolean operators are NEGATION or OR, or it is expected that most words appear in many articles, i.e. $\frac{A_i}{a}$ is relatively high (around $2\%$). This trade-off is complex and depends on computer performance and will thus be discussed further in section \ref{sec:bool_discussion}. 
+The AND, OR and INVERT functions from Index7 have great potential as it utilises the bit wise operations, instead of the two-pointer system. There is a trade-off between the two methods, where the bit wise operations are preferred when $a$ is relatively small, most Boolean operators are NEGATION or OR, or it is expected that most words appear in many articles, i.e. the average $\frac{A_i}{a}$ is relatively high (around $2\%$). This trade-off is complex and depends on the computer performance and will thus be discussed further in section \ref{sec:bool_discussion}. 
 
-The bitwise operations are based on another data structure that stores article lists in bit vector instead of a "positive list". But nonetheless, they can be integrated into the Index8 data structure. This is done by converting each article list in the boolean query tree to a bit vector before combining them. Converting an article list $A_i$ to a bit vector article list takes $O(|A_i|)$ time at it has to bit shift $|A_i|$ bits. Index8.4 is not expected to be better than Index8.0 in the cases where the depth of the query is 1, as converting the article list to a bit vector article list and then performing the bit-wise Boolean operations has the same time complexity as simply completing the Boolean operations described in Index8.0. Whenever the depth of the query grows it is expected that Index8.4 performed significantly better than any other Index8 and similar to Index7.
+The bitwise operations are based on another data structure that stores article lists in bit vector instead of a "positive list". But nonetheless, they can be integrated into the Index8 data structure. This is done by converting each article list in the Boolean query tree to a bit vector before combining them. Converting an article list $A_i$ to a bit vector article list takes $O(|A_i|)$ time at it has to bit shift $|A_i|$ bits. Index8.4 is not expected to be better than Index8.0 in the cases where the depth of the query is 1, as converting the article list to a bit vector article list and then performing the bit-wise Boolean operations has the same time complexity as simply completing the Boolean operations described in Index8.0. Whenever the depth of the query grows it is expected that Index8.4 performed significantly better than any other Index8 and similar to Index7.
 

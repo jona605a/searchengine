@@ -1,7 +1,7 @@
 \subsection{The Z algorithm}
-The Z algorithm is a simple yet important algorithm in string matching and is sometimes referred to as a fundamental preprocessing step\cite{Gusfield1997AlgorithmsOS}. The Z algorithm is used to preprocess a string $S$ and results in an array of $Z_i(S)$ values that alone can be used to do string matching in linear time but is also used in the preprocessing step of other algorithms like the Knuth-Morris-Pratt and Boyer-Moore algorithms. In some literature, it is the entire string matching algorithm that uses the array of $Z_i(S)$-values that is called the Z algorithm, but here Z algorithm refers only to finding the $Z_i(S)$ values. 
+The Z algorithm is a simple yet important algorithm in string matching and is sometimes referred to as a fundamental preprocessing step\cite{Gusfield1997AlgorithmsOS}. The Z algorithm is used to preprocess a string $S$ and results in an array of $Z_i(S)$ values that alone can be used to do string matching in linear time but is also used in the preprocessing step of other algorithms like the Knuth-Morris-Pratt and Boyer-Moore algorithms. In some literature, the Z algorithm refers to the entire string matching algorithm that uses the array of $Z_i(S)$-values, but here Z algorithm refers only to finding the $Z_i(S)$ values. 
 
-In the following, the Z algorithm and the definitions required to understand it are introduced. The Z algorithm is explained in detail, before explaining how it can be used for the Boyer-Moore algorithm. 
+In the following, the Z algorithm and the definitions required to understand it are introduced. The Z algorithm is explained in detail before explaining how it can be used for the Boyer-Moore algorithm. 
 
 First off, consider the definition of $Z_i(S)$ for a given string $S$. When the string is clear by context, $Z_i$ can be used instead of $Z_i(S)$. 
 
@@ -9,13 +9,13 @@ First off, consider the definition of $Z_i(S)$ for a given string $S$. When the 
     \item[] \textbf{Definition} Given a string $S$ and a position $i>1$ let $Z_i(S)$ denote the length of the longest substring of $S$ that starts at $i$ and matches a prefix of $S$. 
 \end{itemize}
 
-This means that $Z_i$ is how far a substring starting in position $i$ can be read while matching the beginning of $S$. There is a nice way of visualising the $Z_i$ values for a given string, namely $Z$-boxes. Consider figure \ref{fig:z_boxes}, where the string $S$ is represented by a long horizontal line and for each position $x$ up to $i$ where $Z_x>0$, the substring starting at $x$ of length $Z_x$ is shown as a box. In this manner, each box represents a substring that matches a prefix of $S$. 
+ There is a nice way of visualising the $Z_i$ values for a given string, namely $Z$-boxes. Consider figure \ref{fig:z_boxes}, where the string $S$ is represented by a long horizontal line and for each position $x$ up to $i$ where $Z_x>0$, the substring starting at $x$ of length $Z_x$ is shown as a box. In this manner, each box represents a substring that matches a prefix of $S$. 
 
 For a given position $i$, there may be many $Z$-boxes starting at a position less than $i$, so it is useful to have the following two definitions:
 
 \begin{itemize}
     \item[] \textbf{Definition} For any position $i>1$ where $Z_i>0$ the $Z$-box at $i$ is defined as the substring starting at $i$ of length $Z_i$, ending in position $i+Z_i-1$. 
-    \item[] \textbf{Definition} For every $i>1$, $r_i$ is the right-most endpoint of the $Z$-boxes that begin at or before position $i$ and $l_i$ is the left end of one such $Z$-box. If there are more than one option, $l_i$ can refer to any one of them. 
+    \item[] \textbf{Definition} For every $i>1$, $r_i$ is the right-most endpoint of the $Z$-boxes that begin at or before position $i$ and $l_i$ is the left end of one such $Z$-box. If there is more than one option, $l_i$ can refer to any one of them. 
 \end{itemize}
 
 \begin{figure}[t]
@@ -28,9 +28,9 @@ For a given position $i$, there may be many $Z$-boxes starting at a position les
 
 These definitions are enough to define and understand the Z algorithm. The Z algorithm works inductively by assuming for a position $i$ that the algorithm has correctly computed the $Z_x$ values for $x$ from 2 up to $i-1$ as well as the $r_{i-1}$ and $l_{i-1}$ values. It uses these to compute the next $Z_i$, $r_i$ and $l_i$ values. The idea is to use the concept of Z-boxes to infer information about the next $Z_i$ value and thereby compute every $Z_i$ value in linear time. 
 
-Even though $r_i$ and $l_i$ are defined for each position $i$, the algorithm requires only the right-most $r$ value and its corresponding $l$ value and updates them when finding a $Z$-box that ends at a later position. This is why the algorithm uses a single variable to denote $r$ and $l$. 
+Even though $r_i$ and $l_i$ are defined for each position $i$, the algorithm requires only the right-most $r$ value and its corresponding $l$ value and updates them when finding a $Z$-box that ends at a later position. This is why the algorithm uses a single variable to denote $r$ and $l$. The entire Z algorithm is written in Algorithm \ref{alg:z_alg}. 
 
-\begin{algorithm}
+\begin{algorithm}[bht!]
 \caption{Z algorithm}\label{alg:z_alg}
 \begin{algorithmic}
 \State Initialise $r=l=0$ and $Z_i=0$ for all $i$. 
@@ -101,10 +101,10 @@ When $Z_{k'}<|\beta|$, called case 2a in the algorithm, the smaller substring $\
 
 When $Z_{k'}>|\beta|$, called case 2b in the algorithm, $\beta$ matches all characters in $S[k'..Z_l]$, but $S(|\beta|+1)=:a$ cannot match $S(k+|\beta|+1)=:b$. Why? Because by definition, $\alpha$ is a maximal length substring that matches a prefix of $S$, which means that there must be a mismatch at the end of the $Z$-box starting at position $l$ with the character at position $Z_l+1$, $c:=S(Z_l+1)$. Since $Z_{k'}>|\beta|$, the character $c$ matches the character $a$. Altogether this means that $a=c$ and $c\neq b$ implies $a\neq b$, i.e. that $S(|\beta|+1)$ mismatches $S(k+|\beta|+1)$. In this case, $Z_k=Z_{k'}$ and no more. 
 
-Following the logic above, when $Z_{k'}=|\beta|$, the substring $\beta$ matches $S[k'..Z_l]$. But now $Z_{k'}=|\beta|$ only implies that $S(Z_{k'}+1)$ mismatches $S(k'+Z_{k'}+1)$, i.e. $a\neq c$. From above, $c\neq b$ still holds, but now $a=b$ is a possibility, so start matching from those two characters beyond the current $Z$-box $\alpha$. When the next mismatch is found at position $q\geq r+1$, update $Z_k$, $r$ and $l$ as described in the algorithm, since a new right-most $Z$-box has been found. 
+Following the logic above, when $Z_{k'}=|\beta|$, the substring $\beta$ matches $S[k'..Z_l]$. But now $Z_{k'}=|\beta|$ only implies that $S(Z_{k'}+1)$ mismatches $S(k'+Z_{k'}+1)$, i.e. $a\neq c$. From above, $c\neq b$ still holds, but now $a=b$ is a possibility, so start matching from those two characters beyond the current $Z$-box $\alpha$. When the next mismatch is found at position $q\geq r+1$, update $Z_k$, $r$ and $l$ as described in the algorithm since a new right-most $Z$-box has been found. 
 
 \subsection{A simple Z-based string matching algorithm}
 
-Using the Z algorithm, a possible simple string matching algorithm that runs in linear time could be: given a pattern $P$ and text $T$, find all $Z_i$ values in $P\$T$ where $\$$ is a character not in the alphabet. All values are at most $n=|P|$ and when a position $i$ has $Z_i=n$, then the substring starting at $i$ in $P\$T$ matches $P$. This basic algorithm runs in $O(n+m)$ time, since the Z algorithm runs in linear time. A proof for the linear time complexity of the Z algorithm is given in \cite{Gusfield1997AlgorithmsOS}. 
+Using the Z algorithm, a possible simple string matching algorithm that runs in linear time could be: given a pattern $P$ and text $T$, find all $Z_i$ values in $P\$T$ where $\$$ is a character not in the alphabet. All values are at most $n$ and when a position $i$ has $Z_i=n$, then the substring starting at $i$ in $P\$T$ matches $P$. This basic algorithm runs in $O(n+m)$ time since the Z algorithm runs in linear time. Proof for the linear time complexity of the Z algorithm is given in \cite{Gusfield1997AlgorithmsOS}. 
 
 There exist many more advanced string matching algorithms than this basic one and these will be explored in the following. 

@@ -22,22 +22,22 @@ Given the pattern $P=$"ABCDABD", the longest proper suffixes of $P[1..i]$ that a
 \end{figure}
 The idea is that if a mismatch occurs at position $i+1$ then $sp_{i}(P)$ tells how many characters in $P$ that is guaranteed to match the last $sp_i(P)$ characters in the search text, $T$ before the mismatch. There is, therefore, no need to compare the  $sp_i(P)$ first characters of the $P$ to $T$, which allows the algorithm to start comparing the mismatched character of T with $P(sp_i(P)+1)$.
 
-The example below shows a mismatch at position $i=7$. As $sp_{6}(P) = 2$, it will now be $P(3)$ that will be compared to the mismatched character of $T$. 
+The example in figure \ref{fig:KMPshift} shows a mismatch at position $i=7$. As $sp_{6}(P) = 2$, it will now be $P(3)$ that will be compared to the mismatched character of $T$. 
 
 \begin{figure}[H]
 \begin{verbatim}
-                       12345678901
-                    T: ABCDABCDABD
-                    P: ABCDABD
-                       ^^^^^^*
-                           ABCDABD
-                             ^^^^^
+                              12345678901
+                           T: ABCDABCDABD
+                           P: ABCDABD
+                              ^^^^^^*
+                                  ABCDABD
+                                    ^^^^^
 \end{verbatim}
 \caption{An example of matching the pattern $P$ with a text $T$ utilising the $sp_i(P)$ values.}
 \label{fig:KMPshift}
 \end{figure}
 
-$sp(P)$ values can be calculated in linear time. This is done by keeping track of the length of the longest proper prefix (l) which is also a suffix of the substring P[1...i] continuously, and a pointer $i$ that keeps track of the position in the pattern. The algorithm for calculating $sp(P)$ values is presented in algorithm \ref{alg:spP}.
+The $sp(P)$ values can be calculated in linear time. This is done by keeping track of the length of the longest proper prefix (l) which is also a suffix of the substring $P[1...i]$ continuously, and a pointer $i$ that keeps track of the position in the pattern. The algorithm for calculating $sp(P)$ values is presented in algorithm \ref{alg:spP}.
 
 \begin{algorithm}[t]
 \caption{Calculate $sp_i(P)$ values for $i \in [0..|P|[$. This is a $0$-indexed version of the algorithm. }\label{alg:spP}
@@ -68,7 +68,7 @@ Before beginning KMP the $sp_i(P)$ is calculated for the failure function of the
 The pattern is placed such that the first character of the pattern aligns with the first character of the search text. The first characters that are compared are the first character of the pattern and of the search text. 
 
 If the characters match, the next character of the pattern and of the search text is compared, as KMP uses a left-to-right scan. 
-If a mismatch occurs, the algorithm uses the information stored in the failure function to determine the next position to compare in the pattern. If the Failure function at the position of the mismatch in the pattern is greater than zero, it means that there is a prefix of the pattern of a length given in the Failure function, that is also a suffix of the substring matched until that point. In such cases, the pattern shifts such that the mismatched character of the search text aligns with the character right after the pattern given by the failure function of the position of the mismatched character of the pattern.
+If a mismatch occurs, the algorithm uses the information stored in the failure function to determine the next position to compare in the pattern. If the Failure function at the position of the mismatch in the pattern is greater than zero, it means that there is a prefix of the pattern of a length given in the Failure function, that also is a suffix of the substring matched until that point. In such cases, the pattern shifts such that the mismatched character of the search text aligns with the character right after the pattern given by the failure function of the position of the mismatched character of the pattern.
 
 The process continues until either a complete match is found, or if there is no text left to search in. If a match is found, the algorithm can either continue searching for additional occurrences or stop and return the index where the match starts.
 
