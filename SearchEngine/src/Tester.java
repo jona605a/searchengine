@@ -199,12 +199,6 @@ public class Tester {
             case "5":
                 return new Index5(filename);
 
-            // case "6":
-            // return new Index6(filename);
-
-            // case "7":
-            // return new Index7(filename);
-
             default:
                 return null;
         }

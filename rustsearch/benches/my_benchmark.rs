@@ -321,74 +321,33 @@ pub fn full_text_search_11_1(c: &mut Criterion) {
     full_text_searching_template(c, "11_1")
 }
 
-pub fn kmp_vs_boyer_moore(c: &mut Criterion) {
-    let file_size = "5MB";
-
-    let file_path = format!("data/WestburyLab.wikicorp.201004_{}.txt", file_size);
-
-    let full_text_queries: Vec<String> = gen_a_lot_of_runs_full_text(file_path.clone(), 1000);
-    let config = Config {
-        file_path: file_path.to_owned(),
-        indexno: "10_0".to_string(),
-    };
-
-    let index = config.to_index().unwrap();
-
-    // c.bench_function(&format!("Bench KMP {}", file_size), |b| {
-    //     b.iter(|| {
-    //         for sentence in &full_text_queries {
-    //             let query = Query {
-    //                 search_string: sentence.to_owned(),
-    //                 search_type: SearchType::ExactSearch("KMP".to_string()),
-    //             };
-    //             index.search(&query);
-    //         }
-    //     })
-    // });
-
-    c.bench_function(&format!("Bench BoyerMoore {}", file_size), |b| {
-        b.iter(|| {
-            for sentence in &full_text_queries {
-                let query = Query {
-                    search_string: sentence.to_owned(),
-                    search_type: SearchType::ExactSearch("BoyerMoore".to_string()),
-                };
-                index.search(&query);
-            }
-        })
-    });
-
-    c.bench_function(&format!("Bench ApostolicoGiancarlo {}", file_size), |b| {
-        b.iter(|| {
-            for sentence in &full_text_queries {
-                let query = Query {
-                    search_string: sentence.to_owned(),
-                    search_type: SearchType::ExactSearch("ApostolicoGiancarlo".to_string()),
-                };
-                index.search(&query);
-            }
-        })
-    });
-
-    // c.bench_function(&format!("Bench Dumide 100KB"), |b| {
-    //     b.iter(|| {
-    //         for sentence in &full_text_queries {
-    //             let query = Query {
-    //                 search_string: sentence.to_owned(),
-    //                 search_type: SearchType::ExactSearch("dumide".to_string()),
-    //             };
-
-    //             index.search(&query);
-    //         }
-    //     })
-    // });
-}
 
 //criterion_group!(benches,indexing_7,indexing_8_0,indexing_9_1,indexing_9_0,searching_index_7_0,searching_index_8_0,searching_index_8_1,searching_index_8_2,searching_index_8_3,searching_index_8_4,find_word_9_0,find_word_9_1,prefix_search_index_9_0,prefix_search_index_9_1);
 criterion_group!(
     name = benches;
     config = Criterion::default().sample_size(100);
-    targets = indexing_9_1,indexing_9_0
+    targets =   opening_and_reading_file,
+                indexing_7_0,
+                indexing_8_0,
+                indexing_9_1,
+                indexing_9_0,
+                indexing_10_0,
+                indexing_11_0,
+                searching_index_7_0,
+                searching_index_8_0,
+                searching_index_8_1,
+                searching_index_8_2,
+                searching_index_8_3,
+                searching_index_8_4,
+                find_word_9_0,
+                find_word_9_1,
+                prefix_search_index_9_0,
+                prefix_search_index_9_1,
+                full_text_search_10_0,
+                full_text_search_10_1,
+                full_text_search_11_0,
+                full_text_search_11_1,
+                full_text_search_10_2
 );
 
 criterion_main!(benches);
