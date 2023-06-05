@@ -6,10 +6,10 @@ The Knuth-Morris-Pratt (KMP) algorithm is a string-matching algorithm that effic
 The failure function, built in the preprocessing step, is used to determine the number of characters to skip in the pattern when a mismatch occurs during matching and is based on $sp_i(P)$ values.
 
 \begin{itemize}
-    \item[] \textbf{Definition} For each position $i$ in pattern $P$, let $sp_i(P)$ be the length of the longest propper sufix of P[1..i] that matches a prefix of the $P$. $sp_1(P)$ is defined to be 0.
+    \item[] \textbf{Definition} For each position $i$ in pattern $P$, let $sp_i(P)$ be the length of the longest proper suffix of $P[1..i]$ that matches a prefix of the $P$. $sp_1(P)$ is defined to be 0.
 \end{itemize}
 
-Given the pattern $P=$"ABCDABD", the longest proper suffixes of $P[1..i]$ that also are a prefixes of $P$ are as followed:
+Given the pattern $P=$"ABCDABD", the longest proper suffixes of $P[1..i]$ that also are prefixes of $P$ are as followed:
 
 \begin{figure}[H]
 \begin{verbatim}
@@ -20,10 +20,9 @@ Given the pattern $P=$"ABCDABD", the longest proper suffixes of $P[1..i]$ that a
 \caption{$sp(P)$ values for  $P=$"ABCDABD"}
 \label{fig:spP}
 \end{figure}
+The idea is that if a mismatch occurs at position $i+1$ then $sp_{i}(P)$ tells how many characters in $P$ that is guaranteed to match the last $sp_i(P)$ characters in the search text, $T$ before the mismatch. There is, therefore, no need to compare the  $sp_i(P)$ first characters of the $P$ to $T$, which allows the algorithm to start comparing the mismatched character of T with $P(sp_i(P)+1)$.
 
-The idea is that if a mismatch occurs at position $i+1$ then $sp_{i}(P)$ tells how many characters in $P$ that is guaranteed to match the last characters in the search text, $T$ before the mismatch. There is, therefore, no need to compare the  $sp_i(P)$ first characters of the $P$ to $T$, which allows the algorithm to start comparing the mismatched character of T with $P[sp_i(P)+1]$.
-
-The example below shows a mismatch at position $i=7$. As $sp_{6}(P) = 2$, it will now be $P[3]$ that will be compared to the mismatched character of $T$. 
+The example below shows a mismatch at position $i=7$. As $sp_{6}(P) = 2$, it will now be $P(3)$ that will be compared to the mismatched character of $T$. 
 
 \begin{figure}[H]
 \begin{verbatim}
@@ -34,35 +33,32 @@ The example below shows a mismatch at position $i=7$. As $sp_{6}(P) = 2$, it wil
                            ABCDABD
                              ^^^^^
 \end{verbatim}
-\caption{A visual example of matching the pattern P with a text T utilising the $sp_i(P)$ values.}
+\caption{An example of matching the pattern $P$ with a text $T$ utilising the $sp_i(P)$ values.}
 \label{fig:KMPshift}
 \end{figure}
 
-$sp(P)$ values can be calculated in linear time. This is done by keeping track of the length of the longest proper prefix (l) which is also a suffix of the substring P[1...i] continuously, and a pointer $i$ that keeps track of the position in the pattern. The algorithm for calculating $sp(P)$ values is presented in \ref{alg:spP}.
+$sp(P)$ values can be calculated in linear time. This is done by keeping track of the length of the longest proper prefix (l) which is also a suffix of the substring P[1...i] continuously, and a pointer $i$ that keeps track of the position in the pattern. The algorithm for calculating $sp(P)$ values is presented in algorithm \ref{alg:spP}.
 
 \begin{algorithm}[t]
-\caption{calculate $sp_i(P)$ values for $i \in [1..|P|]$}\label{alg:spP}
+\caption{Calculate $sp_i(P)$ values for $i \in [0..|P|[$. This is a $0$-indexed version of the algorithm. }\label{alg:spP}
 \begin{algorithmic}
-\State Initialise l to 0.
-\State Initialise $sp_1(P)$ to 0 pr definition.
-\State Initialise i = 1
-\While{i < |P|}
-    \If{P[i]=P[l]}
-        \State l += 1
-        \State $sp_i(P)$ = l
-        \State i += 1
+\State Initialise $l$ to 0.
+\State Initialise $sp_0(P)$ to 0 per definition.
+\State Initialise $i := 1$
+\While{$i < |P|$}
+    \If{$P[i]=P[l]$}
+        \State $l := l + 1$
+        \State $sp_i(P) := l$
+        \State $i := i + 1$
     \Else
-        \If{l != 0}
-            \State l = $sp_{l-1}(P)$
+        \If{$l \neq 0$}
+            \State $l := sp_{l-1}(P)$
         \Else
-            \State $sp_{i}(P)$ = 0
-            \State i += 1
+            \State $sp_{i}(P) := 0$
+            \State $i := i + 1$
         \EndIf
     \EndIf
-    
-
 \EndWhile
-
 \end{algorithmic}
 \end{algorithm}
 

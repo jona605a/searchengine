@@ -4,7 +4,7 @@
 \input{Setup/Settings.tex}
 
 \begin{document}
-\RaggedRight
+%\RaggedRight
 
 \pagenumbering{roman}
 \input{Frontmatter/Frontpage.tex}
@@ -27,11 +27,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \pagenumbering{arabic}
 
-\input{LaTeX/Chapters/01Introduction}
+%\input{LaTeX/Chapters/01Introduction}
 
 \subfile{Chapters/ProblemDescriptionAndDataFiles/ProblemDescriptionAndDataFiles.tex}
 \subfile{Chapters/BasicPart/BasicPart.tex}
-\subfile{LaTeX/Chapters/MovingToRust/movingtorust}
+\input{LaTeX/Chapters/MovingToRust/movingtorust}
 \subfile{Chapters/BooleanSearch/BooleanSearch.tex}
 \subfile{Chapters/PrefixSearch/PrefixSearch.tex}
 \subfile{LaTeX/Chapters/FullText/FullText.tex}
@@ -43,7 +43,7 @@
 \printbibliography[heading=bibintoc,title={Bibliography}]
 \cleardoublepage 
 %\appendix
-%\input{Backmatter/Appendix.tex}
+\input{Backmatter/Appendix.tex}
 \cleartoleftpage
 \input{Backmatter/Backpage.tex}
 

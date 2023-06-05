@@ -8,17 +8,19 @@ Since a user might search for a sentence of arbitrary length, a first approach m
 
 Other approaches might for each word store its context, such that the local environment (i.e. part of the sentence) could be looked up in the index. An example of this could be to store each word together with its next two words in a triple. If the size of the query sentence was upper bounded by a constant $O(1)$, this would be a good solution. However, for a query of unknown length, the index could never store enough local information to support every possible query. 
 
-\kommentar{Nævn at suffix træer er en mulighed men at vi har valgt at prioritere andet}
+In section \ref{sec:suffixtree} a special trie called a suffix tree was introduced. This data structure could preprocess the entire text in time and space proportional to the length of the text using a smart implementation and would allow for efficient full text searches for sentences of arbitrary length. However, due to the complexity of the suffix tree construction, the implementation of this data structure has been deemed out of scope for this project. It is however important to know about when comparing different search algorithm and it is a potential avenue for further work. 
 
 This leaves the search engine with one way of looking up words: go back to the original text documents and use a string matching algorithm to find the sentence. How to decide which documents to look through is an important decision as it determines the total size of the search text. This will be discussed in section \ref{sec:index10}. 
 
-This chapter will focus on various string matching algorithms in detail. The length of the text is denoted $m$ and the length of the pattern is denoted $n$. This may not be the convention everywhere, however this section follows chapter 1 and 2 from \cite{Gusfield1997AlgorithmsOS} in which they use this notation.\footnote{Apologies to our supervisor}
+For this chapter, the length of the text will be denoted $m$ and the length of the pattern will be denoted $n$. This may not be the convention everywhere, however this section follows chapter 1 and 2 from \cite{Gusfield1997AlgorithmsOS} in which they use this notation.\footnote{Apologies to our supervisor}
+
+This chapter will focus on various string matching algorithms in detail, namely KMP, Boyer-Moore and Apostolico-Giancarlo. The purpose is to create five indices that use these algorithms to support full text searching. To be able to understand and implement these algorithm, they will firstly be introduced and described in detail, including important preprocessing steps such as the Z algorithm. 
 
 \subsection{Naive search}
 
 There exist many different algorithm for string matching, each with different strengths and weaknesses depending on the use case. Notable mentions are the Knuth-Morris-Pratt (KMP), Boyer-Moore, Rabin Karp, Aho-Corasick, and Apostolico–Giancarlo algorithms (the latter two being extensions of the first two). 
 
-What are the differences between these algorithms and which ones are suitable for the problem of searching for a few occurrences of a sentence of a couple of words in a text in the English language? 
+In this section, the differences between some of these algorithms and which ones are suitable for the problem of searching for a few occurrences of a sentence of a couple of words in a text in the English language are looked into. 
 
 To be able to compare various string matching algorithms, it is useful to have a baseline. A naive search method for string matching is described in algorithm \ref{alg:naivematch}. For each character in the text $T$, this algorithm uses $O(|P|)=O(n)$ time which results in $O(m\cdot n)$ total time. 
 
@@ -32,11 +34,11 @@ To be able to compare various string matching algorithms, it is useful to have a
 \end{algorithmic}
 \end{algorithm}
 
-The way to achieve a speed-up to run in linear time, $(O(m+n)$, all algorithms use some sort of knowledge of either the pattern or the text to either shift $P$ by more than one character at a time or completely skip characters in $T$ if a match is not possible for some section. Before explaining the precise algorithms, an illustration of this can be helpful. 
+The way to achieve a speed-up to run in linear time, $O(m+n)$, all algorithms use some sort of knowledge of either the pattern or the text to either shift $P$ by more than one character at a time or completely skip characters in $T$ if a match is not possible for some section. Before explaining the precise algorithms, an illustration can be helpful. 
 
 Consider the text T=\verb|XABXYABXYABXZ| of length 13 and the pattern P=\verb|ABXYABXZ| of length 8. Following an example with notation from Gusfield\cite{Gusfield1997AlgorithmsOS}, the naive algorithm can be compared to two smarter possible versions, see figure \ref{fig:stringmatchingexample}. 
 
-\begin{figure}[t]
+\begin{figure}[b!]
 \begin{verbatim}
       0        1              0        1              0        1   
       1234567890123           1234567890123           1234567890123
@@ -58,14 +60,14 @@ Consider the text T=\verb|XABXYABXYABXZ| of length 13 and the pattern P=\verb|AB
     \label{fig:stringmatchingexample}
 \end{figure}
 
-The naive algorithm starts by finding a mismatch. It then shifts $P$ by one position, immediately and matches the next seven characters before finding the next mismatch at position 9 in $T$. It then shifts $P$ by one position and finds a mismatch three times before finally matching the whole pattern. 
+The naive algorithm starts by finding a mismatch. It then shifts $P$ by one position, and immediately matches the next seven characters before finding the next mismatch at position 9 in $T$. It then shifts $P$ by one position and finds a mismatch three times before finally matching the whole pattern. 
 
 A smarter algorithm recognises that when position 8 of $P$ mismatches with position 9 of $T$, then the next three shifts must be mismatches as the first letter $A$ will not match before encountering the next $A$ in the text. It knows this because the next $A$ in $P$ does not occur before position 5, so the smarter algorithm can shift the pattern four positions to align the two $A$s. 
 
 Likewise, an even smarter algorithm can recognise that when position 8 of $P$ mismatches with position 9 in $T$, it has already matched the substring $ABX$, which is also the first three characters in $P$. Therefore, it does not need to compare these characters again after shifting $P$, as is shown in the figure \ref{fig:stringmatchingexample} when the rightmost algorithm does not even compare $ABX$ after shifting. 
 
 \subsection{Preprocessing}
-The key to how the algorithm can figure out how to shift the pattern multiple positions or which parts of the pattern it does not need to compare lies in analysing the pattern before beginning to match in what is called the preprocessing step. Here, information like which characters there are in the pattern and where, along with which substrings match a prefix of the pattern, is obtained. For example, knowing that the letter $A$ only appears in position 1 and 5 of the pattern and that the substring, $ABX$ in position 5-7 matches a prefix of the pattern in position 1-3. 
+The key to how the algorithm can figure out how to shift the pattern multiple positions or which parts of the pattern it does not need to compare lies in analysing the pattern before beginning to match in what is called the preprocessing step. Here, information like which characters there are in the pattern and where, along with which substrings match a prefix of the pattern, is obtained. For example, going back to figure \ref{fig:stringmatchingexample}, knowing that the letter $A$ only appears in position 1 and 5 of the pattern and that the substring, $ABX$ in position 5-7 matches a prefix of the pattern in position 1-3. 
 
-The time spent in the preprocessing step typically only takes linear time in the length of the pattern and typically results in the time for the search step being reduced to linear in the text $O(m)$. This is what makes preprocessing so powerful and is why all string matching algorithm use some form of preprocessing of the pattern, or sometimes the text itself, for achieving linear or better time. 
+The time spent in the preprocessing step typically only takes linear time in the length of the pattern and typically results in the time for the search step being reduced to linear in the text $O(m)$. This is what makes preprocessing so powerful and is why most string matching algorithms use some form of preprocessing of the pattern, or sometimes the text itself as when constructing a suffix tree, for achieving linear or better time. 
 

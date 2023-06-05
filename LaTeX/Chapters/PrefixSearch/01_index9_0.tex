@@ -1,28 +1,21 @@
-\section{Index 9.0}
-Index 9.0 supports prefix search, as it uses a trie as its data structure. The trie is constructed by traversing through all of the words in the database and performing the following steps:
+\section{Index9.0}
+Index9.0 supports prefix search, as it uses a trie as its data structure. 
 
-\begin{enumerate}
-  \item For each word in the database iterate through the characters of the word.
-  \item Begin at the root node and check if there is a child node representing the current character of the word. 
-  \item If a child node exists, move to that node and continue to the next character of the word.
-  \item If a child node does not exist for the current character, create a new node and link it to the current node as a child. Move to the newly created node.
-  \item Do step 3 and 4 for all characters in all words
-\end{enumerate}
+In Index9.0, each node is a struct containing three fields: a character corresponding to the label on that node, a linked list containing the children it has, and an optional linked list of the articles in which the word ending in this node is present.
 
-Index 9.0 Each note is a struct containing three fields: a character, describing which character they represent, a linked list, describing which children they have, and another linked list, describing that the word ending in this node, is present in the articles listed in the linked list.
+The construction of the trie is done by following the steps in section \ref{sec:Constructiontire}, where the data structures for storing the children is an array.
 
-Step 3-4 takes $O(\Sigma)$ time, as it has to iterate through the linked list of children to see if the character exist. The length of the linked list of children is bounded by $\Sigma$. The construction of Index 9.0 thereby runs in $O(n\cdot \Sigma)$ time as all characters of the text need to be evaluated by step 3 or 4.
+Step 3-4 takes $O(\Sigma)$ time, as it has to iterate through the list of children to see if the character exist. The length of the list of children is bounded by $|\Sigma|$ and is implemented in practice as a dynamic vector. The construction of Index9.0 thereby runs in $O(n\cdot|\Sigma|)$ time, as all characters of the text need to be evaluated by step 3 or 4.
 
-Index9.0 uses $O(p + u\cdot a)$ space, where $p$ is the number of prefixes in a test. $p$ thereby represents all the internal nodes in the trie and $ u\cdot a$ represents the $u$ end nodes and their belonging article list.
+Index9.0 uses $O(p + u\cdot a)$ space, where $p$ is the number of prefixes in the input file. $p$ thereby represents all the nodes in the trie and $ u\cdot a$ represents the $u$ end nodes and their belonging article list of length $O(a)$.
 
-\subsection{Search techniques for Index9}
-Given a query, the index simply traverses its way through the trie, according to the next character in the query, starting at the root node. If the next character of the query is not a child of the current node of the trie, then the index replies that the query not was found in the database. If there are no characters left of the query, and the article list of the current node does not exist, then the index replies that the query was not found in the database. If the article list exists, then the index simply returns the article list. It is thereby also possible to search for single complete words in the database.
+\subsection{Search techniques for Index9.0}
+Given a query, the search function simply traverses its way through the trie, according to the next character in the query, starting at the root node. If the next character of the query is not a child of the current node or if there are no characters left of the query, and the article list of the current node does not exist, then the function replies that the query not was found in the database. If the article list exists, then the index simply returns the article list. It is thereby possible to search for single complete words in the database.
 
-Searching for a single complete word in the index takes $O(q\cdot \Sigma)$, where $q$ is the number of characters in the query, as it is necessary to search for characters in $q$ different linked lists. 
+Searching for a single complete word in the index takes $O(q\cdot |\Sigma|)$, where $q$ is the number of characters in the query, as it is necessary to search for characters in $q$ different lists. 
 
-If the next character is "*" the index returns the union of all the article lists of the end notes of the sub trie starting in the current node. To calculate this union, the sub trie is recursively traversed. When traversing the sub trie, if a node has an article list, the article list is transformed into a bitwise article list. Then the bitwise-OR operation from index 8.4 is used to calculate the union.
+If the next character is "*" the index returns the union of all the article lists of the end nodes of the sub trie starting in the current node. To calculate this union, the sub trie is recursively traversed. When traversing the sub trie, if a node has an article list, the article list is transformed into an article bit vector. Then the bit wise OR operation from Index8.4 is used to calculate the union.
 
-Searching for a prefix in the index thereby takes $O(q\cdot \Sigma + 
- d \cdot a)$. It is still necessary to traverse the trie to find the node where the prefix ends. This takes $O(q\cdot \Sigma)$ time. It takes $\Theta(a)$ time to transform an article list into a bitwise article list, and we need to transform $d$ of them, where $d$ is the number of end nodes in the sub trie. Performing the bitwise-OR operation takes $\Theta(a)$ time. Performing the bitwise operation $d-1$ times then takes $O(a \cdot d)$ time. In total the prefix search thereby takes $O(q\cdot n + u\cdot a + u\cdot a) = O(q\cdot n + u\cdot a)$
+Searching for a prefix in the index takes $O(q\cdot |\Sigma| + \$ \cdot a)$ time. It is still necessary to traverse the trie to find the node where the prefix ends. This takes $O(q\cdot |\Sigma|)$ time. It takes $\Theta(a)$ time to transform an article list into a article bit vector, and we need to transform $\$$ of them, where $\$$ is the number of accepting nodes in the sub trie. Performing the bit wise OR operation takes $\Theta(a)$ time. Performing the bit wise operation $\$-1$ times then takes $O(a \cdot \$)$ time. In total the prefix search thereby takes $O(q\cdot |\Sigma| + d\cdot a + \$\cdot a) = O(q\cdot |\Sigma| + \$\cdot a)$ time. 
 
  

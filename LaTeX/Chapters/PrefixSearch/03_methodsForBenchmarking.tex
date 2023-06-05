@@ -1,9 +1,7 @@
 \section{Methods for Benchmarking Prefix search Indexes}
-To compare the indexing time, the code that indexed the different search engines where timed using criterion. All search engines were indexed over different file sizes.
+To compare the indexing time, the code that indexed the different search engines were timed using criterion. All search engines were indexed over different file sizes.
 
-To compare the prefix search indexes to the previous indexes, the search time for complete single words where also times. Here 1000 words were found for each filesize. With a $90\%$ change a word from the database of the file size where selected. Otherwise, the string "icantbefound" where selected.
-
-To compare the prefix search function against each other 1000 prefixes were found for each filesize. These were the same words used for finding a complete word but now only the first 3 characters. Insted of the "icantbefound" string the string ". *" where used as ". " cant be found in any of the tires.
+To compare the prefix search function against each other, 1000 prefixes were generated for each filesize. 1000 words were found for each filesize and the 3 first characters and an added "*" were then used as the prefix query. With a $90\%$ chance a word from the database of the file size was selected. Otherwise, a string not in the database was selected. 
 
 For each file size, searching for the 1000 queries with complete words and the 1000 queries with prefixes were timed using Criterion.
 

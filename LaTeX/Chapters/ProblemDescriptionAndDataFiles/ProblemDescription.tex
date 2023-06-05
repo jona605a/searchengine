@@ -1,28 +1,23 @@
 \section{Project Description}
-\kommentar{Den projektbeskrivelse vi afleverede}
-The main objective of this project is to implement a search engine that can efficiently search through a large dataset of Wikipedia articles from 2010. The primary focus of the project will be to address the algorithmic challenges of compactly representing large datasets while supporting fast searches.
+The main objective of this project is to implement a search engine that can efficiently perform a search in a large dataset of Wikipedia articles from 2010. The primary focus of the project will be to address the algorithmic challenges of compactly representing large data sets while supporting fast searches.
 
 The project consist of a Basic part and and Advanced part. In the basic part, the search engine will be built using linked list and hash functions, and will be able to handle queries such as "which documents contain the word X". 
 
-The advanced part will further improve the search engine by exploring more advanced features. It will focus on ranking the articles based on relevance and implementing Boolean search and full-text indexing. Ranking the articles will involve analyzing the content of each article and assigning a score based on the relevance to the query. Boolean search will allow users to use logical operators such as AND, OR, and NOT to refine their search results, while full-text indexing will enable searching for specific words or phrases within the articles' text.
+The advanced part will further improve the search engine by exploring more advanced features. It will focus on implementing Boolean search, prefix search and full-text indexing. Boolean search will allow users to use logical operators such as AND, OR, and NOT to refine their search results. Prefix search allows for searching the text for prefixes of a word when the suffix is insignificant, while full-text indexing enables searching for specific words or phrases within the articles' text. The implementation of both prefix search and full-text search will use features developed in the Boolean part, and thus shows a use case of Boolean indexing in practice beside simple Boolean search queries.
 
-The Basic part will be implemented using JAVA while the Advanced part will be implemented using RUST.
+The Basic part will be implemented using Java while the Advanced part will be implemented using Rust.
 
-Overall, this project aims to develop a search engine that can handle large datasets efficiently while providing advanced features such as ranking, Boolean search, and full-text indexing. While the search engine is being built around the Wikipedia dataset, the techniques and algorithms used in the project will be applicable to any data set. The project will require a strong understanding of data structures, algorithms, and information retrieval, making it an excellent opportunity to develop practical skills in these areas.
+The Basic part, Boolean Search, Prefix Search and Full-text search have  been divided into four sections. For each section, and in the order mentioned, relevant theory, the implemented indices that support each function, methods for testing the indices and discussion and comparison of them among each other will all be evaluated.
 
- 
+While the search engine is being built using the Wikipedia data set, the techniques and algorithms introduced in the project will be applicable to any data set. The project will require a strong understanding of data structures, algorithms, and information retrieval, making it an excellent opportunity to develop practical skills in these areas.
 
 Teaching Goals
 \begin{itemize}
     \item Implement relevant data structures and algorithms. 
-    \item Analyze and evaluate the efficiency of the solutions from a theoretical and practical perspective, using both theoretical asymptotic analysis and empirical analysis.
+    \item Analyse and evaluate the efficiency of the solutions from a theoretical and practical perspective, using both theoretical asymptotic analysis and empirical analysis.
     \item Document key relevant aspects of the work in a concise manner. 
 \end{itemize}
 
 \section{Problem analysis}
 
-Building an effective search engine is a challenging task that requires efficient algorithms and data structures to manage large amounts of data. Moreover, the algorithms and data structures vary greatly depending on which functionalities the search engine has to implement. The first step is to support queries such as "Which documents contain the word X?". For this part, it is enough to store each word in a simple data structure and look up which document they appear in. Two straight forwards approaches are to use linked lists or hash functions. More advanced queries prompt the search engine for similarly more advanced data structures. Queries such as "Which documents contain the words shoe and boot but not sandal?", "Which documents contain a word starting with be\_\_?", and "Which documents contain the sentence 'to be or not to be'?" each require their own additions. The challenge is to support as many of these queries as possible while compactly representing the dataset and supporting fast searches. 
-
-%However, when working with a large dataset, managing and searching for data can be challenging. The implementations of search engines using linked lists or hash functions are therefore just a starting point.
-
-
+Building an effective search engine is a challenging task that requires efficient algorithms and data structures to manage large amounts of data. Moreover, the algorithms and data structures have a large range of variety depending on functionalities implemented in the search engine. The first step is to support queries such as "Which documents contain the word X?". For this part, it is enough to store each word in a simple data structure and look up in which document they appear. Two straight forward approaches are to use linked lists or hash functions. More advanced queries prompt the search engine for similarly more advanced data structures. Queries such as "Which documents contain the words shoe and boot but not sandal?", "Which documents contain a word starting with be\_\_?", and "Which documents contain the sentence 'to be or not to be'?" each require their own additions. 
