@@ -15,7 +15,6 @@ impl Index<HashMap<String, Vec<usize>>> {
         let mut article_titles: Vec<String> = Vec::new();
 
         for (title, contents) in articles_iter {
-            //dbg!(&title);
             if title != "" {
                 article_titles.push(title.to_string());
                 for word in contents {
@@ -173,8 +172,7 @@ mod tests {
             "".to_string(),
             "data/WestburyLab.wikicorp.201004_100KB.txt".to_string(),
             "8".to_string(),
-        ])
-        .unwrap();
+        ]);
         Index::index8(&config).unwrap()
     }
 

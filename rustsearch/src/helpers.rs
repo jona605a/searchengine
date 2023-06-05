@@ -12,15 +12,21 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn build(args: &[String]) -> Result<Config, &str> {
+    pub fn build(args: &[String]) -> Config {
         if args.len() < 3 {
-            return Err("not enough arguments");
+            eprintln!(
+                "File not specified. Defaulting to data/WestburyLab.wikicorp.201004_100KB.txt"
+            );
+            return Config {
+                file_path: "data/WestburyLab.wikicorp.201004_100KB.txt".to_string(),
+                indexno: "0".to_string(),
+            };
         }
 
         let file_path = args[1].clone();
         let indexno = args[2].clone();
 
-        Ok(Config { file_path, indexno })
+        Config { file_path, indexno }
     }
 
     pub fn to_index(&self) -> Result<Box<dyn Search>, Box<dyn Error>> {
@@ -30,8 +36,14 @@ impl Config {
             "7_0" => Ok(Box::new(Index::index7(&self)?)),
             "8" => Ok(Box::new(Index::index8(&self)?)),
             "8_0" => Ok(Box::new(Index::index8(&self)?)),
+            "8_1" => Ok(Box::new(Index::index8(&self)?)),
+            "8_2" => Ok(Box::new(Index::index8(&self)?)),
+            "8_3" => Ok(Box::new(Index::index8(&self)?)),
+            "8_4" => Ok(Box::new(Index::index8(&self)?)),
             "9_0" => Ok(Box::new(Index::index9_0(&self)?)),
+            "9.0" => Ok(Box::new(Index::index9_0(&self)?)),
             "9_1" => Ok(Box::new(Index::index9_1(&self)?)),
+            "9.1" => Ok(Box::new(Index::index9_1(&self)?)),
             "10" => Ok(Box::new(Index::index10(&self)?)),
             "10_0" => Ok(Box::new(Index::index10(&self)?)),
             "10_1" => Ok(Box::new(Index::index10(&self)?)),
@@ -49,7 +61,9 @@ pub fn read_file_to_string(file_path: &String) -> Result<String, Box<dyn Error>>
     Ok(contents)
 }
 
-pub fn read_and_clean_file_to_iter(config: &Config) -> Result<Vec<(String,Vec<String>)>, Box<dyn Error>> {
+pub fn read_and_clean_file_to_iter(
+    config: &Config,
+) -> Result<Vec<(String, Vec<String>)>, Box<dyn Error>> {
     let filecontents = fs::read_to_string(&config.file_path)?;
     let re = Regex::new(r"\. |\.\n|\.\r\n|\n\n|; |[\[\]\{\}\\\n\(\) ,:/=?!*]").unwrap();
 
@@ -57,16 +71,25 @@ pub fn read_and_clean_file_to_iter(config: &Config) -> Result<Vec<(String,Vec<St
     // In each article, it is assumed that the first line is the title, ending in a '.'
     // The contents of each article is split according to the regular expression.
 
-    let articles_iter: Vec<(String, Vec<String>)> = filecontents.split("---END.OF.DOCUMENT---").map(|a| {
-        // let (title, contents) = a.trim().split_once(".\n").unwrap_or(("", ""));
-        let (title, contents) = match a.trim().split_once(".\n") {
-            Some((t, c)) => (t, c),
-            None => a.trim().split_once(".\r\n") // Some Windows shit
-                        .unwrap_or(("", "")), 
-        };
-        let x: Vec<String> = re.split(contents).filter(|&s| s!="").map(|s| s.to_string()).collect();
-        (title.to_string(), x)
-    }).collect();
+    let articles_iter: Vec<(String, Vec<String>)> = filecontents
+        .split("---END.OF.DOCUMENT---")
+        .map(|a| {
+            // let (title, contents) = a.trim().split_once(".\n").unwrap_or(("", ""));
+            let (title, contents) = match a.trim().split_once(".\n") {
+                Some((t, c)) => (t, c),
+                None => a
+                    .trim()
+                    .split_once(".\r\n") // Some Windows shit
+                    .unwrap_or(("", "")),
+            };
+            let x: Vec<String> = re
+                .split(contents)
+                .filter(|&s| s != "")
+                .map(|s| s.to_string())
+                .collect();
+            (title.to_string(), x)
+        })
+        .collect();
     Ok(articles_iter)
 }
 
@@ -109,4 +132,3 @@ pub fn write_article_files(config: &Config) {
         }
     }
 }
-

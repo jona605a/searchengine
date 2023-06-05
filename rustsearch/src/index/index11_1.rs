@@ -58,6 +58,8 @@ impl Index<HashMap<(String, String, String), Vec<usize>>> {
             Some(x) => x,
         };
 
+        // println!(format!("From 11.1: Searching through \n{:?}\n articles for query \"{}\"", art_intersect, query));
+
         // With the intersection, we can now go through each article that "pass the test" of having the correct triples,
         // and actually linear search through them to find the correct answers
         let p: Vec<char> = query.chars().collect();
@@ -65,7 +67,6 @@ impl Index<HashMap<(String, String, String), Vec<usize>>> {
         let mut result: Vec<usize> = Vec::new();
         let (L_prime, l_prime, R,_) = boyer_moore_preprocess(&p);
 
-        // TODO: improve generality of this section **************************************
         for art_no in art_intersect {
             // Read the file
             let t: Vec<char> =
@@ -106,8 +107,7 @@ mod tests {
             "".to_string(),
             "data/WestburyLab.wikicorp.201004_100KB.txt".to_string(),
             "11".to_string(),
-        ])
-        .unwrap();
+        ]);
         Index::index11(&config).unwrap()
     }
 

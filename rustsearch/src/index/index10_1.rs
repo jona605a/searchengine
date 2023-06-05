@@ -186,6 +186,8 @@ impl Index<HashMap<String, HashSet<usize>>> {
             .filter(|ar_no| x.all(|hs_a| hs_a.contains(ar_no)))
             .collect();
 
+        // dbg!(format!("From 10.1: Searching through {} articles for query {}",art_intersect.len(), query));
+
         let mut result: Vec<usize> = Vec::new();
         let (L_prime, l_prime, R, _) = boyer_moore_preprocess(&p);
 

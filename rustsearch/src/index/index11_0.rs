@@ -21,11 +21,11 @@ impl Index<HashMap<(String, String, String), Vec<usize>>> {
         // The actual indexing
         for (title, contents) in articles_iter {
             let mut contents_iter = contents.iter();
-            if contents.len() > 1 {
+            if title != "" {
                 article_titles.push(title.to_string());
 
-                let mut prv1 = contents_iter.next().unwrap();
-                let mut prv2 = contents_iter.next().unwrap();
+                let mut prv1 = match contents_iter.next() {Some(value) => value , None => continue};
+                let mut prv2 = match contents_iter.next() {Some(value) => value , None => continue};
 
                 for word in contents_iter {
                     let v = database
@@ -118,8 +118,7 @@ mod tests {
             "".to_string(),
             "data/WestburyLab.wikicorp.201004_100KB.txt".to_string(),
             "11".to_string(),
-        ])
-        .unwrap();
+        ]);
         Index::index11(&config).unwrap()
     }
 
@@ -345,8 +344,7 @@ mod tests {
             "".to_string(),
             "data/WestburyLab.wikicorp.201004_100MB.txt".to_string(),
             "11".to_string(),
-        ])
-        .unwrap();
+        ]);
         let index = Index::index11(&config).unwrap();
         dbg!(index.database.len());
     }

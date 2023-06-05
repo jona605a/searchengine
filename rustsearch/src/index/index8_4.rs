@@ -94,8 +94,7 @@ mod tests {
             "".to_string(),
             "data/WestburyLab.wikicorp.201004_100KB.txt".to_string(),
             "8_4".to_string(),
-        ])
-        .unwrap();
+        ]);
         Index::index8(&config).unwrap()
     }
 

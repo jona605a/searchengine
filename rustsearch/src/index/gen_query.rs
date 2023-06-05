@@ -93,7 +93,7 @@ pub fn gen_a_lot_of_runs_bool(file_path: String, number: usize) -> Vec<Vec<Strin
     let mut rng = StdRng::seed_from_u64(8008135);
 
     let config: Config =
-        Config::build(&["".to_string(), file_path.clone(), "7".to_string()]).unwrap();
+        Config::build(&["".to_string(), file_path.clone(), "7".to_string()]);
 
     let index8 = Index::index8(&config).unwrap();
 
@@ -115,7 +115,7 @@ pub fn gen_a_lot_of_runs_tries(file_path: String, number: usize, prefix: bool) -
     let mut rng = StdRng::seed_from_u64(8008135);
 
     let config: Config =
-        Config::build(&["".to_string(), file_path.clone(), "8".to_string()]).unwrap();
+        Config::build(&["".to_string(), file_path.clone(), "8".to_string()]);
 
     let index8 = Index::index8(&config).unwrap();
 
@@ -136,7 +136,7 @@ pub fn gen_a_lot_of_runs_tries(file_path: String, number: usize, prefix: bool) -
 pub fn gen_a_lot_of_runs_full_text(file_path: String, number: usize) -> Vec<String> {
     let mut rng = StdRng::seed_from_u64(8008135);
 
-    let config = Config::build(&["".to_string(), file_path, "11".to_string()]).unwrap();
+    let config = Config::build(&["".to_string(), file_path, "11".to_string()]);
 
     let articles_iter: Vec<(String, Vec<String>)> = read_and_clean_file_to_iter(&config).unwrap();
     let search_queries: Vec<String> = (1..=number)

@@ -467,8 +467,7 @@ mod tests {
             "".to_string(),
             "data/WestburyLab.wikicorp.201004_100MB.txt".to_string(),
             "10_0".to_string(),
-        ])
-        .unwrap();
+        ]);
         let index = Index::index10(&config).unwrap();
         dbg!(index.database.len());
     }
