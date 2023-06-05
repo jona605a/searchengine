@@ -179,7 +179,7 @@ pub fn prefix_search_template(c: &mut Criterion, i_string: &str, prefix_bool: bo
     let files = fs::read_dir("data/");
     let searchtype_string = match prefix_bool {
         false => "Find word",
-        true => "prefix search 9_0 in file",
+        true => "prefix search 9_0",
     };
 
     let search_type = match i_string {

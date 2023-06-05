@@ -9,7 +9,7 @@ data = {}
 last_filesize = None
 
 def read_data(type, foldername):
-        index,version = map(int,folderName.split()[2].split("_"))
+        index,version = map(int,folderName.split()[-2].split("_"))
         filesize = int(folderName.split()[-1][:-2])
         
         if filesize not in data: 
@@ -27,6 +27,9 @@ def read_data(type, foldername):
 #Load data from folder criterion
 for folderName in os.listdir("../target/criterion"):
     
+    print(folderName)
+    if folderName == ".DS_Store" or folderName == "report": 
+        continue
     if folderName.split()[0] == "searching": 
         index,version = map(int,folderName.split()[2].split("_"))
         filesize = int(folderName.split()[5][:-3])
@@ -252,17 +255,17 @@ def plot_fullsearch_long(data,indexes):
 
 booleanIndexes = [(7,0),(8,0),(8,1),(8,2),(8,3),(8,4)]
 
-#plot_indexing(data,[(7,0),(8,0)])
-#plot_indexing(data,[(7,0),(8,0),(9,0),(9,1)])
-#plot_indexing(data,[(7,0),(8,0),(9,0),(9,1),(10,0),(11,0)])
-#plot_depth(data,booleanIndexes)
-#plot_filesize(data,booleanIndexes)
-#plot_find_word(data,[(8,0),(9,0),(9,1)])
-#plot_depth_filesize(data,booleanIndexes)
-#plot_prefixsearch(data,[(9,0),(9,1)])
-#plot_fullsearch(data,[(11,0),(11,1)])         
-#plot_fullsearch(data,[(10,0),(10,1),(10,2)])         
-#plot_fullsearch_long(data,[(10,0),(10,1),(10,2)])
-#plot_fullsearch_long(data,[(11,0),(11,1)])
+plot_indexing(data,[(7,0),(8,0)])
+plot_indexing(data,[(7,0),(8,0),(9,0),(9,1)])
+plot_indexing(data,[(7,0),(8,0),(9,0),(9,1),(10,0),(11,0)])
+plot_depth(data,booleanIndexes)
+plot_filesize(data,booleanIndexes)
+plot_find_word(data,[(8,0),(9,0),(9,1)])
+plot_depth_filesize(data,booleanIndexes)
+plot_prefixsearch(data,[(9,0),(9,1)])
+plot_fullsearch(data,[(11,0),(11,1)])         
+plot_fullsearch(data,[(10,0),(10,1),(10,2)])         
+plot_fullsearch_long(data,[(10,0),(10,1),(10,2)])
+plot_fullsearch_long(data,[(11,0),(11,1)])
 
 
