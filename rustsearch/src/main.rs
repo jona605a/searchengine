@@ -170,7 +170,7 @@ fn user_dialog() {
         }
 
         // Ready to get the query!!
-        'searching: loop {
+        loop {
             println!("\nSearch type {} selected. Please enter a query (\"back\" to go back):", &user_search_type);
             let mut user_search_string = String::new();
             io::stdin()

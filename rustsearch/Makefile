@@ -1,10 +1,5 @@
-size ?= "100KB"
-file ?= "data/WestburyLab.wikicorp.201004_$(size).txt"
-ss ?= "third"
-output ?= "output.txt"
-
 run: 
-	cargo run -- $(file) "9_0"
+	cargo run --release
 
-file:
-	cargo run -- $(ss) $(file) > $(output)
+test_all:
+	cargo test --release -- --test-threads=1

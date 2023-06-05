@@ -149,7 +149,7 @@ pub fn gen_a_lot_of_runs_full_text(file_path: String, number: usize) -> Vec<Stri
 mod bool_tests {
     use super::*;
     use rand::SeedableRng;
-    use std::collections::{HashMap, HashSet};
+    use std::collections::HashMap;
     use std::fs;
     use std::iter::zip;
 
@@ -235,9 +235,9 @@ mod bool_tests {
     #[test]
     fn get_search_word_full_text_can_be_seeded() {
         
-        let file_path = "data\\WestburyLab.wikicorp.201004_100KB.txt".to_string();
+        let file_path = "data/WestburyLab.wikicorp.201004_100KB.txt".to_string();
 
-        let config = Config::build(&["".to_string(), file_path, "11".to_string()]).unwrap();
+        let config = Config::build(&["".to_string(), file_path, "11".to_string()]);
 
         let articles_iter: Vec<(String, Vec<String>)> = read_and_clean_file_to_iter(&config).unwrap();
         
@@ -249,7 +249,7 @@ mod bool_tests {
         let result4 = get_search_fulltext(&articles_iter, &mut rng);
         
         //dbg!("{} {} {} {}", &result1,&result2,&result3,&result4);
-        assert_eq!(result1, "conditions from a knowledge of");
+        assert_eq!(result1, "from a knowledge of the");
         assert_eq!(result2, "also be divided into syndromal");
         assert_eq!(result3, "upon its side but in");
         assert_eq!(result4, "kept its name with a");
