@@ -1,0 +1,79 @@
+
+\section{Knuth-Morris-Pratt Algorithm}
+The Knuth-Morris-Pratt (KMP) algorithm is a string-matching algorithm that efficiently searches for occurrences of a pattern within a larger text. It utilises a preprocessing step to build a failure function, also known as the KMP table. The failure function allows the algorithm to skip unnecessary comparisons during the matching process, resulting in improved performance. The KMP algorithm does also exist as a Z-based KMP algorithm. This section will not focus on this version.
+
+\subsection{Failure function}
+The failure function, built in the preprocessing step, is used to determine the number of characters to skip in the pattern when a mismatch occurs during matching and is based on $sp_i(P)$ values.
+
+\begin{itemize}
+    \item[] \textbf{Definition} For each position $i$ in pattern $P$, let $sp_i(P)$ be the length of the longest propper sufix of P[1..i] that matches a prefix of the $P$. $sp_1(P)$ is defined to be 0.
+\end{itemize}
+
+Given the pattern $P=$"ABCDABD", the longest proper suffixes of $P[1..i]$ that also are a prefixes of $P$ are as followed:
+
+\begin{figure}[H]
+\begin{verbatim}
+                           1234567
+                        P: ABCDABD
+                    sp(P): 0000120
+\end{verbatim}
+\caption{$sp(P)$ values for  $P=$"ABCDABD"}
+\label{fig:spP}
+\end{figure}
+
+The idea is that if a mismatch occurs at position $i+1$ then $sp_{i}(P)$ tells how many characters in $P$ that is guaranteed to match the last characters in the search text, $T$ before the mismatch. There is, therefore, no need to compare the  $sp_i(P)$ first characters of the $P$ to $T$, which allows the algorithm to start comparing the mismatched character of T with $P[sp_i(P)+1]$.
+
+The example below shows a mismatch at position $i=7$. As $sp_{6}(P) = 2$, it will now be $P[3]$ that will be compared to the mismatched character of $T$. 
+
+\begin{figure}[H]
+\begin{verbatim}
+                       12345678901
+                    T: ABCDABCDABD
+                    P: ABCDABD
+                       ^^^^^^*
+                           ABCDABD
+                             ^^^^^
+\end{verbatim}
+\caption{A visual example of matching the pattern P with a text T utilising the $sp_i(P)$ values.}
+\label{fig:KMPshift}
+\end{figure}
+
+$sp(P)$ values can be calculated in linear time. This is done by keeping track of the length of the longest proper prefix (l) which is also a suffix of the substring P[1...i] continuously, and a pointer $i$ that keeps track of the position in the pattern. The algorithm for calculating $sp(P)$ values is presented in \ref{alg:spP}.
+
+\begin{algorithm}[t]
+\caption{calculate $sp_i(P)$ values for $i \in [1..|P|]$}\label{alg:spP}
+\begin{algorithmic}
+\State Initialise l to 0.
+\State Initialise $sp_1(P)$ to 0 pr definition.
+\State Initialise i = 1
+\While{i < |P|}
+    \If{P[i]=P[l]}
+        \State l += 1
+        \State $sp_i(P)$ = l
+        \State i += 1
+    \Else
+        \If{l != 0}
+            \State l = $sp_{l-1}(P)$
+        \Else
+            \State $sp_{i}(P)$ = 0
+            \State i += 1
+        \EndIf
+    \EndIf
+    
+
+\EndWhile
+
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Running KMP}
+Before beginning KMP the $sp_i(P)$ is calculated for the failure function of the pattern $P$. 
+
+The pattern is placed such that the first character of the pattern aligns with the first character of the search text. The first characters that are compared are the first character of the pattern and of the search text. 
+
+If the characters match, the next character of the pattern and of the search text is compared, as KMP uses a left-to-right scan. 
+If a mismatch occurs, the algorithm uses the information stored in the failure function to determine the next position to compare in the pattern. If the Failure function at the position of the mismatch in the pattern is greater than zero, it means that there is a prefix of the pattern of a length given in the Failure function, that is also a suffix of the substring matched until that point. In such cases, the pattern shifts such that the mismatched character of the search text aligns with the character right after the pattern given by the failure function of the position of the mismatched character of the pattern.
+
+The process continues until either a complete match is found, or if there is no text left to search in. If a match is found, the algorithm can either continue searching for additional occurrences or stop and return the index where the match starts.
+
+By utilising the failure function to determine the number of characters to skip, the KMP algorithm avoids unnecessary comparisons and achieves a linear time complexity in the worst case, making it highly efficient for string-matching tasks.

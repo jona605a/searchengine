@@ -1,7 +1,7 @@
 \section{Index 9.1}
-Index 9.1 is built using the same principles as index 9.0. Index 9.0 differs by keeping tack of each nodes children by using a hashmap instead of a linked list. This affects the indexing time and the search time as follows:
+Index 9.1 is built using the same principles as index 9.0. Index 9.1 differs by keeping tack of each nodes children by using a hashmap instead of a linked list. This affects the indexing time and the search time as follows:
 
 Step 3-4 takes $O(1)$ time, as it now is a hashmap. The construction of Index 9.1 thereby runs in $O(n)$ time as all characters of the text need to be evaluated by step 3 or 4.
 
-Searching for a single complete word in the index now takes $O(q)$ and searching for a prefix now takes  $O(q + u\cdot a)$.
+Searching for a single complete word in the index now takes $O(q)$ and searching for a prefix now takes  $O(q + d\cdot a)$.
 

@@ -55,8 +55,72 @@ impl Search for Index<HashMap<String, HashSet<String>>> {
 
 #[cfg(test)]
 mod tests {
-    // use super::*;
+    use super::*;
+    use std::{collections::HashSet};
 
-    // #[test]
-    // fn
+    fn setup_test() -> Index<HashMap<String, Vec<usize>>> {
+        let mut database: HashMap<String, Vec<usize>> = HashMap::new();
+        database.insert("word1".to_string(), vec![0]);
+        database.insert("word2".to_string(), vec![0, 1, 2, 3, 4, 5, 6, 7]);
+        database.insert("word3".to_string(), vec![0, 2, 4, 6]);
+        database.insert("word4".to_string(), vec![1, 2, 3]);
+        let mut article_titles: Vec<String> = Vec::new();
+        for i in 0..100 {
+            article_titles.push(format!("article {}", i).to_string());
+        }
+        Index {
+            database,
+            article_titles,
+        }
+    }
+
+    #[test]
+    fn vec_to_articlelist_works() {
+        let test_index = setup_test();
+
+        let vec: Vec<usize> = vec![0, 1];
+
+        let hs = vec!["article 0".to_string(), "article 1".to_string()];
+        assert_eq!(test_index.vec_to_articlelist(vec), hs)
+    }
+
+    #[should_panic]
+    #[test]
+    fn vec_to_articlelist_panics_when_out_of_range() {
+        let test_index = setup_test();
+
+        let vec: Vec<usize> = vec![100000000];
+
+        test_index.vec_to_articlelist(vec);
+    }
+
+    fn search_match(index: &Index<HashMap<String, Vec<usize>>>, query: &str, titles: Vec<&str>) {
+        dbg!(&query.to_string());
+        let index_result: HashSet<String> =
+            HashSet::from_iter(index.boolean_search_naive(&query.to_string()));
+        assert_eq!(
+            index_result,
+            HashSet::from_iter(titles.iter().map(|s| s.to_string()))
+        )
+    }
+
+    #[test]
+    fn find_a_word() {
+        let index = setup_test();
+        search_match(&index, "  word1 ", vec!["article 0"]);
+    }
+
+
+    #[test]
+    fn word_not_in_database() {
+        let index = setup_test();
+        search_match(&index, "nowhere", vec![]);
+    }
+
+    #[test]
+    fn the_empty_query() {
+        let index = setup_test();
+        search_match(&index, "", vec![]);
+    }
 }
+

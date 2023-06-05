@@ -10,7 +10,7 @@ def BCGSplot(promts):
         dataGS = pd.read_csv(f"Plotting/BCGScounting/GS{promt}.csv",header=None)
         
         plt.title(f"{promt}")
-        plt.xticks(range(len([*promt])),[*promt])
+        plt.xticks(range(1,len([*promt])+1),[*promt])
         plt.hist([dataBC[0],dataGS[0]],bins=len([*promt]),label=['Bad character rule', 'Good suffix rule'])
         plt.show()
 

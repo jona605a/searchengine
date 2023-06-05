@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
-    
+    //This test only runs index 10_1 (Boyer-Moore). It was used to count how many bad character rule shift and good
+    // suffix rule shift that were made - but is nolonger compatable. 
 
     use crate::{
         helpers::Config,

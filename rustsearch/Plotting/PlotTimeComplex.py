@@ -8,10 +8,29 @@ data = {}
 
 last_filesize = None
 
+def read_data(type, foldername):
+        index,version = map(int,folderName.split()[-2].split("_"))
+        filesize = int(folderName.split()[-1][:-2])
+        
+        if filesize not in data: 
+            data[filesize] = {}
+        if f"{type}{(index,version)}" not in data[filesize]:
+            data[filesize][f"{type}{(index,version)}"] = {"mean": None, "lower_bound": None,"upper_bound": None}
+        
+        f = open(f"../target/criterion/{folderName}/new/estimates.json")
+        estimates = json.load(f)
+
+        data[filesize][f"{type}{(index,version)}"]["mean"] = estimates["mean"]["point_estimate"]
+        data[filesize][f"{type}{(index,version)}"]["lower_bound"] = estimates["mean"]["confidence_interval"]["lower_bound"]
+        data[filesize][f"{type}{(index,version)}"]["upper_bound"] = estimates["mean"]["confidence_interval"]["upper_bound"]
+
 #Load data from folder criterion
 for folderName in os.listdir("../target/criterion"):
     
-    if folderName.split()[0] == "searching":
+    print(folderName)
+    if folderName == ".DS_Store" or folderName == "report": 
+        continue
+    if folderName.split()[0] == "searching": 
         index,version = map(int,folderName.split()[2].split("_"))
         filesize = int(folderName.split()[5][:-3])
         depth = int(folderName.split()[7])
@@ -28,86 +47,8 @@ for folderName in os.listdir("../target/criterion"):
         data[filesize][f"searching{(index,version)}"]["lower_bound"][depth-1] = estimates["mean"]["confidence_interval"]["lower_bound"]
         data[filesize][f"searching{(index,version)}"]["upper_bound"][depth-1] = estimates["mean"]["confidence_interval"]["upper_bound"]
     
-    if folderName.split()[0] == "indexing":
-        index,version = map(int,folderName.split()[2].split("_"))
-        filesize = int(folderName.split()[3][:-2])
-        
-        if filesize not in data: 
-            data[filesize] = {}
-        if f"indexing{(index,version)}" not in data[filesize]:
-            data[filesize][f"indexing{(index,version)}"] = {"mean": None, "lower_bound": None,"upper_bound": None}
-        
-        f = open(f"../target/criterion/{folderName}/new/estimates.json")
-        estimates = json.load(f)
-
-        data[filesize][f"indexing{(index,version)}"]["mean"] = estimates["mean"]["point_estimate"]
-        data[filesize][f"indexing{(index,version)}"]["lower_bound"] = estimates["mean"]["confidence_interval"]["lower_bound"]
-        data[filesize][f"indexing{(index,version)}"]["upper_bound"] = estimates["mean"]["confidence_interval"]["upper_bound"]
-    
-    if folderName.split()[0] == "prefix":
-        index,version = map(int,folderName.split()[2].split("_"))
-        filesize = int(folderName.split()[5][:-2])
-        
-        if filesize not in data: 
-            data[filesize] = {}
-        if f"prefix{(index,version)}" not in data[filesize]:
-            data[filesize][f"prefix{(index,version)}"] = {"mean": None, "lower_bound": None,"upper_bound": None}
-        
-        f = open(f"../target/criterion/{folderName}/new/estimates.json")
-        estimates = json.load(f)
-
-        data[filesize][f"prefix{(index,version)}"]["mean"] = estimates["mean"]["point_estimate"]
-        data[filesize][f"prefix{(index,version)}"]["lower_bound"] = estimates["mean"]["confidence_interval"]["lower_bound"]
-        data[filesize][f"prefix{(index,version)}"]["upper_bound"] = estimates["mean"]["confidence_interval"]["upper_bound"]
-
-    if folderName.split()[0] == "Find":
-        index,version = map(int,folderName.split()[2].split("_"))
-        filesize = int(folderName.split()[3][:-2])
-        
-        if filesize not in data: 
-            data[filesize] = {}
-        if f"Find{(index,version)}" not in data[filesize]:
-            data[filesize][f"Find{(index,version)}"] = {"mean": None, "lower_bound": None,"upper_bound": None}
-        
-        f = open(f"../target/criterion/{folderName}/new/estimates.json")
-        estimates = json.load(f)
-
-        data[filesize][f"Find{(index,version)}"]["mean"] = estimates["mean"]["point_estimate"]
-        data[filesize][f"Find{(index,version)}"]["lower_bound"] = estimates["mean"]["confidence_interval"]["lower_bound"]
-        data[filesize][f"Find{(index,version)}"]["upper_bound"] = estimates["mean"]["confidence_interval"]["upper_bound"]
-
-    if folderName.split()[0] == "Full":
-        index,version = map(int,folderName.split()[2].split("_"))
-        filesize = int(folderName.split()[3][:-2])
-        
-        if filesize not in data: 
-            data[filesize] = {}
-        if f"Full{(index,version)}" not in data[filesize]:
-            data[filesize][f"Full{(index,version)}"] = {"mean": None, "lower_bound": None,"upper_bound": None}
-        
-        f = open(f"../target/criterion/{folderName}/new/estimates.json")
-        estimates = json.load(f)
-
-        data[filesize][f"Full{(index,version)}"]["mean"] = estimates["mean"]["point_estimate"]
-        data[filesize][f"Full{(index,version)}"]["lower_bound"] = estimates["mean"]["confidence_interval"]["lower_bound"]
-        data[filesize][f"Full{(index,version)}"]["upper_bound"] = estimates["mean"]["confidence_interval"]["upper_bound"]
-
-    if folderName.split()[0] == "Long":
-        index,version = map(int,folderName.split()[4].split("_"))
-        filesize = int(folderName.split()[5][:-2])
-        
-        if filesize not in data: 
-            data[filesize] = {}
-        if f"Long{(index,version)}" not in data[filesize]:
-            data[filesize][f"Long{(index,version)}"] = {"mean": None, "lower_bound": None,"upper_bound": None}
-        
-        f = open(f"../target/criterion/{folderName}/new/estimates.json")
-        estimates = json.load(f)
-
-        data[filesize][f"Long{(index,version)}"]["mean"] = estimates["mean"]["point_estimate"]
-        data[filesize][f"Long{(index,version)}"]["lower_bound"] = estimates["mean"]["confidence_interval"]["lower_bound"]
-        data[filesize][f"Long{(index,version)}"]["upper_bound"] = estimates["mean"]["confidence_interval"]["upper_bound"]    
-        
+    else:
+        read_data(folderName.split()[0],folderName)
 
 def plot_indexing(data,indexes):
     for index in indexes:
@@ -314,17 +255,17 @@ def plot_fullsearch_long(data,indexes):
 
 booleanIndexes = [(7,0),(8,0),(8,1),(8,2),(8,3),(8,4)]
 
-#plot_indexing(data,[(7,0),(8,0)])
-#plot_indexing(data,[(7,0),(8,0),(9,0),(9,1)])
-#plot_indexing(data,[(7,0),(8,0),(9,0),(9,1),(10,0),(11,0)])
-#plot_depth(data,booleanIndexes)
-#plot_filesize(data,booleanIndexes)
-#plot_find_word(data,[(8,0),(9,0),(9,1)])
-#plot_depth_filesize(data,booleanIndexes)
-#plot_prefixsearch(data,[(9,0),(9,1)])
-#plot_fullsearch(data,[(11,0),(11,1)])         
-#plot_fullsearch(data,[(10,0),(10,1),(10,2)])         
-#plot_fullsearch_long(data,[(10,0),(10,1),(10,2)])
-#plot_fullsearch_long(data,[(11,0),(11,1)])
+plot_indexing(data,[(7,0),(8,0)])
+plot_indexing(data,[(7,0),(8,0),(9,0),(9,1)])
+plot_indexing(data,[(7,0),(8,0),(9,0),(9,1),(10,0),(11,0)])
+plot_depth(data,booleanIndexes)
+plot_filesize(data,booleanIndexes)
+plot_find_word(data,[(8,0),(9,0),(9,1)])
+plot_depth_filesize(data,booleanIndexes)
+plot_prefixsearch(data,[(9,0),(9,1)])
+plot_fullsearch(data,[(11,0),(11,1)])         
+plot_fullsearch(data,[(10,0),(10,1),(10,2)])         
+plot_fullsearch_long(data,[(10,0),(10,1),(10,2)])
+plot_fullsearch_long(data,[(11,0),(11,1)])
 
 
