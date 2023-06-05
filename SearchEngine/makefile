@@ -4,8 +4,11 @@ FILE ?= "Data/WestburyLab.wikicorp.201004_$(SIZE).txt"
 i ?= 4
 j ?= 5
 
-run:
+run: compile
 	java --enable-preview -cp bin Index$(IDX) $(FILE)
+
+compile:
+	javac src/*.java -d bin
 
 testCollisions:
 	java --enable-preview -cp bin Index$(IDX) Data/WestburyLab.wikicorp.201004_100KB.txt "Test"

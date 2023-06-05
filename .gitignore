@@ -14,6 +14,7 @@ data/
 # Other file extensions
 WestburyLab.wikicorp*
 Guide-searchengine/
+bin/
 *.csv
 *.png
 *.pdf
