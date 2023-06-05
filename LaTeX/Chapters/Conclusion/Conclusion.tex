@@ -1,3 +1,13 @@
 \chapter{Conclusion}
 
-We have learned a lot. 
+The main objective of this project was to implement a search engine that can efficiently search through a large dataset of Wikipedia articles from 2010. 
+
+In the basic part, the advantages of a dynamic hashmap were shown to be superior to the other indices of the basic part.
+ 
+In the Boolean part, the advantages of Boolean bit operations were shown to be very effective in reducing the search time. The Boolean bit operation was expected to be better than a two-pointer system when the average article list is long relative to $a$. Boolean bit operations are therefore fit to evaluate query trees that consist of OR operators, as seen in prefix search. However, Boolean bit operations come at a cost of having poor space complexities. This can make the solution infeasible for larger data bases. 
+
+In the prefix search chapter, a trie using linear search through the children of a node was compared to a trie using hash maps. The linear method was shown to be effective when the average number of children for a node is low but had a worst case complexity depending on the size of the alphabet, whereas the hash map method was better for large alphabets and when nodes have many children. The hash map method also depends on the efficiency of the hash function used, which has a large impact on the real-time search time. Lastly, the space complexity of the trie can be improved by compacting the tries. 
+
+The chapter introducing string matching described several algorithms in detail and it was proven that the Extended Bad Character rule in the Boyer-Moore algorithm is unnecessary when used in combination with the Good Suffix rule. The KMP and Boyer-Moore algorithms were shown to be very similar for short queries, while the Boyer-Moore algorithm improved for longer queries. The Apostolico-Giancarlo extension was similar to but moderately slower than the standard Boyer-Moore algorithm, because of the added logical steps needed. Also, the scenarios where the extension would be superior are rare in natural language text. 
+
+There are endless options to expand the search engines to better time and space complexities. This project is an initial investigation of data structures and algorithms to support Boolean search, Prefix Search and Full-text Search. 

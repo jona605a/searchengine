@@ -1,8 +1,24 @@
 \section*{Abstract}
 \addcontentsline{toc}{section}{Abstract}
-\blindtext
+%motivation
+Search engines are an essential part of our online experience. They help us to find relevant information quickly and with easy access for purposes like work, study, or entertainment, etc. 
 
+%What is the project about
+The focus in this project was on building a search engine for a large dataset consisting of a snapshot of Wikipedia from 2010, which has been converted into a simple text format. The aim was to support a variation of common user queries such as "Which documents contain the word X" while compactly representing the dataset and supporting fast searches.
 
+%basix part
+Two straightforward approaches to building search engines are using linked lists and hash functions. This was implemented using Java as an introduction to the problem. 
 
+%Advanced part
+When working with a large dataset or when implementing more advanced searching techniques, other data structures and searching algorithms must be implemented to support Boolean Search, Prefix Searching and Full-text Searching. These indices were implemented in Rust. 
 
+%Boolean 
+To support Boolean search, the Boolean operators and, or, and invert were implemented in multiple ways with the aim of improving search times and for comparison of methods. The index using bit operators performed best, but the superior performance was linked to poorer space complexity than the other indices. 
 
+%Prefix
+To efficiently support prefix search, the data structure tries was used. The options for storing the children of each node, using either a linked list or hash maps were explored. Both implementations had advantages and disadvantages, depending on the hash function used and the nature of the data. 
+
+%Fulltext
+To support full-text search, the theory of the KMP, Boyer-Moore and Apostolico-Giancarlo algorithms was reviewed in detail. Indices supporting full-text search was then implemented based on these algorithms. 
+
+All Indices were analysed in terms of time complexity and space complexity. Furthermore, they were timed and compared.

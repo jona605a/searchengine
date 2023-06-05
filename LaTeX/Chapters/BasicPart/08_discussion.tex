@@ -1,35 +1,37 @@
-\subsection{Comparison of Basic part indices}
+\section{Discussion}
 
 To summarise the comparison of the indices of the basic part, the search and indexing time complexity and space complexity of the indices are gathered in the table \ref{tab:basicpartTimecomplexity}. 
 
 \begin{table}[th!]
 \centering
 \begin{tabular}{l|ll|ll}
-            & Time &     & Memory & \\
+            & Time &     & Space & \\
     Index & Indexing & Search & Indexing & Search\\
 \hline
 1 &  $\Theta(n)$                &  $O(n)$  &  $\Theta(n)$   & $O(1)$ \\
-2 &  $\Theta(n)$                &  $O(n)$  &  $\Theta(n)$   & $O(a)$         \\
+2 &  $\Theta(n)$                &  $\Theta(n)$  &  $\Theta(n)$   & $O(a)$         \\
 3  &  $O(n\cdot u)$             &  $O(u)$  &  $O(u\cdot a )$ & $O(1)$         \\
 4  &  $O(n\cdot \frac{u}{k})$   &  $O(\frac{u}{k})$  &  $O(u\cdot a + k)$ & $O(1)$ \\
-5  &  $O(n)$   &  $O(1)$  &  $O(u\cdot a)$ & $O(1)$         
+5  &  $\Theta(n)$   &  $O(1)$  &  $O(u\cdot a)$ & $O(1)$         
 \end{tabular}
-\caption{Caption}
+\caption{The complexities of each basic index, showing both time and space for indexing and searching}
 \label{tab:basicpartTimecomplexity}
 \end{table}
 
-One thing to keep in mind is that $O(u\cdot a)$ is upper bounded by $O(n)$, as there at max is one title appended to to an article list pr word in the file.
+One thing to keep in mind is that $O(u\cdot a)$ is upper bounded by $O(n)$, as there at max is one title appended to to an article list per word in the file.
 
-The time complexity of indexing for index2 is analysed to be linear. This tendency is also seen in figure \ref{fig:BPindextime2}.
+The time complexity of indexing for Index2 is analysed to be linear. This tendency is also seen in figure \ref{fig:BPindextime2}.
 
-Index 3 has an indexing time complexity of $O(n\cdot u)$. It is tricky to determine if figure \ref{fig:BPindextime3} shows that the indexing running time is linear or quadratic, due to the lack of data points. No additional data points for the indexing time of Index3 were gathered, as this was very time-consuming. In figure \ref{fig:BPindextime2345} Index3 is compared to the other indices of the Basic Part. The figure illustrates how poorly Index3 performs compared to the other indices. The architecture of the data structure of Index3 was however never predicted to be an effective design compared to hashmaps. 
+Index 3 has an indexing time complexity of $O(n\cdot u)$. It is tricky to determine if figure \ref{fig:BPindextime3} shows that the indexing running time is linear or quadratic, due to the lack of data points. No additional data points for the indexing time of Index3 were gathered, as this was very time-consuming. 
 
-Index2 has the search time complexity of $O(n)$ while Index3 has a search time complexity $O(u)$, and it is therefore predicted that Index3 will perform better as $u\leq n$. This is also the tendency seen in \ref{fig:BPsearch23}.
+In figure \ref{fig:BPindextime2345} Index3 is compared to the other indices of the Basic Part. The figure illustrates how poorly Index3 performs compared to the other indices. The architecture of the data structure of Index3 was however never predicted to be an effective design compared to hash maps. 
+
+Index2 has the search time complexity of $\Theta(n)$ while Index3 has a search time complexity $O(u)$, and it is therefore predicted that Index3 will perform better as $u\leq n$. This is also the tendency seen in \ref{fig:BPsearch23}. Note however, that the search task measured is to search the file for each unique word in the file, resulting in having to search for more words in the larger files. Thus, since Index2 has search time complexity $\Theta(n)$ and Index3 has $O(u)$, the measured time is multiplied by a factor of $u$, yielding $\Theta(n\cdot u)$ and $O(u^2)$ respectively, which corresponds to the tendency observed in the figure. 
 
 Figure \ref{fig:BPindextime45} shows that the indexing time for Index5 is linear. Index4 has a time complexity of $O(n\cdot \frac{u}{k})$ as it uses a static hash map where it is possible for all entries to be used at some point, meaning that multiple words share the same hash key. This slows down the indexing time. 
 In figure \ref{fig:BPindextime45}, Index5 performs much better than Index4. This is due to the fact that Index5 uses a dynamic hash map. 
 
- Index 4 is analysed to have a time complexity of $O(\frac{u}{k})$ as multiple words share the same hash key, which it then has to search through linearly. This slows down the search time. In figure \ref{fig:BPsearch23}, it is seen that index5 searches in constant time, which once again shows the benefits of a dynamic hashmap.
+ Index 4 is analysed to have a search time complexity of $O(\frac{u}{k})$ as multiple words share the same hash key, which it then has to search through linearly. This slows down the search time. Similar to above, the search task is proportional to $u$ which the figure illustrates by being linear in $u$ and not growing to a quadratic function like observed for Index 2 and 3. In figure \ref{fig:BPsearch45}, it is seen that index5 searches in constant time, which once again shows the benefits of a dynamic hashmap. The scale of the y-axis of figure \ref{fig:BPsearch23} and \ref{fig:BPsearch45} shows that Index 4 and 5 searches for all the unique word of each file size in a matter of seconds whereas index 2 and 3 performs worse by several orders of magnitude.
 
- As it is seen in table \ref{tab:basicpartTimecomplexity}, Index5 has the overall best run time and space complexities. This is also the tendency seen from the timing of the data. Index 5 is therefore the index of choice in the basis part of the project.  
+ As it is seen in table \ref{tab:basicpartTimecomplexity}, Index5 has the overall best run time and space complexities. This is also the tendency seen from the timing of the code. Index 5 is therefore the index of choice in the basis part of the project.  
 

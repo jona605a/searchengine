@@ -1,16 +1,33 @@
-\documentclass[../../main.tex]{subfiles}
-\begin{document}
-
-
 \chapter{Rust}
 
-We are in Rust now!
+When working with algorithms and data structures and implementing them in practice, it is important to have precise control over what objects are created, which steps an algorithm performs, that potential overhead is minimised and so on. These are some of the reasons why the programming language Rust is a good choice for working with algorithms and data structures. 
 
 \section{The advantages of Rust}
 
-\section{Index 6 - Making a basic index in Rust}
+In Rust, the most important aspects are memory safety and speed. Rust uses many features from low-level programming languages such as C to achieve fast code with minimal overhead, but also incorporates many higher level features like many object-oriented traits and being a functional language\cite{Rust}. 
 
-\subsection{How we're reading files - regex}
+In contrast to many higher level languages like Java and Python, Rust does not use a garbage collector to make sure unused references to data is cleaned up regularly. Instead, Rust uses the concept of \textit{ownership} to be memory safe without the need for a garbage collector\cite{Rust}. Ownership is a concept that ensures each object and variable is "owned" by only one function and in order to read or write to these objects, either ownership or a reference must be passed along. This paradigm results in many functionalities in Rust sometimes becoming more difficult than in Java where object pointers can be passed around with no security checks, but once understood, makes sure that all code is memory safe and that no illegal or invalid references are created or used. A very important result of ownership is that the Rust compiler is allowed to assume much more about correctly written Rust code and can thus perform many more optimisations than other languages. The absence of a garbage collector also results in Rust saving performance time since the borrow checker ensures no references will become invalid during runtime\cite{Rust}. 
 
-\end{document}
+Lastly, since Rust is known for being very memory safe it is often used for concurrent applications, in which many memory issues are solved by the concept of ownership. This project does not use concurrency however, as it does not impact the general complexity of algorithms and is generally not the focus of the project. 
+
+\section{Index6 - Making a basic index in Rust}
+Since the rest of the project will be written in Rust, a basic index using the architecture of Index5 was implemented as Index6, in order to introduce and familiarise ourselves with the language. For the hash table, Index6 uses Rust's default hash function Sip hash\cite{Siphash}. Index6 has been tested for correctness but not timed or compared to the other indices as this merely was a warm-up for creating indices in Rust. Index6 therefore has exactly the same complexities as Index5. 
+
+\subsection{Preprocessing the input file}
+
+In the basic part, the input file was not preprocessed in any way and the words were only split by spaces. Since punctuation and other special characters were not considered, this could result in words in the index not actually corresponding to the intended word that it should represent, since a word followed by a comma would be considered an entire different word than the word itself. 
+
+\newpage
+For example, consider the following subsentence from the 5th article, "Alabama":
+
+\begin{center}
+    "\texttt{[...] 'amo' (meaning "to cut", "to trim", or "to gather"). This [...]}"
+\end{center}
+
+This sentence would be split into words like [\texttt{(meaning}], [\texttt{"to}], [\texttt{cut",}] and so on, which is unintended. 
+
+In order to solve this problem, all indices in Rust preprocess the input file to remove special characters like punctuation. Although many techniques are available, the method of choice for this project was a regular expression. This increases the time of reading the input and might be considered a very complicated choice for the scope of the problem, but regular expressions still run in time linear to the input, making it good enough. 
+
+\section{Benchmarking using Rust Criterion}
+To compare the different search engines implemented, the indexing and search functions of each index were timed. Timing the code was done using Rust Criterion. When timing with Criterion, the cache is firstly warmed up for 3 seconds, which reduces the variance from each timing. After the cache is warmed up the same piece of code is run 100 times and the mean, the standard deviation and potential outliers are calculated.
 

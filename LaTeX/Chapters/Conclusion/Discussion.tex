@@ -1,3 +1,50 @@
 \chapter{Discussion}
 
-Discussing our indices and stuff
+In table \ref{tab:Runstimestotal} all time and space complexities for all indices have been gathered. For comments on the results of each section or comparison of the indices that implements the same features, we will referrer to the discussion sections of The Basic Part, Boolean Search, Prefix Search or Full-text search chapters. This section will discuss the possibility of merging the indices into one that supports all features and suggestions for future work.
+
+\begin{table}[th!]
+\centering
+\begin{tabular}{l|ll|ll}
+            & Time &     & Space & \\
+    Index & Indexing & Search & Indexing & Search\\
+\hline
+1 &  $\Theta(n)$                &  $O(n)$  &  $\Theta(n)$   & $O(1)$ \\
+2 &  $\Theta(n)$                &  $\Theta(n)$  &  $\Theta(n)$   & $O(a)$         \\
+3  &  $O(n\cdot u)$             &  $O(u)$  &  $O(u\cdot a )$ & $O(1)$         \\
+4  &  $O(n\cdot \frac{u}{k})$   &  $O(\frac{u}{k})$  &  $O(u\cdot a + k)$ & $O(1)$ \\
+5  &  $\Theta(n)$   &  $O(1)$  &  $O(u\cdot a)$ & $O(1)$       \\\hline
+6  &  $\Theta(n)$   &  $O(1)$  &  $O(u\cdot a)$ & $O(1)$       \\\hline
+7    &  $\Theta(n)$   &  $O(q\cdot a)$  &  $\Theta(u\cdot a)$ & $\Theta(q\cdot a)$       \\
+8.0  &  $\Theta(n)$   &  $O(q\cdot a)$  &  $O(u\cdot a)$ & $O(q\cdot a)$       \\
+8.1  &  $\Theta(n)$   &  $O(q\cdot a)$  &  $O(u\cdot a)$ & $O(q\cdot a)$       \\
+8.2  &  $\Theta(n)$   &  $O(q\cdot a)$  &  $O(u\cdot a)$ & $O(q\cdot a)$       \\
+8.3  &  $\Theta(n)$   &  $O(q\cdot a)$  &  $O(u\cdot a)$ & $O(q\cdot a)$       \\
+8.4  &  $\Theta(n)$   &  $\Theta(q\cdot a)$  &  $O(u\cdot a)$ & $\Theta(q\cdot a)$       \\\hline
+9.0  &  $O(n\cdot|\Sigma|)$&  $O(q\cdot|\Sigma|+\$\cdot a)$  &  $O(p+\$\cdot a)$ & $\Theta(\$\cdot a)$\\
+9.1  &  $\Theta(n)$&  $O(q+\$\cdot a)$  &  $O(p+\$\cdot a)$ & $\Theta(\$\cdot a)$\\\hline
+10.0  & $\Theta(n)$   &  $O(q\cdot a+\alpha\cdot n)$  &  $O(u\cdot a)$ & $O(q\cdot a + t)$\\
+10.1  & $\Theta(n)$   &  $O(q\cdot a+\alpha\cdot n)$  &  $O(u\cdot a)$ & $O(q\cdot a + t)$\\
+10.2  & $\Theta(n)$   &  $O(q\cdot a+\alpha\cdot n)$  &  $O(u\cdot a)$ & $O(q\cdot a + t)$\\
+11.0  & $\Theta(n)$   &  $O(q\cdot a)$  &  $O(\min(n,u^3)\cdot a)$ & $O(q\cdot a + t)$       \\
+11.1  & $\Theta(n)$   &  $O(q\cdot a+\alpha_{tri}\cdot n)$  &  $O(\min(n,u^3)\cdot a)$ & $O(q\cdot a + t)$       \\
+\end{tabular}
+\caption{Overview of the time and space complexities of every index implemented. Each entry is explained in the relevant section where all symbols are introduced as well. }
+\label{tab:Runstimestotal}
+\end{table}
+
+
+\section{Combining all indices to one}
+To make the search engine that supports queries like "X OR Y* AND NOT X Y Z", it would be necessary to support all search features at once. A simple way to do this would be to make one index for each feature and simply calculate the result of each section split by the boolean operators, by using the relevant index. At last, these results could be inserted into the boolean search query tree and evaluated by the chosen boolean index. It is however not necessary to index a whole different new index per feature supported. 
+
+The trie structure is necessary to support prefix search. Boolean search and full-text search both use hash maps to store their unique word and their belonging article list. As mentioned in section \textit{Possible Structures of Tries} \ref{sec:posStrucOfTrie}, a trie can work similarly to a hash map. It is therefore only necessary to make one index like Index 9.0 or 9.1 and then implement a Full-text and Boolean search function to this index.
+
+Considering the three major search functionalities implemented in this project, Boolean search, Prefix search and Full-text search, it is relevant to discuss what the cost of implementing these functionalities are. All indices store some article list for the words/triples in the input file, which both determines the space used for indexing the file as well as part of the search times for all indices that combine the lists in some manner, as seen by the $O(q\cdot a)$ and $O(u\cdot a)$ factors in table \ref{tab:Runstimestotal}. The additional costs by the various functionalities are mostly visible in the time it takes to combine the article lists in the boolean query tree, the subtrie below the prefix, or string matching in several article files. As it is relatively fast to support both boolean and prefix search, being linear in the reported articles, these functionalities could be implemented for most search engines. Full text search is the most expensive function and greatly depends on the query itself. If searching for a common subsentence like "and it is", the search time would be linear in the whole database, which is infeasible. As discussed previously, full text search also has many possible ways of improving and use less space e.g. by not writing files to the disk. 
+
+\section{Further work}
+
+As Full-text searching is one of the most expensive functionalities to implement, implementations of suffix trees would be interesting to look into as future work. This topic could be very interesting for this project as it is a whole new method of implementing Full-text search, that doesn't rely on string-matching algorithms. furthermore is it a data structure that resembles tries. 
+
+The indices that support prefix search could be expanded to support the features of auto-completing words. This would require an efficient method of recommending the words of the accepting nodes of the subtree of the prefix given.
+
+The subject of choosing the best hash function could also be looked into. A cryptographic hash function like the Siphash function gives security against HashDoS attacks. However, if such security is not necessary for the search engine, other hash functions would be interesting to consider, as most indices in this project use hash tables to some extent. 
+

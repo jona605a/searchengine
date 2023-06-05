@@ -4,12 +4,16 @@
 
 \begin{table}[ht!]
     \centering
-    \begin{tabular}{c|c|c}
-        Symbol & Short description & Notes or something \\\hline
-        $n$ & The total number of words in the input file &   \\
+    \begin{tabular}{c|p{7.5cm}|p{4cm}}
+        Symbol & Short description & Notes \\\hline
+        $n$ & The total number of words in the input file & The length of the search pattern in chapter \ref{chap:fulltext}.  \\
         $u$ & The number of unique words in the input file &   \\
         $a$ & The number of articles in the input file &   \\
-        $k$ & The size of the hash table in some of the indexes &   \\
+        $k$ & The size of the hash table in some of the indices &   \\
+        $d$ & The depth of a boolean query tree. The maximum number of edges from the root node to a leaf  &   \\
+        $q$ & The number of words in a query & \\
+        $m$ & The length of the search text. & Used in the chapter \ref{chap:fulltext}.  \\
+        
     \end{tabular}
     \caption{Overview of the symbols used in our analysis}
     \label{tab:symbol_desc}
